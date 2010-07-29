@@ -49,15 +49,15 @@ function genxml_import_uninstall()
  */
 function genxml_import_admin_navigation($tabs)
 {
-    if (get_acl()->checkUserPermission('GenericXmlImporter_Index', 'index')) {
-        $tabs['GenXML Import'] = uri('generic-xml-importer/index/');        
+    if (get_acl()->checkUserPermission('GenericXmlImporter_Upload', 'upload')) {
+        $tabs['GenXML Import'] = uri('generic-xml-importer/upload/');        
     }
     return $tabs;
 }
 
 function genxml_import_define_acl($acl)
 {
-    $acl->loadResourceList(array('GenericXmlImporter_Index' => array('index', 'status')));
+    $acl->loadResourceList(array('GenericXmlImporter_Upload' => array('index', 'status')));
 }
 
 function genxml_import_admin_header($request)

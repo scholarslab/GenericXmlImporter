@@ -18,7 +18,7 @@
  *3. User selects document record.  Variables passed to CsvImport session, user redirected to CsvImport column mapping
  */
 
-class GenericXmlImporter_IndexController extends Omeka_Controller_Action
+class GenericXmlImporter_UploadController extends Omeka_Controller_Action
 {
     public function indexAction() 
     {
@@ -100,24 +100,9 @@ class GenericXmlImporter_IndexController extends Omeka_Controller_Action
         ini_set('memory_limit', $memoryLimit);
 	
 	 	$genericXmlImportSession = new Zend_Session_Namespace('GenericXmlImport');
-        $view = $this->view;        
-        
-		/*$itemTypeId = $genericXmlImportSession->item_type_id;
-		$collectionId = $genericXmlImportSession->collection_id;
-		$public = $genericXmlImportSession->public;
-		$featured = $genericXmlImportSession->featured;*/
-	
-		
+        $view = $this->view;
 
-		$form = $this->elementForm($genericXmlImportSession);
-		
-		/*$genericXmlImportSession2 = new Zend_Session_Namespace('GenericXmlImport2');
-		$genericXmlImportSession2->element_set = $elementSet;
-		$itemTypeId = $genericXmlImportSession->item_type_id;
-		$collectionId = $genericXmlImportSession->collection_id;
-		$public = $genericXmlImportSession->public;
-		$featured = $genericXmlImportSession->featured;*/
-		
+		$form = $this->elementForm($genericXmlImportSession);		
 		$this->view->form = $form;
 	}
 	

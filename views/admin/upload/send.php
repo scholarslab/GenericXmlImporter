@@ -10,7 +10,7 @@
                 echo '<p class="error">' . html_escape($err) . '</p>';
             }
         ?>
-        <p><a href="../index/">Return to form</a>.</p>
+        <p><a href="../upload/">Return to form</a>.</p>
 </div>
 
 <?php 

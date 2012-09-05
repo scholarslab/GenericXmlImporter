@@ -9,6 +9,6 @@
     <?php echo $form; ?>
 </div>
 
-<?php 
-    foot(); 
+<?php
+    foot();
 ?>

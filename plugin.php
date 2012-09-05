@@ -3,16 +3,20 @@
 /**
  * Generic XML import plugin
  *
- * @copyright  Scholars' Lab 2010
- * @license    http://www.apache.org/licenses/LICENSE-2.0.html
- * @version    $Id:$
+ * @version $Id$
+ * @copyright Daniel Berthereau for École des Ponts ParisTech, 2012
+ * @copyright Scholars' Lab, 2010 [GenericXmlImporter v.1.0]
+ * @license http://www.apache.org/licenses/LICENSE-2.0.html
  * @package GenericXmlImporter
+ * @author Daniel Berthereau
  * @author Ethan Gruber: ewg4x at virginia dot edu
  **/
 
-define('GENXML_IMPORT_DIRECTORY', dirname(__FILE__));
-define('GENXML_IMPORT_TMP_LOCATION', GENXML_IMPORT_DIRECTORY . DIRECTORY_SEPARATOR . 'xmldump');
-define('GENXML_IMPORT_DOC_EXTRACTOR', GENXML_IMPORT_DIRECTORY . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'genxml-import-documents.xsl');
+defined('GENXML_IMPORT_DIRECTORY') or define('GENXML_IMPORT_DIRECTORY', dirname(__FILE__));
+defined('GENXML_IMPORT_TMP_LOCATION') or define('GENXML_IMPORT_TMP_LOCATION', GENXML_IMPORT_DIRECTORY . DIRECTORY_SEPARATOR . 'xmldump');
+defined('GENXML_IMPORT_DOC_EXTRACTOR') or define('GENXML_IMPORT_DOC_EXTRACTOR', GENXML_IMPORT_DIRECTORY . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'genxml-import-documents.xsl');
+// Delimiter depends on the xsl sheet.
+defined('GENXML_IMPORT_DELIMITER') or define('GENXML_IMPORT_DELIMITER', ',');
 add_plugin_hook('install', 'genxml_import_install');
 add_plugin_hook('uninstall', 'genxml_import_uninstall');
 add_plugin_hook('define_acl', 'genxml_import_define_acl');
@@ -23,34 +27,34 @@ add_plugin_hook('config', 'genxml_import_config');
 
 function genxml_import_install()
 {
-	try {
-		$xh = new XSLTProcessor; // we check for the ability to use XSLT
-	} catch (Exception $e) {
-		throw new Zend_Exception("This plugin requires XSLT support");
-	}
+    try {
+        $xh = new XSLTProcessor; // we check for the ability to use XSLT
+    } catch (Exception $e) {
+        throw new Zend_Exception("This plugin requires XSLT support");
+    }
 }
 
 /**
  * Uninstall the plugin.
- * 
+ *
  * @return void
  */
 function genxml_import_uninstall()
 {
     // delete the plugin options
-    delete_option('genxml_import_memory_limit'); 
+    delete_option('genxml_import_memory_limit');
 }
 
 
 /**
  * Add the admin navigation for the plugin.
- * 
+ *
  * @return array
  */
 function genxml_import_admin_navigation($tabs)
 {
     if (get_acl()->checkUserPermission('GenericXmlImporter_Upload', 'upload')) {
-        $tabs['GenXML Import'] = uri('generic-xml-importer/upload/');        
+        $tabs['GenXML Import'] = uri('generic-xml-importer/upload/');
     }
     return $tabs;
 }
@@ -62,14 +66,14 @@ function genxml_import_define_acl($acl)
 
 function genxml_import_admin_header($request)
 {
-	if ($request->getModuleName() == 'generic-xml-importer') {
-		echo '<link rel="stylesheet" href="' . html_escape(css('generic_xml_importer_main')) . '" />';
-		//echo js('generic_xml_import_main');
+    if ($request->getModuleName() == 'generic-xml-importer') {
+        echo '<link rel="stylesheet" href="' . html_escape(css('generic_xml_importer_main')) . '" />';
+        //echo js('generic_xml_import_main');
     }
 }
 
 function genxml_import_config_form()
-{  
+{
     if (!$memoryLimit = get_option('genxml_import_memory_limit')) {
         $memoryLimit = ini_get('memory_limit');
     }

@@ -24,6 +24,7 @@ Warning
 -------
 
 Use it at your own risk.
+
 It's always recommended to backup your database so you can roll back if needed.
 
 
@@ -81,25 +82,25 @@ Contact
 Current maintainers:
 
 * Daniel Berthereau (see [Daniel_KM][5])
+* Scholars' Lab (see [Scholars' Lab][6]) [GenericXmlImporter v1.0]
 
-First version of this plugin has been built for École des Ponts ParisTech
-(see [ENPC][6]).
+First version of this plugin has been built by [Scholars' Lab of University of Virginia Library][7], under Apache v2 licence.
+
+This plugin has been updated for École des Ponts ParisTech (see [ENPC][8]).
 
 
 Copyright
 ---------
 
-Copyright Daniel Berthereau for École des Ponts ParisTech, 2012
-Copyright Scholars' Lab, 2010 [GenericXmlImporter v1.0]
-
-Based on GenericXmlImporter of Scholars' Lab, 2010, published under Apache v2
-licence (see [Omeka/svn GenericXmlImporter](7))
+* Copyright Daniel Berthereau for École des Ponts ParisTech, 2012
+* Copyright Scholars' Lab, 2010 [GenericXmlImporter v1.0]
 
 
 [1]: http://www.omeka.org "Omeka.org"
-[2]: https://github.com/Daniel-KM/CleanUrl "GitHub XmlImport"
+[2]: https://github.com/Daniel-KM/XmlImport "GitHub XmlImport"
 [3]: http://www.cecill.info/licences/Licence_CeCILL_V2-en.html "CeCILL"
 [4]: https://www.gnu.org/licenses/gpl-3.0.html "GNU/GPL"
 [5]: http://github.com/Daniel-KM "Daniel_KM"
-[6]: http://bibliotheque.enpc.fr "École des Ponts ParisTech"
-[7]: https://addons.omeka.org/svn/plugins/GenericXmlImporter/ "Omeka/svn GenericXmlImporter"
+[6]: https://github.com/scholarslab "Scholars' Lab"
+[7]: http://www.scholarslab.org/research/omeka-plugins/ "Scholars' Lab of University of Virginia Library"
+[8]: http://bibliotheque.enpc.fr "École des Ponts ParisTech"

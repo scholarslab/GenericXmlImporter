@@ -1,100 +1,110 @@
 <?php
-
 /**
- * Generic XML import plugin
- *
- * @version $Id:$
+ * @version $Id$
  * @copyright Daniel Berthereau for École des Ponts ParisTech, 2012
- * @copyright Scholars' Lab, 2010 [v1.0]
+ * @copyright Scholars' Lab, 2010 [GenericXmlImporter v.1.0]
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2-en.txt
  * @license http://www.gnu.org/licenses/gpl-3.0.txt
  * @license http://www.apache.org/licenses/LICENSE-2.0.html
- * @package GenericXmlImporter
+ * @package XmlImport
  * @author Daniel Berthereau
  * @author Ethan Gruber: ewg4x at virginia dot edu
- **/
-
-defined('GENXML_IMPORT_DIRECTORY') or define('GENXML_IMPORT_DIRECTORY', dirname(__FILE__));
-defined('GENXML_IMPORT_TMP_LOCATION') or define('GENXML_IMPORT_TMP_LOCATION', GENXML_IMPORT_DIRECTORY . DIRECTORY_SEPARATOR . 'xmldump');
-defined('GENXML_IMPORT_DOC_EXTRACTOR') or define('GENXML_IMPORT_DOC_EXTRACTOR', GENXML_IMPORT_DIRECTORY . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'genxml-import-documents.xsl');
-// Delimiter depends on the xsl sheet.
-defined('GENXML_IMPORT_DELIMITER') or define('GENXML_IMPORT_DELIMITER', ',');
-add_plugin_hook('install', 'genxml_import_install');
-add_plugin_hook('uninstall', 'genxml_import_uninstall');
-add_plugin_hook('define_acl', 'genxml_import_define_acl');
-add_plugin_hook('admin_theme_header', 'genxml_import_admin_header');
-add_filter('admin_navigation_main', 'genxml_import_admin_navigation');
-add_plugin_hook('config_form', 'genxml_import_config_form');
-add_plugin_hook('config', 'genxml_import_config');
-
-function genxml_import_install()
-{
-    try {
-        $xh = new XSLTProcessor; // we check for the ability to use XSLT
-    } catch (Exception $e) {
-        throw new Zend_Exception("This plugin requires XSLT support");
-    }
-}
+ */
 
 /**
- * Uninstall the plugin.
+ * Allows to import one or multiple XML files via generic or custom XSLT sheet.
  *
- * @return void
+ * Process ends with CsvImport, so all imports can be managed in one place.
+ *
+ * @see README.md
  */
-function genxml_import_uninstall()
-{
-    // delete the plugin options
-    delete_option('genxml_import_memory_limit');
-}
 
+/** Installation of the plugin. */
+$XmlImportPlugin = new XmlImportPlugin();
+$XmlImportPlugin->setUp();
 
 /**
- * Add the admin navigation for the plugin.
+ * Contains code used to integrate the plugin into Omeka.
  *
- * @return array
+ * @package XmlImport
  */
-function genxml_import_admin_navigation($tabs)
-{
-    if (get_acl()->checkUserPermission('GenericXmlImporter_Upload', 'upload')) {
-        $tabs['GenXML Import'] = uri('generic-xml-importer/upload/');
+class XmlImportPlugin extends Omeka_Plugin_Abstract
+    {
+    protected $_hooks = array(
+        'install',
+        'uninstall',
+        'define_acl',
+        'admin_theme_header',
+    );
+
+    protected $_filters = array(
+        'admin_navigation_main',
+    );
+
+    protected $_options = array(
+        'xml_import_path_main' => '',
+        'xml_import_path_images' => '',
+        'xml_import_path_subfolder' => '',
+        'xml_import_stylesheet' => 'xml-import-generic.xsl',
+        'xml_import_delimiter' => ',',
+        'xml_import_stylesheet_parameters' => '',
+    );
+
+    /**
+     * Installs the plugin.
+     */
+    public function hookInstall()
+    {
+        // Default stylesheet.
+        $this->_options['xml_import_stylesheet'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'xml-import-generic.xsl';
+
+        // Checks the ability to use XSLT.
+        try {
+            $xslt = new XSLTProcessor;
+        } catch (Exception $e) {
+            throw new Zend_Exception('This plugin requires XSLT support.');
+        }
+
+        $this->_installOptions();
     }
-    return $tabs;
-}
 
-function genxml_import_define_acl($acl)
-{
-    $acl->loadResourceList(array('GenericXmlImporter_Upload' => array('index', 'status')));
-}
-
-function genxml_import_admin_header($request)
-{
-    if ($request->getModuleName() == 'generic-xml-importer') {
-        echo '<link rel="stylesheet" href="' . html_escape(css('generic_xml_importer_main')) . '" />';
-        //echo js('generic_xml_import_main');
+    /**
+     * Uninstalls the plugin.
+     */
+    public function hookUninstall()
+    {
+        $this->_uninstallOptions();
     }
-}
 
-function genxml_import_config_form()
-{
-    if (!$memoryLimit = get_option('genxml_import_memory_limit')) {
-        $memoryLimit = ini_get('memory_limit');
+    /**
+     * Defines the plugin's access control list.
+     *
+     * @param object $acl
+     */
+    public function hookDefineAcl($acl)
+    {
+        $acl->loadResourceList(array('XmlImport_Upload' => array('index', 'status')));
     }
-?>
-    <div class="field">
-        <label for="genxml_import_memory_limit">Memory Limit</label>
-        <?php echo __v()->formText('genxml_import_memory_limit', $memoryLimit, null);?>
-        <p class="explanation">Set a high memory limit to avoid memory allocation
-        issues during harvesting. Examples include 128M, 1G, and -1. The available
-        options are K (for Kilobytes), M (for Megabytes) and G (for Gigabytes).
-        Anything else assumes bytes. Set to -1 for an infinite limit. Be advised
-        that many web hosts set a maximum memory limit, so this setting may be
-        ignored if it exceeds the maximum allowable limit. Check with your web host
-        for more information.</p>
-    </div>
-<?php
-}
 
-function genxml_import_config()
-{
-    set_option('genxml_import_memory_limit', $_POST['genxml_import_memory_limit']);
+    public function hookAdminThemeHeader($request)
+    {
+        if ($request->getModuleName() == 'xml-import') {
+            queue_css('xml_import_main');
+            queue_js('xml_import_main');
+        }
+    }
+
+    /**
+     * Adds a tab to the admin navigation.
+     *
+     * @param array $tabs
+     * @return array
+     */
+    public static function filterAdminNavigationMain($tabs)
+    {
+        if (get_acl()->isAllowed(current_user(), 'XmlImport_Upload', 'upload')) {
+            $tabs['XML Import'] = uri('xml-import/upload/');
+        }
+        return $tabs;
+    }
 }

@@ -1,11 +1,11 @@
 <?php
-    head(array('title' => 'Generic XML Import', 'bodyclass' => 'primary', 'content_class' => 'horizontal-nav'));
+    head(array('title' => 'XML Import', 'bodyclass' => 'primary', 'content_class' => 'horizontal-nav'));
 ?>
-<h1>Generic XML Import</h1>
+<h1>XML Import</h1>
 
 <div id="primary">
     <?php echo flash(); ?>
-     <?php
+        <?php
             if (!empty($err)) {
                 echo '<p class="error">' . html_escape($err) . '</p>';
             }

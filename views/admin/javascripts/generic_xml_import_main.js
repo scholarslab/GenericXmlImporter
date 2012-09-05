@@ -1,22 +1,22 @@
 function csvImportAddElementToColumnMap(elementsListDivId, elementsDropDownId, elementsHiddenInputId) {
     // element list div
     var eListDiv = $(elementsListDivId);
-    
+
     // elements list
     var eList = eListDiv.firstChild;
     if (!eList) {
-        eList = csvImportCreateNode('ul', '');  
+        eList = csvImportCreateNode('ul', '');
         eListDiv.appendChild(eList);
     }
-    
+
     // selected element id
     var sElementId = $(elementsDropDownId).value;
-    
-    // new element 
+
+    // new element
     var nElement = csvImportCreateNode('li', csvImportGetLabelFromDropDown(elementsDropDownId));
-    nElement.setAttribute('class', 'csv-import-element-delete');    
+    nElement.setAttribute('class', 'csv-import-element-delete');
     nElement.setAttribute('onclick', 'csvImportRemoveElementFromColumnMap(' + "'" + sElementId + "'" + ',' + "'" + elementsListDivId + "'"  + ',' + "'" + elementsHiddenInputId + "'" + ',this);');
-    
+
     // if the element is new, add it to the elements list
     if (!csvImportColumnMapHasElement(sElementId, elementsHiddenInputId)) {
         eList.appendChild(nElement);
@@ -30,19 +30,19 @@ function csvImportAddElementToColumnMap(elementsListDivId, elementsDropDownId, e
 function csvImportRemoveElementFromColumnMap(elementId, elementsListDivId, elementsHiddenInputId, elementListItem) {
     // element list div
     var eListDiv = $(elementsListDivId);
-    
+
     // elements list
     var eList = eListDiv.firstChild;
-    
+
     // remove the element from the list
     eList.removeChild(elementListItem);
-    
+
     // remove the list if it is empty
     if (!eList.firstChild) {
         eListDiv.removeChild(eList);
     }
-    
-    
+
+
     // rebuild the hidden text without the element
     var elementIds = $(elementsHiddenInputId).value.split(',');
     var hT = '';

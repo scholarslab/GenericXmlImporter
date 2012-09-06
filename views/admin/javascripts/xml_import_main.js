@@ -42,7 +42,6 @@ function csvImportRemoveElementFromColumnMap(elementId, elementsListDivId, eleme
         eListDiv.removeChild(eList);
     }
 
-
     // rebuild the hidden text without the element
     var elementIds = $(elementsHiddenInputId).value.split(',');
     var hT = '';

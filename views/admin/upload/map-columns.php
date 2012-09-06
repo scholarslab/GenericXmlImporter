@@ -1,7 +1,7 @@
 <?php
-    head(array('title' => 'Generic XML Import', 'bodyclass' => 'primary', 'content_class' => 'horizontal-nav'));
+    head(array('title' => 'XML Import', 'bodyclass' => 'primary', 'content_class' => 'horizontal-nav'));
 ?>
-<h1>Generic XML Import</h1>
+<h1>XML Import</h1>
 
 <div id="primary">
     <h2>Step 2: Map Columns To Elements, Tags, or Files</h2>

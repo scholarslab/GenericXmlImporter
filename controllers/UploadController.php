@@ -355,10 +355,10 @@ class XmlImport_UploadController extends Omeka_Controller_Action
             'size' => '1',
             'validators' => array(
                 array('validator' => 'NotEmpty',
-                      'breakChainOnFailure' => TRUE,
-                      'options' => array('messages' => array(
-                          Zend_Validate_NotEmpty::IS_EMPTY => "Column delimiter must be one character long.",
-                      )),
+                    'breakChainOnFailure' => TRUE,
+                    'options' => array('messages' => array(
+                        Zend_Validate_NotEmpty::IS_EMPTY => "Column delimiter must be one character long.",
+                    )),
                 ),
                 array('validator' => 'StringLength', 'options' => array(
                     'min' => 1,

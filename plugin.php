@@ -17,10 +17,6 @@
  * @see README.md
  */
 
-/** Installation of the plugin. */
-$XmlImportPlugin = new XmlImportPlugin();
-$XmlImportPlugin->setUp();
-
 /**
  * Contains code used to integrate the plugin into Omeka.
  *
@@ -106,3 +102,7 @@ class XmlImportPlugin extends Omeka_Plugin_Abstract
         return $tabs;
     }
 }
+
+/** Installation of the plugin. */
+$xmlImportPlugin = new XmlImportPlugin();
+$xmlImportPlugin->setUp();

@@ -191,8 +191,10 @@
 
     <xsl:value-of select="$séparateur"/>
     <!-- Le mot Pages est ajouté, car cela serait incompréhensible dans dc:format. -->
-    <xsl:text>Pages : </xsl:text>
-    <xsl:value-of select="refNum:nombrePages"/>
+    <xsl:if test="refNum:nombrePages != ''">
+        <xsl:text>Pages : </xsl:text>
+        <xsl:value-of select="refNum:nombrePages"/>
+    </xsl:if>
     <!-- Non utilisé dans les fichiers de numérisation de l'ENPC. -->
     <!--
     <xsl:value-of select="$séparateur"/>

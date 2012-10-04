@@ -50,6 +50,10 @@
 <xsl:param name="renommage_fichier">true</xsl:param>
 <!-- Préfixe à ajouter pour identifier le document -->
 <xsl:param name="préfixe">document:</xsl:param>
+<!-- Copyright du document papier. -->
+<xsl:param name="copyright">Domaine public (original papier)</xsl:param>
+<!-- Copyright pour les images numériques. -->
+<xsl:param name="copyright_2">École Nationale des Ponts et Chaussées (image numérisée)</xsl:param>
 
 <!-- Constantes -->
 <xsl:variable name="saut_ligne">
@@ -92,6 +96,10 @@
         <xsl:text>Éditeur</xsl:text>
         <xsl:value-of select="$séparateur"/>
         <xsl:text>Date</xsl:text>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:text>Droits</xsl:text>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:text>Droits_2</xsl:text>
         <xsl:value-of select="$séparateur"/>
         <xsl:text>Format_1</xsl:text>
         <xsl:value-of select="$séparateur"/>
@@ -168,6 +176,10 @@
     <xsl:value-of select="refNum:editeur"/>
     <xsl:value-of select="$séparateur"/>
     <xsl:value-of select="refNum:dateEdition"/>
+    <xsl:value-of select="$séparateur"/>
+    <xsl:value-of select="$copyright"/>
+    <xsl:value-of select="$séparateur"/>
+    <xsl:value-of select="$copyright_2"/>
 
     <!-- Tomaison variant entre 0 et 3 dans refNum , trois colonnes sont utilisées. -->
     <xsl:value-of select="$séparateur"/>

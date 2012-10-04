@@ -17,7 +17,9 @@ For more information on Omeka, see [Omeka][1].
 Installation
 ------------
 
-Installs it like any other Omeka plugin, then follows the config instructions.
+Uncompress files and rename plugin folder "XmlImport".
+
+Then install it like any other Omeka plugin and follow the config instructions.
 
 
 Warning

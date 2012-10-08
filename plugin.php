@@ -36,9 +36,6 @@ class XmlImportPlugin extends Omeka_Plugin_Abstract
     );
 
     protected $_options = array(
-        'xml_import_path_main' => '',
-        'xml_import_path_images' => '',
-        'xml_import_path_subfolder' => '',
         'xml_import_stylesheet' => 'xml-import-generic.xsl',
         'xml_import_delimiter' => ',',
         'xml_import_stylesheet_parameters' => '',
@@ -77,7 +74,13 @@ class XmlImportPlugin extends Omeka_Plugin_Abstract
      */
     public function hookDefineAcl($acl)
     {
-        $acl->loadResourceList(array('XmlImport_Upload' => array('index', 'status')));
+        $acl->loadResourceList(array(
+            'XmlImport_Upload' => array(
+                'index',
+                'select-element',
+                'update',
+            ),
+        ));
     }
 
     public function hookAdminThemeHeader($request)

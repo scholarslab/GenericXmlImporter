@@ -1,6 +1,6 @@
 
-XmlImport (plugin for Omeka)
-============================
+Xml Import (plugin for Omeka) [files_metadata branch]
+=============================
 
 
 Summary
@@ -11,7 +11,10 @@ a generic or a custom XSLT sheet.
 
 Process uses CsvImport, so all imports can be managed in one place.
 
-For more information on Omeka, see [Omeka][1].
+This release is a branch of the original plugin that allows import of metadata
+of files. It requires a fork of CsvImport (see [CsvImport fork][1]).
+
+For more information on Omeka, see [Omeka][2].
 
 
 Installation
@@ -33,13 +36,13 @@ It's always recommended to backup your database so you can roll back if needed.
 Troubleshooting
 ---------------
 
-See online issues on [GitHub][2].
+See online issues on [GitHub][3].
 
 
 License
 -------
 
-This plugin is published under [Apache licence v2][3].
+This plugin is published under [Apache licence v2][4].
 
 
 Contact
@@ -47,8 +50,8 @@ Contact
 
 Current maintainers:
 
-* Daniel Berthereau (see [Daniel_KM][4])
-* Scholars' Lab (see [Scholars' Lab][5])
+* Daniel Berthereau (see [Daniel_KM][5])
+* Scholars' Lab (see [Scholars' Lab][6])
 
 First version of this plugin has been built by [Scholars' Lab of University of Virginia Library][6].
 
@@ -62,10 +65,11 @@ Copyright
 * Copyright Scholars' Lab, 2010 [GenericXmlImporter v1.0]
 
 
-[1]: http://www.omeka.org "Omeka.org"
-[2]: https://github.com/Daniel-KM/XmlImport "GitHub XmlImport"
-[3]: https://www.apache.org/licenses/LICENSE-2.0.html "Apache licence v2"
-[4]: http://github.com/Daniel-KM "Daniel_KM"
-[5]: https://github.com/scholarslab "Scholars' Lab"
-[6]: http://www.scholarslab.org/research/omeka-plugins/ "Scholars' Lab of University of Virginia Library"
-[7]: http://bibliotheque.enpc.fr "École des Ponts ParisTech"
+[1]: https://github.com/Daniel-KM/CsvImport "CsvImport fork"
+[2]: http://www.omeka.org "Omeka.org"
+[3]: https://github.com/Daniel-KM/XmlImport/Issues "GitHub XmlImport"
+[4]: https://www.apache.org/licenses/LICENSE-2.0.html "Apache licence v2"
+[5]: http://github.com/Daniel-KM "Daniel_KM"
+[6]: https://github.com/scholarslab "Scholars' Lab"
+[7]: http://www.scholarslab.org/research/omeka-plugins/ "Scholars' Lab of University of Virginia Library"
+[8]: http://bibliotheque.enpc.fr "École des Ponts ParisTech"

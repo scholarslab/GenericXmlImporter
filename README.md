@@ -1,5 +1,5 @@
 
-XmlImport (plugin for Omeka)
+Xml Import (plugin for Omeka)
 ============================
 
 
@@ -63,7 +63,7 @@ Copyright
 
 
 [1]: http://www.omeka.org "Omeka.org"
-[2]: https://github.com/Daniel-KM/XmlImport "GitHub XmlImport"
+[2]: https://github.com/Daniel-KM/XmlImport/Issues "GitHub XmlImport"
 [3]: https://www.apache.org/licenses/LICENSE-2.0.html "Apache licence v2"
 [4]: http://github.com/Daniel-KM "Daniel_KM"
 [5]: https://github.com/scholarslab "Scholars' Lab"

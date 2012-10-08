@@ -185,10 +185,10 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         // Get variables from args array passed into detached process.
         $fileList = $args['file_list'];
         $csvFilename = $args['csv_filename'];
+        $itemTypeId = $args['item_type_id'];
+        $collectionId = $args['collection_id'];
         $itemsArePublic = $args['public'];
         $itemsAreFeatured = $args['featured'];
-        $collectionId = $args['collection_id'];
-        $itemTypeId = $args['item_type_id'];
         $tagName = $args['tag_name'];
         $stylesheet = $args['stylesheet'];
         $delimiter = $args['delimiter'];
@@ -253,9 +253,9 @@ class XmlImport_UploadController extends Omeka_Controller_Action
                 $csvImportSession->columnDelimiter = $delimiter;
 
                 $csvImportSession->itemTypeId = empty($itemTypeId) ? 0 : $itemTypeId;
+                $csvImportSession->collectionId = $collectionId;
                 $csvImportSession->itemsArePublic = ($itemsArePublic == '1');
                 $csvImportSession->itemsAreFeatured = ($itemsAreFeatured == '1');
-                $csvImportSession->collectionId = $collectionId;
                 $csvImportSession->columnNames = $file->getColumnNames();
                 $csvImportSession->columnExamples = $file->getColumnExamples();
                 $csvImportSession->ownerId = $this->getInvokeArg('bootstrap')->currentuser->id;
@@ -297,7 +297,8 @@ class XmlImport_UploadController extends Omeka_Controller_Action
 
         // One xml file upload.
         $fileUploadElement = new Zend_Form_Element_File('xmldoc');
-        $fileUploadElement->setLabel('Select one XML file')
+        $fileUploadElement
+            ->setLabel('Select one XML file')
             ->setDescription('Maximum file size is the minimum of ' . ini_get('upload_max_filesize') . ' and ' . ini_get('post_max_size') . '.')
             ->addValidator('Count', FALSE, array('min' => 0, 'max' => 1))
             ->addValidator('Extension', FALSE, 'xml');
@@ -305,22 +306,25 @@ class XmlImport_UploadController extends Omeka_Controller_Action
 
         // Multiple files.
         $xmlFolderElement = new Zend_Form_Element_Text('xmlfolder');
-        $xmlFolderElement->setLabel('Select a folder of XML files')
+        $xmlFolderElement
+            ->setLabel('Select a folder of XML files')
             ->setDescription('All XML files in this folder, recursively, will be processed.')
             ->setAttrib('size', '80');
         $form->addElement($xmlFolderElement);
 
         // Item Type.
         $itemType = new Zend_Form_Element_Select('xml_import_item_type');
-        $itemType->setLabel('Item Type')
+        $itemType
+            ->setLabel('Item Type')
             ->addMultiOptions($itemtypes);
         $form->addElement($itemType);
 
         // Collection.
-         $collectionId = new Zend_Form_Element_Select('xml_import_collection_id');
-         $collectionId->setLabel('Collection')
+        $collectionId = new Zend_Form_Element_Select('xml_import_collection_id');
+        $collectionId
+            ->setLabel('Collection')
             ->addMultiOptions($collections);
-         $form->addElement($collectionId);
+        $form->addElement($collectionId);
 
         // Items are public?
         $itemsArePublic = new Zend_Form_Element_Checkbox('xml_import_items_are_public');
@@ -336,7 +340,8 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $default_directory = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'libraries');
         $stylesheets = $this->_listDirectory($default_directory, 'xsl');
         $stylesheet = new Zend_Form_Element_Select('xml_import_stylesheet');
-        $stylesheet->setLabel('Stylesheet')
+        $stylesheet
+            ->setLabel('Stylesheet')
             ->setDescription('The generic stylesheet is "xml-import-generic.xsl". It transforms a flat xml file with multiple records into a csv file with multiple rows.')
             ->setRequired(TRUE)
             ->addMultiOptions($stylesheets)
@@ -373,7 +378,8 @@ class XmlImport_UploadController extends Omeka_Controller_Action
 
         // XSLT parameters.
         $stylesheetParametersElement = new Zend_Form_Element_Text('xml_import_stylesheet_parameters');
-        $stylesheetParametersElement->setLabel('Add specific parameters to use with your stylesheet')
+        $stylesheetParametersElement
+            ->setLabel('Add specific parameters to use with your stylesheet')
             ->setDescription('Format: parameter1_name|parameter1_value, parameter2_name|parameter2_value...')
             ->setValue(get_option('xml_import_stylesheet_parameters'))
             ->setAttrib('size', '80');
@@ -381,7 +387,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
 
         // Submit button.
         $form->addElement('submit','submit');
-        $submitElement=$form->getElement('submit');
+        $submitElement = $form->getElement('submit');
         $submitElement->setLabel('Upload');
 
         return $form;
@@ -422,7 +428,8 @@ class XmlImport_UploadController extends Omeka_Controller_Action
 
         // Available record elements.
         $tagName = new Zend_Form_Element_Select('xml_import_tag_name');
-        $tagName->setLabel('Tag Name')
+        $tagName
+            ->setLabel('Tag Name')
             ->addMultiOptions($elementSet);
         $form->addElement($tagName);
 
@@ -464,7 +471,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
 
         // Submit button.
         $form->addElement('submit','submit');
-        $submitElement=$form->getElement('submit');
+        $submitElement = $form->getElement('submit');
         $submitElement->setLabel('Next ->');
 
         return $form;

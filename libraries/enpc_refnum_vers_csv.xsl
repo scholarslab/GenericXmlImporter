@@ -28,16 +28,18 @@
     - Compte tenu du contenu des fichiers refNum des prestataires, certains noms de fichiers doivent être modifiés. En pratique, seuls les liens incomplets vers les fichiers sont renommés (cf. infra).
 -->
 
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                version="1.0"
-                xmlns:refNum="http://bibnum.bnf.fr/ns/refNum">
+<xsl:stylesheet version="1.1"
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:refNum="http://bibnum.bnf.fr/ns/refNum">
 <xsl:output method="text"
-            media-type="text/csv"
-            encoding="UTF-8"
-            omit-xml-declaration="yes"/>
+    media-type="text/csv"
+    encoding="UTF-8"
+    omit-xml-declaration="yes"/>
 
 <!-- Paramètres -->
-<xsl:param name="delimiter">|</xsl:param>
+<!-- Délimiteur : tabulation par défaut, car c'est le seul caractère que l'on ne trouve jamais dans les fichiers refNum. -->
+<!-- Attention : CsvImport ne le permet pas dans la version par défaut. -->
+<xsl:param name="delimiter"><xsl:text>&#x9;</xsl:text></xsl:param>
 <xsl:param name="enclosure">"</xsl:param>
 <!-- Actuellement, CsvImport ne prend en charge que la virgule pour les champs multivalués. -->
 <xsl:param name="délimiteur_multivaleur">,</xsl:param>
@@ -45,11 +47,11 @@
 <!-- CsvImport ne semble pas prendre en compte les fichiers locaux : il faut donc utiliser un lien ou un montage sur le serveur. -->
 <xsl:param name="chemin_source">http://127.0.0.1/images</xsl:param>
 <!-- Collections principales : Annales, Cours, Journaux_mission, Phares, Cartes -->
-<xsl:param name="collection">Autres</xsl:param>
+<xsl:param name="collection"></xsl:param>
 <!-- Utilisation de la fonction de renommage -->
 <xsl:param name="renommage_fichier">true</xsl:param>
 <!-- Préfixe à ajouter pour identifier le document -->
-<xsl:param name="préfixe">document:</xsl:param>
+<xsl:param name="préfixe_identifiant">document:</xsl:param>
 <!-- Copyright du document papier. -->
 <xsl:param name="copyright">Domaine public (original papier)</xsl:param>
 <!-- Copyright pour les images numériques. -->
@@ -57,8 +59,7 @@
 
 <!-- Constantes -->
 <xsl:variable name="saut_ligne">
-<xsl:text>
-</xsl:text>
+    <xsl:text>&#x0A;</xsl:text>
 </xsl:variable>
 <xsl:variable name="séparateur">
     <xsl:value-of select="$enclosure"/>
@@ -109,7 +110,7 @@
         <xsl:value-of select="$séparateur"/>
         <xsl:text>Format_4</xsl:text>
         <xsl:value-of select="$séparateur"/>
-        <xsl:text>Capture Date</xsl:text>
+        <xsl:text>Date Created</xsl:text>
         <xsl:value-of select="$séparateur"/>
         <!-- Compte tenu des spécifications de numérisation, le nombre d'objet est toujours égal au nombre d'images. -->
         <xsl:text>Nombre vue objet</xsl:text>
@@ -136,17 +137,14 @@
 
 <!-- Template d'un document refNum -->
 <xsl:template match="refNum:document">
-    <xsl:variable name="Ligne">
-        <xsl:value-of select="$début_ligne"/>
-        <xsl:value-of select="$préfixe"/>
-        <xsl:value-of select="@identifiant"/>
-        <xsl:apply-templates select="refNum:bibliographie"/>
-        <xsl:apply-templates select="refNum:production"/>
-        <xsl:apply-templates select="refNum:structure"/>
-    </xsl:variable>
+    <xsl:value-of select="$début_ligne"/>
+    <xsl:value-of select="$préfixe_identifiant"/>
+    <xsl:value-of select="@identifiant"/>
 
-    <!-- La normalisation est nécessaire, car les fichiers originaux peuvent avoir des sauts de ligne, notamment sur dateNumerisation et description. -->
-    <xsl:value-of select="normalize-space($Ligne)"/>
+    <xsl:apply-templates select="refNum:bibliographie"/>
+    <xsl:apply-templates select="refNum:production"/>
+    <xsl:apply-templates select="refNum:structure"/>
+
     <xsl:value-of select="$fin_ligne"/>
 </xsl:template>
 
@@ -167,11 +165,11 @@
         </xsl:otherwise>
     </xsl:choose>
     <xsl:value-of select="$séparateur"/>
-    <xsl:value-of select="refNum:titre"/>
+    <xsl:value-of select="normalize-space(refNum:titre)"/>
     <xsl:value-of select="$séparateur"/>
     <xsl:value-of select="refNum:auteur"/>
     <xsl:value-of select="$séparateur"/>
-    <xsl:value-of select="refNum:description"/>
+    <xsl:value-of select="normalize-space(refNum:description)"/>
     <xsl:value-of select="$séparateur"/>
     <xsl:value-of select="refNum:editeur"/>
     <xsl:value-of select="$séparateur"/>
@@ -217,21 +215,7 @@
 <xsl:template match="refNum:production">
     <xsl:value-of select="$séparateur"/>
     <!-- Ce champ n'est pas rempli correctement dans les fichiers refNum d'un prestataire (un espace et/ou un saut de ligne en trop). -->
-    <xsl:choose>
-        <xsl:when test="refNum:dateNumerisation = normalize-space(refNum:dateNumerisation)">
-            <xsl:value-of select="refNum:dateNumerisation"/>
-        </xsl:when>
-        <xsl:otherwise>
-            <xsl:choose>
-                <xsl:when test="substring(normalize-space(refNum:dateNumerisation), string-length(normalize-space(refNum:dateNumerisation)), 1) = ' '">
-                    <xsl:value-of select="substring(normalize-space(refNum:dateNumerisation), 1, string-length(normalize-space(refNum:dateNumerisation)) - 1)"/>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:value-of select="normalize-space(refNum:dateNumerisation)"/>
-                </xsl:otherwise>
-            </xsl:choose>
-        </xsl:otherwise>
-    </xsl:choose>
+    <xsl:value-of select="normalize-space(refNum:dateNumerisation)"/>
     <xsl:value-of select="$séparateur"/>
     <xsl:value-of select="refNum:nombreVueObjets"/>
     <xsl:value-of select="$séparateur"/>
@@ -258,7 +242,7 @@
     <xsl:value-of select="$séparateur"/>
     <xsl:value-of select="./refNum:commentaire/@date"/>
     <xsl:value-of select="$séparateur"/>
-    <xsl:value-of select="./refNum:commentaire"/>
+    <xsl:value-of select="normalize-space(./refNum:commentaire)"/>
 
     <!-- Récupération et renommage des noms de fichiers dans un champ multivalué. -->
     <!-- CsvImport a besoin d'une URL complète pour importer les fichiers. -->
@@ -273,6 +257,7 @@
                 <xsl:value-of select="$délimiteur_multivaleur"/>
             </xsl:otherwise>
         </xsl:choose>
+
         <xsl:if test="$chemin_source">
             <xsl:value-of select="$chemin_source"/>
             <xsl:text>/</xsl:text>

@@ -106,6 +106,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
                     $xmlImportSession = new Zend_Session_Namespace('XmlImport');
                     $xmlImportSession->file_list = $fileList;
                     $xmlImportSession->csv_filename = $csvFilename;
+                    $xmlImportSession->record_type_id = $uploadedData['xml_import_record_type'];
                     $xmlImportSession->item_type_id = $itemTypeId;
                     $xmlImportSession->collection_id = $collectionId;
                     $xmlImportSession->public = $uploadedData['xml_import_items_are_public'];
@@ -154,10 +155,12 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         if ($_POST) {
             if ($form->isValid($this->_request->getPost())) {
                 $uploadedData = $form->getValues();
+
                 $args = array();
                 $args['file_list'] = unserialize($uploadedData['xml_import_file_list']);
                 $args['csv_filename'] = $uploadedData['xml_import_csv_filename'];
                 $args['tag_name'] = $uploadedData['xml_import_tag_name'];
+                $args['record_type_id'] = $uploadedData['xml_import_record_type'];
                 $args['item_type_id'] = $uploadedData['xml_import_item_type'];
                 $args['collection_id'] = $uploadedData['xml_import_collection_id'];
                 $args['public'] = $uploadedData['xml_import_items_are_public'];
@@ -185,6 +188,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         // Get variables from args array passed into detached process.
         $fileList = $args['file_list'];
         $csvFilename = $args['csv_filename'];
+        $recordTypeId = $args['record_type_id'];
         $itemTypeId = $args['item_type_id'];
         $collectionId = $args['collection_id'];
         $itemsArePublic = $args['public'];
@@ -196,6 +200,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
 
         $csvFilePath = sys_get_temp_dir() . '/' . 'omeka_xml_import_' . date('Ymd-His') . '_' . $this->_sanitizeString($csvFilename) . '.csv';
         $csvFilename = 'Via Xml Import: ' . $csvFilename;
+
         try {
             // Add items of the custom fields. Allowed types are already checked.
             $parameters = array();
@@ -252,6 +257,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
                 $csvImportSession->filePath = $csvFilePath;
                 $csvImportSession->columnDelimiter = $delimiter;
 
+                $csvImportSession->recordTypeId = $recordTypeId;
                 $csvImportSession->itemTypeId = empty($itemTypeId) ? 0 : $itemTypeId;
                 $csvImportSession->collectionId = $collectionId;
                 $csvImportSession->itemsArePublic = ($itemsArePublic == '1');
@@ -311,6 +317,16 @@ class XmlImport_UploadController extends Omeka_Controller_Action
             ->setDescription('All XML files in this folder, recursively, will be processed.')
             ->setAttrib('size', '80');
         $form->addElement($xmlFolderElement);
+
+        // radio button for selecting record type
+        $form->addElement('radio', 'xml_import_record_type', array(
+            'label' => 'Record type',
+            'multiOptions' => array(
+                2 => 'Item',
+                3 => 'File',
+            ),
+            'required' => TRUE,
+        ));
 
         // Item Type.
         $itemType = new Zend_Form_Element_Select('xml_import_item_type');
@@ -403,6 +419,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
     {
         $fileList = $xmlImportSession->file_list;
         $csvFilename = $xmlImportSession->csv_filename;
+        $recordTypeId = $xmlImportSession->record_type_id;
         $itemTypeId = $xmlImportSession->item_type_id;
         $collectionId = $xmlImportSession->collection_id;
         $public = $xmlImportSession->public;
@@ -440,6 +457,10 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $csvFilenameElement = new Zend_Form_Element_Hidden('xml_import_csv_filename');
         $csvFilenameElement->setValue($csvFilename);
         $form->addElement($csvFilenameElement);
+
+        $recordTypeElement = new Zend_Form_Element_Hidden('xml_import_record_type');
+        $recordTypeElement->setValue($recordTypeId);
+        $form->addElement($recordTypeElement);
 
         $itemTypeElement = new Zend_Form_Element_Hidden('xml_import_item_type');
         $itemTypeElement->setValue($itemTypeId);

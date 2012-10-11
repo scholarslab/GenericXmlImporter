@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Document : refNum_codes.xml
+    Crée le : 05/10/2012
+    Version : 1.0
+    Auteur : Daniel Berthereau pour l'École des Ponts (http://bibliotheque.enpc.fr)
+    Description : Liste des codes du modèle refNum : cf. http://bibnum.bnf.fr/refNum.
+
+    Notes
+    Contient uniquement les codes nécessaires à la mise en place de la bibliothèque numérique.
+-->
+
+<XMLlist>
+    <typePagination>
+        <entry code="N">Non paginée</entry>
+        <entry code="A">Chiffres arabes</entry>
+        <entry code="R">Chiffres romains</entry>
+        <entry code="F">Foliotation</entry>
+        <entry code="X">Autre type</entry>
+    </typePagination>
+
+    <typePage>
+        <entry code="N">Normale</entry>
+        <entry code="P">Page de titre</entry>
+        <entry code="T">Table des matières</entry>
+        <entry code="I">Index</entry>
+        <entry code="L">Logo</entry>
+        <entry code="E">Première page à afficher</entry>
+        <entry code="A">Publicités ou catalogues d'éditeurs</entry>
+        <entry code="R">Index ou tables des matières sans renvoi</entry>
+        <entry code="D">Dessins ou illustrations</entry>
+        <entry code="C">Couverture ou couvrure</entry>
+    </typePage>
+
+    <supportOrigine>
+        <entry code="CALQUE">Calque</entry>
+        <entry code="CYLINDRE">Cylindre</entry>
+        <entry code="DIA 35 CO POS">Diapositive 35 mm en couleur positive</entry>
+        <entry code="DIA 35 DT POS">Diapositive 35 mm en demi-teinte positive</entry>
+        <entry code="DISQUE">Disque audio de tous formats</entry>
+        <entry code="FICHE P1 CO POS">Microfiche mono vue en couleur positive</entry>
+        <entry code="FICHE P1 DT NEG">Microfiche mono vue en demi-teinte négative</entry>
+        <entry code="FICHE P1 DT POS">Microfiche mono vue en demi-teinte positive</entry>
+        <entry code="FICHE P1 NB NEG">Microfiche mono vue en noir et blanc négative</entry>
+        <entry code="FICHE P1 NB POS">Microfiche mono vue en noir et blanc positive</entry>
+        <entry code="FICHE P30 NB NEG">Microfiche de partition 30 vues en noir et blanc négative</entry>
+        <entry code="FICHE P30 NB POS">Microfiche de partition 30 vues en noir et blanc positive</entry>
+        <entry code="FICHE P49 DT NEG">Microfiche de partition 49 vues en demi-teinte négative</entry>
+        <entry code="FICHE P49 DT POS">Microfiche de partition 49 vues en demi-teinte positive</entry>
+        <entry code="FICHE P49 NB NEG">Microfiche de partition 49 vues en noir et blanc négative</entry>
+        <entry code="FICHE P49 NB POS">Microfiche de partition 49 vues en noir et blanc positive</entry>
+        <entry code="FICHE P60 NB NEG">Microfiche de partition 60 vues en noir et blanc négative</entry>
+        <entry code="FICHE P60 NB POS">Microfiche de partition 60 vues en noir et blanc positive</entry>
+        <entry code="FICHE P98 DT NEG">Microfiche de partition 98 vues en demi-teinte négative</entry>
+        <entry code="FICHE P98 DT POS">Microfiche de partition 98 vues en demi-teinte positive</entry>
+        <entry code="FICHE P98 NB NEG">Microfiche de partition 98 vues en noir et blanc négative</entry>
+        <entry code="FICHE P98 NB POS">Microfiche de partition 98 vues en noir et blanc positive</entry>
+        <entry code="FICHE PX DT NEG">Microfiche de partition non définie en demi-teinte négative</entry>
+        <entry code="FICHE PX DT POS">Microfiche de partition non définie en demi-teinte positive</entry>
+        <entry code="FICHE PX NB NEG">Microfiche de partition non définie en noir et blanc négative</entry>
+        <entry code="FICHE PX NB POS">Microfiche de partition non définie en noir et blanc positive</entry>
+        <entry code="FILM 16 DT POS">Film 16 mm en demi teinte positif</entry>
+        <entry code="FILM 16 NB NEG">Film 16 mm en noir et blanc négatif</entry>
+        <entry code="FILM 16 NB POS">Film 16 mm en noir et blanc positif</entry>
+        <entry code="FILM 35 CO POS">Film 35 mm en couleur positif</entry>
+        <entry code="FILM 35 DT NEG">Film 35 mm en demi-teinte négatif</entry>
+        <entry code="FILM 35 DT POS">Film 35 mm en demi-teinte positif</entry>
+        <entry code="FILM 35 NB NEG">Film 35 mm en noir et blanc négatif</entry>
+        <entry code="FILM 35 NB POS">Film 35 mm en noir et blanc positif</entry>
+        <entry code="NEGATIF SUR PAPIER">Négatif sur papier</entry>
+        <entry code="PAPIER FEU CO">Papier en feuille en couleur</entry>
+        <entry code="PAPIER FEU DT">Papier en feuille en demi-teinte</entry>
+        <entry code="PAPIER FEU NB">Papier en feuille en noir et blanc</entry>
+        <entry code="PAPIER MAS CO">Papier massicoté en couleur</entry>
+        <entry code="PAPIER MAS DT">Papier massicoté en demi-teinte</entry>
+        <entry code="PAPIER MAS NB">Papier massicoté en noir et blanc</entry>
+        <entry code="PAPIER REL CO">Papier relié en couleur</entry>
+        <entry code="PAPIER REL DT">Papier relié en demi-teinte</entry>
+        <entry code="PAPIER REL NB">Papier relié en noir et blanc</entry>
+        <entry code="PF 13X18 CO POS">Plan film 13x18 en couleur positif</entry>
+        <entry code="PF 13X18 DT POS">Plan film 13x18 en demi-teinte positif</entry>
+        <entry code="PF 18X24 CO POS">Plan film 18x24 en couleur positif</entry>
+        <entry code="PF 18X24 DT POS">Plan film 18x24 en demi-teinte positif</entry>
+        <entry code="PF 20X25 CO POS">Plan film 20x25 en couleur positif</entry>
+        <entry code="PF 4X5 CO POS">Plan film 4x5 en couleur positif</entry>
+        <entry code="PF 4X5 DT POS">Plan film 4x5 en demi-teinte positif</entry>
+        <entry code="PF 9X12 CO POS">Plan film 9x12 en couleur positif</entry>
+        <entry code="PF 9X12 DT POS">Plan film 9x12 en demi-teinte positif</entry>
+        <entry code="PHOTO PAPIER CO">Photo papier couleur</entry>
+        <entry code="PHOTO PAPIER NB">Photo papier noir et blanc</entry>
+        <entry code="PV 9X12 DT NEG">Plaque de verre 9x12 en demi-teinte négative</entry>
+        <entry code="PV CO NEG">Plaque de verre couleur négatif</entry>
+        <entry code="PV CO POS">Plaque de verre couleur positif</entry>
+        <entry code="PV DT NEG">Plaque de verre demi-teinte négatif</entry>
+        <entry code="PV DT POS">Plaque de verre demi-teinte positif</entry>
+        <entry code="PV NB NEG">Plaque de verre noir et blanc négatif</entry>
+        <entry code="PV NB POS">Plaque de verre noir et blanc positif</entry>
+    </supportOrigine>
+</XMLlist>

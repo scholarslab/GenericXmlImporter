@@ -91,6 +91,18 @@ class XmlImport_UploadController extends Omeka_Controller_Action
                     }
                 }
 
+                // Check delimiter.
+                if ($uploadedData['xml_import_delimiter_name'] == 'custom') {
+                    if ($uploadedData['xml_import_delimiter_name'] == '') {
+                        $this->flashError('Error parsing XML document: "' . $filepath . '".');
+                        return;
+                    }
+                }
+                else {
+                    $listDelimiters = $this->_listDelimiters();
+                    $uploadedData['xml_import_delimiter'] = $listDelimiters[$uploadedData['xml_import_delimiter_name']];
+                }
+
                 // Alright, go to next step.
                 try {
                     // Clean up collection id if no collection is selected.
@@ -365,24 +377,40 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $form->addElement($stylesheet);
 
         // Delimiter should be the one used the xsl sheet.
-        // @see CsvImport_Form_Main::init().
+        // @see CsvImport_Form_Main::init() or CsvImport/models/CsvImport/import.php.
         $delimiter = get_option('xml_import_delimiter');
+        if ($delimiter == '') {
+            $delimiter = ',';
+        }
+        $delimiterList = array(
+            'comma'      => '« , » (comma)',
+            'semi-colon' => '« ; » (semi-colon)',
+            'tabulation' => '«   » (tabulation)',
+            'pipe'       => '« | » (pipe)',
+            'space'      => '«   » (space)',
+            'custom'     => 'Custom delimiter',
+        );
+        $delimiterCurrent = in_array($delimiter, $this->_listDelimiters()) ?
+            array_search($delimiter, $this->_listDelimiters()) :
+            'custom';
+        // Two elements are needed to select the delimiter.
+        // First, a list for special types, mainly whitespace and tabulation.
+        $delimiterName = new Zend_Form_Element_Select('xml_import_delimiter_name');
+        $delimiterName
+            ->setLabel('Choose column delimiter')
+            ->addMultiOptions($delimiterList)
+            ->setRequired(TRUE)
+            ->setValue($delimiterCurrent);
+        $form->addElement($delimiterName);
+        // Second, a field to let user chooses.
         $form->addElement('text', 'xml_import_delimiter', array(
-            'label' => 'Choose Column Delimiter',
-            'description' => "A single character that will be used to separate columns in the file (comma by default)."
-                . ' Warning: Note that it must be the same as the one used in the xsl sheet.',
+            'description' => "Choose the character you want to use to separate columns in the imported file." . ' '
+            . "If you want a specific one, choose 'Custom' in the drop-down list and fill the text field with a single character.",
             'value' => $delimiter,
-            'required' => TRUE,
             'size' => '1',
             'validators' => array(
-                array('validator' => 'NotEmpty',
-                    'breakChainOnFailure' => TRUE,
-                    'options' => array('messages' => array(
-                        Zend_Validate_NotEmpty::IS_EMPTY => "Column delimiter must be one character long.",
-                    )),
-                ),
                 array('validator' => 'StringLength', 'options' => array(
-                    'min' => 1,
+                    'min' => 0,
                     'max' => 1,
                     'messages' => array(
                         Zend_Validate_StringLength::TOO_SHORT => "Column delimiter must be one character long.",
@@ -601,7 +629,8 @@ class XmlImport_UploadController extends Omeka_Controller_Action
      * @return string
      *   Transformed data.
      */
-    private function _apply_xslt($xml_file, $xsl_file, $parameters = array()) {
+    private function _apply_xslt($xml_file, $xsl_file, $parameters = array())
+    {
         $DomXml = new DomDocument;
         $DomXml->load($xml_file);
 
@@ -624,7 +653,8 @@ class XmlImport_UploadController extends Omeka_Controller_Action
      * @return
      *   $filepath if no error, FALSE else.
      */
-    private function _append_data_to_file($filepath, $data) {
+    private function _append_data_to_file($filepath, $data)
+    {
         if (file_put_contents($filepath, $data, FILE_APPEND | LOCK_EX) === FALSE) {
             return FALSE;
         }
@@ -639,7 +669,8 @@ class XmlImport_UploadController extends Omeka_Controller_Action
      *
      * @return string The sanitized string to use as a folder or a file name.
      */
-    private function _sanitizeString($string) {
+    private function _sanitizeString($string)
+    {
         $string = trim(strip_tags($string));
         $string = htmlentities($string, ENT_NOQUOTES, 'utf-8');
         $string = preg_replace('#\&([A-Za-z])(?:uml|circ|tilde|acute|grave|cedil|ring)\;#', '\1', $string);
@@ -647,5 +678,17 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $string = preg_replace('#\&[^;]+\;#', '_', $string);
         $string = preg_replace('/[^[:alnum:]\(\)\[\]_\-\.#~@+:]/', '_', $string);
         return preg_replace('/_+/', '_', $string);
+    }
+
+    private function _listDelimiters()
+    {
+        return array(
+            'comma'      => ',',
+            'semi-colon' => ';',
+            'tabulation' => "\t",
+            'pipe'       => '|',
+            'space'      => ' ',
+            'custom'     => 'custom',
+        );
     }
 }

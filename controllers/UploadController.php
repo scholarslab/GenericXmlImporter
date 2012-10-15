@@ -276,6 +276,11 @@ class XmlImport_UploadController extends Omeka_Controller_Action
                 $csvImportSession->itemsAreFeatured = ($itemsAreFeatured == '1');
                 $csvImportSession->columnNames = $file->getColumnNames();
                 $csvImportSession->columnExamples = $file->getColumnExamples();
+                // A bug appears in CsvImport when examples contain UTF-8
+                // characters like 'ГЧ„чŁ'.
+                foreach ($csvImportSession->columnExamples as &$value) {
+                    $value = iconv('ISO-8859-15', 'UTF-8', @iconv('UTF-8', 'ISO-8859-15' . '//IGNORE', $value));
+                }
                 $csvImportSession->ownerId = $this->getInvokeArg('bootstrap')->currentuser->id;
 
                 $this->redirect->goto('map-columns', 'index', 'csv-import');
@@ -631,13 +636,15 @@ class XmlImport_UploadController extends Omeka_Controller_Action
      */
     private function _apply_xslt($xml_file, $xsl_file, $parameters = array())
     {
-        $DomXml = new DomDocument;
-        $DomXml->load($xml_file);
-
-        $DomXsl = new DomDocument;
-        $DomXsl->load($xsl_file);
+        $DomXml = DomDocument::load($xml_file);
+        $DomXsl = DomDocument::load($xsl_file);
 
         $proc = new XSLTProcessor;
+        // Php functions are needed, because php doesn't use XSLT 2.0 and
+        // because we need to check existence of a file.
+        if (get_plugin_ini('XmlImport', 'xml_import_allow_php_in_xsl') == 'TRUE') {
+            $proc->registerPHPFunctions();
+        }
         $proc->importStyleSheet($DomXsl);
         $proc->setParameter('', $parameters);
 

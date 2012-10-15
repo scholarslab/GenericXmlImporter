@@ -13,8 +13,12 @@
     La feuille importe également les fichiers associés éventuels d'OCR Alto et le convertit en texte brut.
 -->
 
-<xsl:stylesheet version="1.1"
+<!-- fn et php permettent de tester l'existence des fichiers et sont nécessaires compte tenu des erreurs dans les fichiers refNum XML. -->
+<!-- Le résultat de la fonction document() varie selon les processeurs et n'est donc pas utilisée. -->
+<xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:fn="http://www.w3.org/2005/xpath-functions"
+    xmlns:php="http://php.net/xsl"
     xmlns:refNum="http://bibnum.bnf.fr/ns/refNum"
     xmlns:alto="http://bibnum.bnf.fr/ns/alto_prod">
 <xsl:output method="text"
@@ -24,9 +28,10 @@
 
 <!-- Paramètres -->
 <!-- Délimiteur : tabulation par défaut, car c'est le seul caractère que l'on ne trouve jamais dans les fichiers refNum. -->
-<!-- Attention : CsvImport ne le permet pas dans la version par défaut.Délimiteur : tabulation par défaut, car c'est le seul caractère que l'on ne trouve jamais dans les fichiers refNum. -->
+<!-- Attention : CsvImport ne le permet pas dans la version originale. -->
 <xsl:param name="delimiter"><xsl:text>&#x9;</xsl:text></xsl:param>
-<xsl:param name="enclosure">"</xsl:param>
+<!-- Avec la tabulation, pas besoin de protecteur. -->
+<xsl:param name="enclosure"></xsl:param>
 <!-- Actuellement, CsvImport ne prend en charge que la virgule pour les champs multivalués. -->
 <xsl:param name="délimiteur_multivaleur">,</xsl:param>
 <xsl:param name="ajoute_entêtes">true</xsl:param>
@@ -93,7 +98,19 @@
         <xsl:value-of select="$séparateur"/>
         <xsl:text>Alto XML</xsl:text>
         <xsl:value-of select="$séparateur"/>
-        <xsl:text>Texte</xsl:text>
+        <xsl:text>OCR Nombre NC</xsl:text>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:text>OCR Nombre NC dico</xsl:text>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:text>OCR Taux NC</xsl:text>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:text>OCR Nombre de caractères</xsl:text>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:text>OCR Caractères douteux</xsl:text>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:text>OCR Taux des caractères douteux</xsl:text>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:text>OCR Texte</xsl:text>
 
         <xsl:value-of select="$fin_ligne"/>
     </xsl:if>
@@ -109,6 +126,11 @@
 
         <xsl:variable name = "identifiantImage">
             <xsl:call-template name="nom_image" />
+        </xsl:variable>
+
+        <!-- Détermine l'url du fichier alto associé, s'il existe, même si l'existence du fichier n'est pas indiqué dans le refNum. -->
+        <xsl:variable name="url_fichier_alto">
+            <xsl:call-template name="retourne_url_fichier_alto"/>
         </xsl:variable>
 
         <xsl:value-of select="$début_ligne"/>
@@ -156,29 +178,43 @@
         <xsl:value-of select="normalize-space(../../refNum:production/refNum:dateNumerisation)"/>
 
         <xsl:value-of select="$séparateur"/>
-        <xsl:value-of select="../../refNum:production/refNum:objetAssocie"/>
-        <!-- Détermine l'url du fichier alto associé, s'il existe. -->
-        <xsl:variable name="url_fichier_alto">
-            <xsl:call-template name="retourne_url_fichier_alto"/>
-        </xsl:variable>
+        <!-- Ce champ n'est pas rempli par l'un des prestataires. Il faut donc s'appuyer sur l'adresse du fichier associé. -->
+        <!-- <xsl:value-of select="../../refNum:production/refNum:objetAssocie"/> -->
+        <!-- Actuellement, seuls des fichiers Alto sont associés pour certains documents. -->
+        <xsl:choose>
+            <xsl:when test="boolean(document($url_fichier_alto))">
+                <xsl:text>ALTO</xsl:text>
+            </xsl:when>
+        </xsl:choose>
 
         <xsl:value-of select="$séparateur"/>
         <!-- Récupération intégrale du fichier associé. -->
-        <xsl:if test="../../refNum:production/refNum:objetAssocie = 'ALTO'">
+        <xsl:if test="boolean(document($url_fichier_alto))">
 <!-- TODO (actuellement, seul le texte brut est extrait, cf. champ suivant ci-dessous). -->
             <!-- Charge le fichier alto et le copie intégralement. -->
             <!-- Supprime les sauts de ligne du fichier alto pour pouvoir le charger en CSV (sans problème compte tenu des données disponibles dans un fichier Alto).-->
         </xsl:if>
 
+        <!-- Statistiques OCR -->
+        <xsl:value-of select="$séparateur"/>
+        <xsl:value-of select="substring-after(document($url_fichier_alto)/alto:alto/alto:Description/alto:OCRProcessing[last()]/alto:ocrProcessingStep/alto:processingStepDescription[1], 'OCR_TOTAL_NC=')"/>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:value-of select="substring-after(document($url_fichier_alto)/alto:alto/alto:Description/alto:OCRProcessing[last()]/alto:ocrProcessingStep/alto:processingStepDescription[2], 'OCR_TOTAL_NC_DICO=')"/>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:value-of select="substring-after(document($url_fichier_alto)/alto:alto/alto:Description/alto:OCRProcessing[last()]/alto:ocrProcessingStep/alto:processingStepDescription[3], 'OCR_TAUX_NC=')"/>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:value-of select="substring-after(document($url_fichier_alto)/alto:alto/alto:Description/alto:OCRProcessing[last()]/alto:ocrProcessingStep/alto:processingStepDescription[4], 'OCR_TOTAL_CAR=')"/>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:value-of select="substring-after(document($url_fichier_alto)/alto:alto/alto:Description/alto:OCRProcessing[last()]/alto:ocrProcessingStep/alto:processingStepDescription[5], 'OCR_TOTAL_CAR_DOUTE=')"/>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:value-of select="substring-after(document($url_fichier_alto)/alto:alto/alto:Description/alto:OCRProcessing[last()]/alto:ocrProcessingStep/alto:processingStepDescription[6], 'OCR_TAUX_CAR=')"/>
+
         <xsl:value-of select="$séparateur"/>
         <xsl:choose>
-            <xsl:when test="../../refNum:production/refNum:objetAssocie = 'ALTO'">
-                    <!-- Charge le fichier alto et extrait le texte brut sans saut de ligne. -->
-                    <!-- Le for-each s'applique une seule fois et permet de créer un nouveau contexte local. -->
-                    <xsl:for-each select="document($url_fichier_alto)">
-                        <xsl:apply-templates select="."/>
-                    </xsl:for-each>
-                </xsl:when>
+            <xsl:when test="boolean(document($url_fichier_alto))">
+                <!-- Charge le fichier alto et extrait le texte brut sans saut de ligne. -->
+                <xsl:apply-templates select="document($url_fichier_alto)"/>
+            </xsl:when>
         </xsl:choose>
 
         <xsl:value-of select="$fin_ligne"/>
@@ -296,14 +332,46 @@
     </xsl:choose>
 </xsl:template>
 
-<!-- Retourne l'adresse du fichier Alto associé si elle existe. -->
+<!-- Retourne l'adresse du fichier Alto associé si le document existe et est lisible. -->
 <xsl:template name="retourne_url_fichier_alto">
-    <xsl:if test="../../refNum:production/refNum:objetAssocie = 'ALTO'">
+    <!-- Impossibilité de tester simplement la balise objetAssocié, car certains refNum l'ont oublié. -->
+    <xsl:variable name="url_fichier_alto">
         <xsl:call-template name="adresse_objet_associé">
             <xsl:with-param name="préfixe_renommage">X</xsl:with-param>
         </xsl:call-template>
         <xsl:text>.xml</xsl:text>
-    </xsl:if>
+    </xsl:variable>
+
+    <!-- Nécessité de tester le contenu de l'url pour éviter les erreurs. -->
+    <xsl:call-template name="teste_fichier">
+        <xsl:with-param name="url" select="$url_fichier_alto"/>
+    </xsl:call-template>
+</xsl:template>
+
+<!-- Teste la disponibilité et l'accessibilité d'un document via son url. -->
+<xsl:template name="teste_fichier">
+    <xsl:param name="url"/>
+
+    <xsl:choose>
+        <!-- Test de la fonction XSLT 2.0. -->
+        <xsl:when test="function-available('fn:unparsed-text-available')">
+            <xsl:if test="fn:unparsed-text-available($url)">
+                <xsl:value-of select="$url"/>
+            </xsl:if>
+        </xsl:when>
+        <!-- Test de la fonction php. -->
+        <xsl:when test="function-available('php:function')">
+            <xsl:if test="php:function('file_get_contents', string($url))">
+                <xsl:value-of select="$url"/>
+            </xsl:if>
+        </xsl:when>
+        <xsl:otherwise>
+        <xsl:message terminate="no">
+                <xsl:text>Pas de fonction pour tester la présence d'un document : risque d'erreur.</xsl:text>
+        </xsl:message>
+        <xsl:value-of select="$url"/>
+        </xsl:otherwise>
+    </xsl:choose>
 </xsl:template>
 
 <!-- Définit l'adresse du fichier associé (vers le fichier original, puisqu'il n'est pas renommé ni chargé). -->
@@ -383,7 +451,7 @@
         <xsl:when test="@SUBS_CONTENT">
             <xsl:choose>
                 <xsl:when test="@SUBS_TYPE = 'HypPart1'">
-                    <xsl:value-of select="@SUBS_CONTENT"/>
+                    <xsl:value-of select="normalize-space(@SUBS_CONTENT)"/>
                 </xsl:when>
                 <xsl:when test="@SUBS_TYPE = 'HypPart2'">
                     <xsl:if test="not(name(following::alto:*[1]) = 'String')">
@@ -393,7 +461,7 @@
             </xsl:choose>
         </xsl:when>
         <xsl:otherwise>
-            <xsl:value-of select="@CONTENT"/>
+            <xsl:value-of select="normalize-space(@CONTENT)"/>
             <xsl:if test="not(name(following::alto:*[1]) = 'String')">
                 <xsl:text> </xsl:text>
             </xsl:if>

@@ -6,11 +6,11 @@
     Auteur : Daniel Berthereau pour l'École des Ponts (http://bibliotheque.enpc.fr)
     Description : Convertit un fichier refNum en Dublin Core au format CSV de façon à l'importer dans Omeka, logiciel libre de création de bibliothèque numérique, par le biais du plugin CsvImport.
 
-
     Notes
-    Cette feuille XSLT respecte au plus près le format refNum de la Bibliothèque nationale de France ((http://bibnum.bnf.fr/refNum/). Toutefois, elle presente certaines particularités pour deux raisons.
+    Cette feuille XSLT respecte au plus près le format refNum de la Bibliothèque nationale de France ((http://bibnum.bnf.fr/refNum/). Toutefois, elle presente certaines particularités pour trois raisons.
     * Les fichiers fournis par les prestataires ne contiennent pas tous les champs du format refNum et certains sont mal transcrits.
     * Le système et les besoins pour la bibliothèque numérique de l'École des Ponts sont également spécifiques.
+    * Le principe de numérisation de l'École des Ponts est d'une image unique par objet, même de grand format. Aucun test n'a été fait au cas où un objet à plusieurs images.
     Le plugin XmlImport permet de gérer ces spécificités, notamment par le biais des paramètres.
 
     Remarques
@@ -33,8 +33,7 @@
     xmlns:refNum="http://bibnum.bnf.fr/ns/refNum">
 <xsl:output method="text"
     media-type="text/csv"
-    encoding="UTF-8"
-    omit-xml-declaration="yes"/>
+    encoding="UTF-8"/>
 
 <!-- Paramètres -->
 <!-- Délimiteur : tabulation par défaut, car c'est le seul caractère que l'on ne trouve jamais dans les fichiers refNum. -->

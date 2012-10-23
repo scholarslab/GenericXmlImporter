@@ -27,6 +27,8 @@ class XmlImportPlugin extends Omeka_Plugin_Abstract
     protected $_hooks = array(
         'install',
         'uninstall',
+        'config_form',
+        'config',
         'define_acl',
         'admin_theme_header',
     );
@@ -36,6 +38,7 @@ class XmlImportPlugin extends Omeka_Plugin_Abstract
     );
 
     protected $_options = array(
+        'xml_import_xsl_directory' => 'libraries',
         'xml_import_stylesheet' => 'xml-import-generic.xsl',
         'xml_import_delimiter' => ',',
         'xml_import_stylesheet_parameters' => '',
@@ -47,6 +50,7 @@ class XmlImportPlugin extends Omeka_Plugin_Abstract
     public function hookInstall()
     {
         // Default stylesheet.
+        $this->_options['xml_import_xsl_directory'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries';
         $this->_options['xml_import_stylesheet'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'xml-import-generic.xsl';
 
         // Checks the ability to use XSLT.
@@ -65,6 +69,22 @@ class XmlImportPlugin extends Omeka_Plugin_Abstract
     public function hookUninstall()
     {
         self::_uninstallOptions();
+    }
+
+    /**
+     * Shows plugin configuration page.
+     */
+    public function hookConfigForm()
+    {
+        include_once 'config_form.php';
+    }
+
+    /**
+     * Processes the configuration form.
+     */
+    public function hookConfig($post)
+    {
+        set_option('xml_import_xsl_directory', realpath($post['xml_import_xsl_directory']));
     }
 
     /**

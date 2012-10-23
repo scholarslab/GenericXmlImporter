@@ -7,7 +7,7 @@
     Description : Convertit les données relatives aux fichiers présentes dans un fichier XML refNum en un fichier en Dublin Core étendu au format CSV, de façon à l'importer dans Omeka par le biais du plugin CsvImport modifié pour l'import.
 
     Notes
-    Cette feuille est complémentaire de enpc_refnum_vers_csv.xsl, mais peut être utilisée indépendamment.
+    Cette feuille est complémentaire de enpc_refnum_vers_csv.xsl, avec les mêmes principes, mais peut être utilisée indépendamment.
     Toutes les données ne sont pas utilisées, car Omeka n'est pas conçu pour gérer les notices.
     Certains codes refNum sont convertis afin d'être directement utilisables par Omeka, sachant que les fichiers refNum initiaux peuvent toujours être utilisés pour d'autres traitements.
     La feuille importe également les fichiers associés éventuels d'OCR Alto et le convertit en texte brut.
@@ -23,8 +23,7 @@
     xmlns:alto="http://bibnum.bnf.fr/ns/alto_prod">
 <xsl:output method="text"
     media-type="text/csv"
-    encoding="UTF-8"
-    omit-xml-declaration="yes"/>
+    encoding="UTF-8"/>
 
 <!-- Paramètres -->
 <!-- Délimiteur : tabulation par défaut, car c'est le seul caractère que l'on ne trouve jamais dans les fichiers refNum. -->
@@ -111,6 +110,8 @@
         <xsl:text>OCR Taux des caractères douteux</xsl:text>
         <xsl:value-of select="$séparateur"/>
         <xsl:text>OCR Texte</xsl:text>
+        <xsl:value-of select="$séparateur"/>
+        <xsl:text>Prestataire</xsl:text>
 
         <xsl:value-of select="$fin_ligne"/>
     </xsl:if>
@@ -143,8 +144,7 @@
         <xsl:value-of select="$identifiantImage"/>
 
         <xsl:value-of select="$séparateur"/>
-        <xsl:call-template name="nom_type_pagination" />
-        <xsl:value-of select="$nomPage"/>
+        <xsl:value-of select="concat(translate(substring($nomPage, 1, 1), $minuscule, $majuscule), substring($nomPage, 2))"/>
         <xsl:text> (document </xsl:text>
         <xsl:value-of select="../../@identifiant"/>
         <xsl:text>, image </xsl:text>
@@ -217,6 +217,9 @@
             </xsl:when>
         </xsl:choose>
 
+        <xsl:value-of select="$séparateur"/>
+        <xsl:value-of select="substring-before(../../@identifiant, '_')"/>
+
         <xsl:value-of select="$fin_ligne"/>
     </xsl:for-each>
 </xsl:template>
@@ -261,47 +264,90 @@
     </xsl:choose>
 </xsl:template>
 
+<!-- Template pour déterminer le numéro de page. -->
 <xsl:template name="nom_page">
     <xsl:choose>
         <!-- Pagination en chiffres arabes. -->
         <xsl:when test="@typePagination = 'A'">
+            <xsl:text>page </xsl:text>
             <xsl:value-of select="@numeroPage"/>
         </xsl:when>
-        <!-- Pagination en chiffres arabes ou romains. -->
+        <!-- Pagination en chiffres romains. -->
         <xsl:when test="@typePagination = 'R'">
+            <xsl:text>page </xsl:text>
             <xsl:number value="@numeroPage" format="I"/>
         </xsl:when>
         <!-- Foliotation. -->
         <xsl:when test="@typePagination = 'F'">
-            <!-- TODO Distinguer la foliotation recto et verso (non utilisé actuellement à l'école). -->
+            <xsl:text>feuillet </xsl:text>
             <xsl:value-of select="@numeroPage"/>
+            <xsl:text> (recto)</xsl:text>
         </xsl:when>
         <!-- Pagination autre. -->
         <xsl:when test="@typePagination = 'X'">
+            <xsl:text>page </xsl:text>
             <xsl:value-of select="@numeroPage"/>
         </xsl:when>
-        <!-- Page non paginée -->
+        <!-- Dans tous les autres cas, la page est non paginée. -->
         <xsl:otherwise>
-<!-- TODO -->
-<!-- Temporairement, utilise le numéro d'image  -->
-<xsl:value-of select="@ordre"/>
-            <!-- Détermine la précédente page avec un numéro. -->
-            <xsl:variable name="précédente" select="@typePagination"/>
-
-            <!-- Si aucune, "image 7" (cad le numéro d'ordre). -->
-
-            <!-- Si ok, ajoute la différence. -->
-
-            <!-- Détermine la page suivante avec un numéro. -->
-
-            <!-- Vérifie que la différence est bien inférieure à la page suivante. -->
-
-            <!-- Si ok, ajoute la différence. -->
-
-            <!-- Détermine le nombre de pages entre ces deux pages. -->
-
-            <!-- TODO A COMPLETER -->
-            <xsl:text> ?</xsl:text>
+            <xsl:variable name="précédente_numérotée" select="(preceding-sibling::refNum:vueObjet[@typePagination != 'N'])[last()]"/>
+            <xsl:variable name="suivante_numérotée" select="(following-sibling::refNum:vueObjet[@typePagination != 'N'])[1]"/>
+                        
+            <xsl:choose>
+                <!-- Pages initiales. -->
+                <xsl:when test="not($précédente_numérotée)">
+                    <!-- Exemple : si la première page numérotée est 3, on peut déduire que les deux précédentes sont 1 et 2. -->
+                    <!-- Il ne peut pas y avoir de feuillet ici. -->
+                    <xsl:choose>
+                         <!-- Pagination en chiffres arabes. -->
+                         <xsl:when test="($suivante_numérotée/@typePagination = 'A') and ($suivante_numérotée/@numeroPage > 1) and ($suivante_numérotée/@numeroPage + @ordre > $suivante_numérotée/@ordre)">
+                              <xsl:text>page </xsl:text>
+                              <xsl:value-of select="$suivante_numérotée/@numeroPage - $suivante_numérotée/@ordre + @ordre"/>
+                              <xsl:text> (non paginée)</xsl:text>
+                         </xsl:when>
+                         <!-- Pagination en chiffres romain. -->
+                         <xsl:when test="($suivante_numérotée/@typePagination = 'R') and ($suivante_numérotée/@numeroPage > 1) and ($suivante_numérotée/@numeroPage + @ordre > $suivante_numérotée/@ordre)">
+                              <xsl:text>page </xsl:text>
+                              <xsl:number value="$suivante_numérotée/@numeroPage - $suivante_numérotée/@ordre + @ordre" format="I"/>
+                              <xsl:text> (non paginée)</xsl:text>
+                         </xsl:when>
+                         <!-- Impossible à déterminer, mais probablement la couverture et les pages de garde ; inutile d'aller plus loin. -->
+                         <xsl:otherwise>
+                             <xsl:text>image non paginée </xsl:text>
+                             <xsl:value-of select="@ordre"/>
+                         </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:when>
+                <!-- Foliotation. -->
+               <xsl:when test="($précédente_numérotée/@typePagination = 'F') and ($précédente_numérotée/@ordre + 1 = @ordre)">
+                    <xsl:text>feuillet </xsl:text>
+                    <xsl:value-of select="$précédente_numérotée/@numeroPage"/>
+                    <xsl:text> (verso)</xsl:text>
+               </xsl:when>
+                <!-- Pages finales : pas d'élément pour déterminer quelque chose. -->
+                <xsl:when test="not($suivante_numérotée)">
+                    <xsl:text>image non paginée </xsl:text>
+                    <xsl:value-of select="@ordre"/>
+                </xsl:when>
+               <!-- La page se situe entre deux numéros et son numéro est déterminable avec une bonne probabilité. -->
+               <!-- Pagination entre deux chiffres arabes, avec test de cohérence par comparaison de la précédente et de la suivante.. -->
+               <xsl:when test="($précédente_numérotée/@typePagination = 'A') and ($suivante_numérotée/@typePagination = 'A') and ($suivante_numérotée/@numeroPage - $suivante_numérotée/@ordre = $précédente_numérotée/@numeroPage - $précédente_numérotée/@ordre)">
+                    <xsl:text>page </xsl:text>
+                    <xsl:value-of select="$suivante_numérotée/@numeroPage - $suivante_numérotée/@ordre + @ordre"/>
+                    <xsl:text> (non paginée)</xsl:text>
+               </xsl:when>
+               <!-- Pagination entre deux chiffres romains, avec test de cohérence par comparaison de la précédente et de la suivante.. -->
+               <xsl:when test="($précédente_numérotée/@typePagination = 'R') and ($suivante_numérotée/@typePagination = 'R') and ($suivante_numérotée/@numeroPage - $suivante_numérotée/@ordre = $précédente_numérotée/@numeroPage - $précédente_numérotée/@ordre)">
+                    <xsl:text>page </xsl:text>
+                    <xsl:number value="$suivante_numérotée/@numeroPage - $suivante_numérotée/@ordre + @ordre" format="I"/>
+                    <xsl:text> (non paginée)</xsl:text>
+               </xsl:when>
+               <!-- Impossible à déterminer, sans doute avec du hors-texte. -->
+               <xsl:otherwise>
+                   <xsl:text>image non paginée </xsl:text>
+                   <xsl:value-of select="@ordre"/>
+               </xsl:otherwise>
+           </xsl:choose>
         </xsl:otherwise>
     </xsl:choose>
 </xsl:template>
@@ -467,8 +513,6 @@
             </xsl:if>
         </xsl:otherwise>
     </xsl:choose>
-
-    <xsl:apply-templates/>
 </xsl:template>
 
 <xsl:template match="text()">

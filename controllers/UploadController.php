@@ -335,7 +335,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
             ->setAttrib('size', '80');
         $form->addElement($xmlFolderElement);
 
-        // radio button for selecting record type
+        // Radio button for selecting record type.
         $form->addElement('radio', 'xml_import_record_type', array(
             'label' => 'Record type',
             'multiOptions' => array(
@@ -370,8 +370,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $form->addElement($itemsAreFeatured);
 
         // XSLT Stylesheet.
-        $default_directory = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'libraries');
-        $stylesheets = $this->_listDirectory($default_directory, 'xsl');
+        $stylesheets = $this->_listDirectory(get_option('xml_import_xsl_directory'), 'xsl');
         $stylesheet = new Zend_Form_Element_Select('xml_import_stylesheet');
         $stylesheet
             ->setLabel('Stylesheet')

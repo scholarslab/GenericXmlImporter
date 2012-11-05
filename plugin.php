@@ -68,7 +68,13 @@ class XmlImportPlugin extends Omeka_Plugin_Abstract
      */
     public function hookUninstall()
     {
-        self::_uninstallOptions();
+        $options = $this->_options;
+        if (!is_array($options)) {
+            return;
+        }
+        foreach ($options as $name => $value) {
+            delete_option($name);
+        }
     }
 
     /**

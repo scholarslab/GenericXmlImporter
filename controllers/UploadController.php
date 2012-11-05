@@ -152,7 +152,16 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $view = $this->view;
 
         $form = $this->_elementForm($xmlImportSession);
-        $this->view->form = $form;
+
+        // When tag is not set, display the form to select one.
+        if ($form->getValue('xml_import_tag_name') === null) {
+            $this->view->form = $form;
+        }
+        // Else go directly to next step.
+        else {
+            $uploadedData = $form->getValues();
+            $this->_prepareCsvArguments($uploadedData);
+        }
     }
 
     /**
@@ -161,35 +170,47 @@ class XmlImport_UploadController extends Omeka_Controller_Action
     public function sendAction()
     {
         $xmlImportSession = new Zend_Session_Namespace('XmlImport');
-        $view = $this->view;
 
+        // Check if user comes directly here.
+        if (!isset($xmlImportSession->file_list)) {
+            return;
+        }
+
+        $view = $this->view;
         $form = $this->_elementForm($xmlImportSession);
         if ($_POST) {
             if ($form->isValid($this->_request->getPost())) {
                 $uploadedData = $form->getValues();
-
-                $args = array();
-                $args['file_list'] = unserialize($uploadedData['xml_import_file_list']);
-                $args['csv_filename'] = $uploadedData['xml_import_csv_filename'];
-                $args['tag_name'] = $uploadedData['xml_import_tag_name'];
-                $args['record_type_id'] = $uploadedData['xml_import_record_type'];
-                $args['item_type_id'] = $uploadedData['xml_import_item_type'];
-                $args['collection_id'] = $uploadedData['xml_import_collection_id'];
-                $args['public'] = $uploadedData['xml_import_items_are_public'];
-                $args['featured'] = $uploadedData['xml_import_items_are_featured'];
-                $args['stylesheet'] = $uploadedData['xml_import_stylesheet'];
-                $args['delimiter'] = $uploadedData['xml_import_delimiter'];
-                $args['stylesheet_parameters'] = $uploadedData['xml_import_stylesheet_parameters'];
-
-                set_option('xml_import_stylesheet', $args['stylesheet']);
-                set_option('xml_import_delimiter', $args['delimiter']);
-                set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
-
-                $this->_generateCsv($args);
-            } else {
+                $this->_prepareCsvArguments($uploadedData);
+            }
+            else {
                 $this->flashError('Error receiving file or no file selected. Verify that it is an XML document.');
             }
         }
+    }
+
+    /**
+     * Helper to prepare array used to generate csv file from a submited form.
+     */
+    private function _prepareCsvArguments($uploadedData) {
+        $args = array();
+        $args['file_list'] = unserialize($uploadedData['xml_import_file_list']);
+        $args['csv_filename'] = $uploadedData['xml_import_csv_filename'];
+        $args['tag_name'] = $uploadedData['xml_import_tag_name'];
+        $args['record_type_id'] = $uploadedData['xml_import_record_type'];
+        $args['item_type_id'] = $uploadedData['xml_import_item_type'];
+        $args['collection_id'] = $uploadedData['xml_import_collection_id'];
+        $args['public'] = $uploadedData['xml_import_items_are_public'];
+        $args['featured'] = $uploadedData['xml_import_items_are_featured'];
+        $args['stylesheet'] = $uploadedData['xml_import_stylesheet'];
+        $args['delimiter'] = $uploadedData['xml_import_delimiter'];
+        $args['stylesheet_parameters'] = $uploadedData['xml_import_stylesheet_parameters'];
+
+        set_option('xml_import_stylesheet', $args['stylesheet']);
+        set_option('xml_import_delimiter', $args['delimiter']);
+        set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
+
+        $this->_generateCsv($args);
     }
 
     /**
@@ -315,7 +336,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
 
         $form = new Omeka_Form();
         $form->setAttrib('id', 'xmlimport');
-        $form->setAction('update');
+        $form->setAction('update', 'upload');
         $form->setMethod('post');
 
         // One xml file upload.
@@ -476,11 +497,18 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $form->setMethod('post');
 
         // Available record elements.
-        $tagName = new Zend_Form_Element_Select('xml_import_tag_name');
-        $tagName
-            ->setLabel('Tag Name')
-            ->addMultiOptions($elementSet);
-        $form->addElement($tagName);
+        if (count($elementSet) == 1) {
+            reset($elementSet);
+            $tagNameElement = new Zend_Form_Element_Hidden('xml_import_tag_name');
+            $tagNameElement->setValue(key($elementSet));
+        }
+        else {
+            $tagNameElement = new Zend_Form_Element_Select('xml_import_tag_name');
+            $tagNameElement
+                ->setLabel('Tag Name')
+                ->addMultiOptions($elementSet);
+        }
+        $form->addElement($tagNameElement);
 
         $fileListElement = new Zend_Form_Element_Hidden('xml_import_file_list');
         $fileListElement->setValue(serialize($fileList));

@@ -128,6 +128,8 @@
         <xsl:value-of select="$séparateur"/>
         <xsl:text>Commentaire</xsl:text>
         <xsl:value-of select="$séparateur"/>
+        <xsl:text>fileOrder</xsl:text>
+        <xsl:value-of select="$séparateur"/>
         <xsl:text>Fichiers</xsl:text>
         <xsl:value-of select="$fin_ligne"/>
     </xsl:if>
@@ -242,6 +244,8 @@
     <xsl:value-of select="./refNum:commentaire/@date"/>
     <xsl:value-of select="$séparateur"/>
     <xsl:value-of select="normalize-space(./refNum:commentaire)"/>
+    <xsl:value-of select="$séparateur"/>
+    <xsl:text>true</xsl:text>
 
     <!-- Récupération et renommage des noms de fichiers dans un champ multivalué. -->
     <!-- CsvImport a besoin d'une URL complète pour importer les fichiers. -->

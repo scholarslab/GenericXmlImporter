@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Document : omeka_sets.xml
+    Crée le : 29/10/2012
+    Version : 1.5.3
+    Author : Daniel Berthereau for Pop Up Archive (http://popuparchive.org)
+    Description : List of default sets of Omeka (version 1.5.3).
+-->
+
+<XMLlist>
+    <elementSet setName="Dublin Core" recordType="All">
+        <element>Title</element>
+        <element>Subject</element>
+        <element>Description</element>
+        <element>Creator</element>
+        <element>Source</element>
+        <element>Publisher</element>
+        <element>Date</element>
+        <element>Contributor</element>
+        <element>Rights</element>
+        <element>Relation</element>
+        <element>Format</element>
+        <element>Language</element>
+        <element>Type</element>
+        <element>Identifier</element>
+        <element>Coverage</element>
+    </elementSet>
+
+    <elementSet setName="Item Type Metadata" recordType="Item">
+        <!-- Document -->
+        <element>Text</element>
+        <!-- Document -->
+        <!-- Moving Image -->
+        <!-- Oral History -->
+        <!-- Sound -->
+        <!-- Still Image -->
+        <element>Original Format</element>
+        <!-- Moving Image -->
+        <!-- Oral History -->
+        <!-- Sound -->
+        <element>Transcription</element>
+        <!-- Moving Image -->
+        <!-- Oral History -->
+        <!-- Sound -->
+        <!-- Event -->
+        <!-- Lesson Plan -->
+        <element>Duration</element>
+        <!-- Moving Image -->
+        <element>Compression</element>
+        <!-- Moving Image -->
+        <element>Producer</element>
+        <!-- Moving Image -->
+        <element>Director</element>
+        <!-- Oral History -->
+        <!-- Sound -->
+        <element>Bit Rate/Frequency</element>
+        <!-- Oral History -->
+        <element>Interviewer</element>
+        <!-- Oral History -->
+        <element>Interviewee</element>
+        <!-- Oral History -->
+        <element>Location</element>
+        <!-- Oral History -->
+        <element>Time Summary</element>
+        <!-- Still Image -->
+        <element>Physical Dimensions</element>
+        <!-- Website -->
+        <element>Local URL</element>
+        <!-- Event -->
+        <element>Event Type</element>
+        <!-- Event -->
+        <element>Participants</element>
+        <!-- Email -->
+        <element>Email Body</element>
+        <!-- Email -->
+        <element>Subject Line</element>
+        <!-- Email -->
+        <element>From</element>
+        <!-- Email -->
+        <element>To</element>
+        <!-- Email -->
+        <element>CC</element>
+        <!-- Email -->
+        <element>BCC</element>
+        <!-- Email -->
+        <element>Number of Attachments</element>
+        <!-- Lesson Plan -->
+        <element>Standards</element>
+        <!-- Lesson Plan -->
+        <element>Objectives</element>
+        <!-- Lesson Plan -->
+        <element>Materials</element>
+        <!-- Lesson Plan -->
+        <element>Lesson Plan Text</element>
+        <!-- Hyperlink -->
+        <element>URL</element>
+        <!-- Person -->
+        <element>Birth Date</element>
+        <!-- Person -->
+        <element>Birthplace</element>
+        <!-- Person -->
+        <element>Death Date</element>
+        <!-- Person -->
+        <element>Occupation</element>
+        <!-- Person -->
+        <element>Biographical Text</element>
+        <!-- Person -->
+        <element>Bibliography</element>
+    </elementSet>
+
+    <elementSet setName="Omeka Legacy File" recordType="File">
+        <element>Additional Creator</element>
+        <element>Transcriber</element>
+        <element>Producer</element>
+        <element>Render Device</element>
+        <element>Render Details</element>
+        <element>Capture Date</element>
+        <element>Capture Device</element>
+        <element>Capture Details</element>
+        <element>Change History</element>
+        <element>Watermark</element>
+        <element>Encryption</element>
+        <element>Compression</element>
+        <element>Post Processing</element>
+    </elementSet>
+
+    <elementSet setName="Omeka Image File" recordType="File">
+        <element>Width</element>
+        <element>Height</element>
+        <element>Bit Depth</element>
+        <element>Channels</element>
+        <element>Exif String</element>
+        <element>Exif Array</element>
+        <element>IPTC String</element>
+        <element>IPTC Array</element>
+    </elementSet>
+
+    <elementSet setName="Omeka Video File" recordType="File">
+        <element>Bitrate</element>
+        <element>Duration</element>
+        <element>Sample Rate</element>
+        <element>Codec</element>
+        <element>Width</element>
+        <element>Height</element>
+    </elementSet>
+</XMLlist>

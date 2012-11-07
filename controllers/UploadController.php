@@ -123,6 +123,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
                     $xmlImportSession->collection_id = $collectionId;
                     $xmlImportSession->public = $uploadedData['xml_import_items_are_public'];
                     $xmlImportSession->featured = $uploadedData['xml_import_items_are_featured'];
+                    $xmlImportSession->html_elements = $uploadedData['xml_import_elements_are_html'];
                     $xmlImportSession->stylesheet = $uploadedData['xml_import_stylesheet'];
                     $xmlImportSession->delimiter = $uploadedData['xml_import_delimiter'];
                     $xmlImportSession->stylesheet_parameters = $uploadedData['xml_import_stylesheet_parameters'];
@@ -146,7 +147,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
     /**
      * Displays second form to choose element (step 2).
      */
-    public function selectElementAction ()
+    public function selectElementAction()
     {
         $xmlImportSession = new Zend_Session_Namespace('XmlImport');
         $view = $this->view;
@@ -202,6 +203,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $args['collection_id'] = $uploadedData['xml_import_collection_id'];
         $args['public'] = $uploadedData['xml_import_items_are_public'];
         $args['featured'] = $uploadedData['xml_import_items_are_featured'];
+        $args['html_elements'] = $uploadedData['xml_import_elements_are_html'];
         $args['stylesheet'] = $uploadedData['xml_import_stylesheet'];
         $args['delimiter'] = $uploadedData['xml_import_delimiter'];
         $args['stylesheet_parameters'] = $uploadedData['xml_import_stylesheet_parameters'];
@@ -209,6 +211,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         set_option('xml_import_stylesheet', $args['stylesheet']);
         set_option('xml_import_delimiter', $args['delimiter']);
         set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
+        set_option('csv_import_html_elements', $args['html_elements']);
 
         $this->_generateCsv($args);
     }
@@ -226,6 +229,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $collectionId = $args['collection_id'];
         $itemsArePublic = $args['public'];
         $itemsAreFeatured = $args['featured'];
+        $elementsAreHtml = $args['html_elements'];
         $tagName = $args['tag_name'];
         $stylesheet = $args['stylesheet'];
         $delimiter = $args['delimiter'];
@@ -266,7 +270,9 @@ class XmlImport_UploadController extends Omeka_Controller_Action
                 // @todo Use Zend/Omeka api.
                 $result = $this->_append_data_to_file($csvFilePath, $csvData);
                 if ($result === FALSE) {
+                    // TODO Display error message before return.
                     $this->flashError('Error saving data, because the filepath is not writable ("' . $filepath . '").');
+                    $this->redirect->goto('index');
                     return;
                 }
             }
@@ -274,14 +280,16 @@ class XmlImport_UploadController extends Omeka_Controller_Action
             // Get the view.
             $view = $this->view;
 
-            // Set up CsvImport validation and column mapping.
+            // Set up CsvImport validation and column mapping if needed.
             $file = new CsvImport_File($csvFilePath, $delimiter);
             if (!$file->parse()) {
+                // TODO Display error message before return.
                 $this->flashError('Your CSV file is incorrectly formatted. ' . $file->getErrorString());
+                $this->redirect->goto('index');
                 return;
             }
+            // Go directly to the correct view of CsvImport plugin.
             else {
-                // Go directly to the map-columns view of CsvImport plugin.
                 $csvImportSession = new Zend_Session_Namespace('CsvImport');
 
                 // @see CsvImport_IndexController::indexAction().
@@ -295,6 +303,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
                 $csvImportSession->collectionId = $collectionId;
                 $csvImportSession->itemsArePublic = ($itemsArePublic == '1');
                 $csvImportSession->itemsAreFeatured = ($itemsAreFeatured == '1');
+                $csvImportSession->elementsAreHtml = ($elementsAreHtml == '1');
                 $csvImportSession->columnNames = $file->getColumnNames();
                 $csvImportSession->columnExamples = $file->getColumnExamples();
                 // A bug appears in CsvImport when examples contain UTF-8
@@ -304,7 +313,12 @@ class XmlImport_UploadController extends Omeka_Controller_Action
                 }
                 $csvImportSession->ownerId = $this->getInvokeArg('bootstrap')->currentuser->id;
 
-                $this->redirect->goto('map-columns', 'index', 'csv-import');
+                if ($recordTypeId == 1) {
+                    $this->redirect->goto('check-omeka-csv', 'index', 'csv-import');
+                }
+                else {
+                    $this->redirect->goto('map-columns', 'index', 'csv-import');
+                }
             }
         } catch (Exception $e) {
             $this->view->error = $e->getMessage();
@@ -336,7 +350,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
 
         $form = new Omeka_Form();
         $form->setAttrib('id', 'xmlimport');
-        $form->setAction('update', 'upload');
+        $form->setAction('update');
         $form->setMethod('post');
 
         // One xml file upload.
@@ -360,9 +374,11 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $form->addElement('radio', 'xml_import_record_type', array(
             'label' => 'Record type',
             'multiOptions' => array(
+                1 => 'All (via Omeka CSV Report)',
                 2 => 'Item',
                 3 => 'File',
             ),
+            'value' => 1,
             'required' => TRUE,
         ));
 
@@ -389,6 +405,12 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $itemsAreFeatured = new Zend_Form_Element_Checkbox('xml_import_items_are_featured');
         $itemsAreFeatured->setLabel('Items Are Featured?');
         $form->addElement($itemsAreFeatured);
+
+        // Elements are html (for automatic import only)?
+        $elementsAreHtml = new Zend_Form_Element_Checkbox('xml_import_elements_are_html');
+        $elementsAreHtml->setLabel('All imported elements are html?');
+        $elementsAreHtml->setDescription('Used only with automatic import via Omeka Csv Report.');
+        $form->addElement($elementsAreHtml);
 
         // XSLT Stylesheet.
         $stylesheets = $this->_listDirectory(get_option('xml_import_xsl_directory'), 'xsl');
@@ -455,7 +477,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $form->addElement($stylesheetParametersElement);
 
         // Submit button.
-        $form->addElement('submit','submit');
+        $form->addElement('submit', 'submit');
         $submitElement = $form->getElement('submit');
         $submitElement->setLabel('Upload');
 
@@ -477,11 +499,13 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $collectionId = $xmlImportSession->collection_id;
         $public = $xmlImportSession->public;
         $featured = $xmlImportSession->featured;
+        $htmlElements = $xmlImportSession->html_elements;
         $stylesheet = $xmlImportSession->stylesheet;
         $delimiter = $xmlImportSession->delimiter;
         $stylesheetParameters = $xmlImportSession->stylesheet_parameters;
 
         // Get first level nodes of first file in order to choose document name.
+        // TODO Add the root element name, because some formats use it.
         reset($fileList);
         $doc = new DomDocument;
         $doc->load(key($fileList));
@@ -496,12 +520,19 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $form->setAction('send');
         $form->setMethod('post');
 
-        // Available record elements.
-        if (count($elementSet) == 1) {
+        // Available record elements inside xml file.
+        // Automatic import via Omeka CSV Report.
+        if ($recordTypeId == 1) {
+            $tagNameElement = new Zend_Form_Element_Hidden('xml_import_tag_name');
+            $tagNameElement->setValue('item');
+        }
+        // Only one document.
+        elseif (count($elementSet) == 1) {
             reset($elementSet);
             $tagNameElement = new Zend_Form_Element_Hidden('xml_import_tag_name');
             $tagNameElement->setValue(key($elementSet));
         }
+        // Multiple possibilities.
         else {
             $tagNameElement = new Zend_Form_Element_Select('xml_import_tag_name');
             $tagNameElement
@@ -537,6 +568,10 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $featuredElement = new Zend_Form_Element_Hidden('xml_import_items_are_featured');
         $featuredElement->setValue($featured);
         $form->addElement($featuredElement);
+
+        $htmlElementsElement = new Zend_Form_Element_Hidden('xml_import_elements_are_html');
+        $htmlElementsElement->setValue($htmlElements);
+        $form->addElement($htmlElementsElement);
 
         $stylesheetElement = new Zend_Form_Element_Hidden('xml_import_stylesheet');
         $stylesheetElement->setValue($stylesheet);

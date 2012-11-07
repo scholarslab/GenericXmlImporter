@@ -88,6 +88,8 @@
         <xsl:value-of select="$séparateur"/>
         <xsl:text>Numéro d'ordre</xsl:text>
         <xsl:value-of select="$séparateur"/>
+        <xsl:text>fileOrder</xsl:text>
+        <xsl:value-of select="$séparateur"/>
         <xsl:text>Support d'origine</xsl:text>
         <xsl:value-of select="$séparateur"/>
         <xsl:text>Date de numérisation</xsl:text>
@@ -165,6 +167,9 @@
         </xsl:if>
         <xsl:value-of select="$séparateur"/>
         <xsl:value-of select="$nomPage"/>
+
+        <xsl:value-of select="$séparateur"/>
+        <xsl:value-of select="@ordre"/>
 
         <xsl:value-of select="$séparateur"/>
         <xsl:value-of select="@ordre"/>
@@ -292,7 +297,7 @@
         <xsl:otherwise>
             <xsl:variable name="précédente_numérotée" select="(preceding-sibling::refNum:vueObjet[@typePagination != 'N'])[last()]"/>
             <xsl:variable name="suivante_numérotée" select="(following-sibling::refNum:vueObjet[@typePagination != 'N'])[1]"/>
-                        
+
             <xsl:choose>
                 <!-- Pages initiales. -->
                 <xsl:when test="not($précédente_numérotée)">

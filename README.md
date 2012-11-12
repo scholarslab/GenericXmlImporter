@@ -50,7 +50,7 @@ Contact
 
 Current maintainers:
 
-* Daniel Berthereau (see [Daniel_KM][5])
+* Daniel Berthereau (see [Daniel-KM][5])
 * Scholars' Lab (see [Scholars' Lab][6])
 
 First version of this plugin has been built by [Scholars' Lab of University of Virginia Library][6].
@@ -69,7 +69,7 @@ Copyright
 [2]: http://www.omeka.org "Omeka.org"
 [3]: https://github.com/Daniel-KM/XmlImport/Issues "GitHub XmlImport"
 [4]: https://www.apache.org/licenses/LICENSE-2.0.html "Apache licence v2"
-[5]: http://github.com/Daniel-KM "Daniel_KM"
+[5]: http://github.com/Daniel-KM "Daniel Berthereau"
 [6]: https://github.com/scholarslab "Scholars' Lab"
 [7]: http://www.scholarslab.org/research/omeka-plugins/ "Scholars' Lab of University of Virginia Library"
 [8]: http://bibliotheque.enpc.fr "École des Ponts ParisTech"

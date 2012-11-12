@@ -349,32 +349,47 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         }
 
         $form = new Omeka_Form();
-        $form->setAttrib('id', 'xmlimport');
-        $form->setAction('update');
-        $form->setMethod('post');
+        $form
+            ->setName('xmlimport')
+            ->setAttrib('id', 'xmlimport')
+            ->setAction('update')
+            ->setMethod('post');
+
+        // Radio button for selecting record type.
+        $form->addElement('radio', 'xml_import_file_import', array(
+            'label' => 'How many files do you want to import?',
+            'multiOptions' => array(
+                1 => 'One file',
+                2 => 'All files in a folder',
+            ),
+            'description' => 'The stylesheet will create one csv file from this or these XML files.',
+            'value' => 1,
+        ));
 
         // One xml file upload.
         $fileUploadElement = new Zend_Form_Element_File('xmldoc');
         $fileUploadElement
-            ->setLabel('Select one XML file')
+            ->setLabel('XML file to upload')
             ->setDescription('Maximum file size is the minimum of ' . ini_get('upload_max_filesize') . ' and ' . ini_get('post_max_size') . '.')
             ->addValidator('Count', FALSE, array('min' => 0, 'max' => 1))
             ->addValidator('Extension', FALSE, 'xml');
         $form->addElement($fileUploadElement);
+        $form->addDisplayGroup(array('xmldoc'), 'singlefile');
 
         // Multiple files.
         $xmlFolderElement = new Zend_Form_Element_Text('xmlfolder');
         $xmlFolderElement
-            ->setLabel('Select a folder of XML files')
+            ->setLabel('Folder of XML files on the server')
             ->setDescription('All XML files in this folder, recursively, will be processed.')
             ->setAttrib('size', '80');
         $form->addElement($xmlFolderElement);
+        $form->addDisplayGroup(array('xmlfolder'), 'multiplefiles');
 
         // Radio button for selecting record type.
         $form->addElement('radio', 'xml_import_record_type', array(
-            'label' => 'Record type',
+            'label' => 'Which type of record do you want to import ?',
             'multiOptions' => array(
-                1 => 'All (via Omeka CSV Report)',
+                1 => 'Any',
                 2 => 'Item',
                 3 => 'File',
             ),
@@ -398,7 +413,8 @@ class XmlImport_UploadController extends Omeka_Controller_Action
 
         // Items are public?
         $itemsArePublic = new Zend_Form_Element_Checkbox('xml_import_items_are_public');
-        $itemsArePublic->setLabel('Items Are Public?');
+        $itemsArePublic
+            ->setLabel('Items Are Public?');
         $form->addElement($itemsArePublic);
 
         // Items are featured?
@@ -406,11 +422,21 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $itemsAreFeatured->setLabel('Items Are Featured?');
         $form->addElement($itemsAreFeatured);
 
+        // Used to hide some elements when record type is set to all.
+        $form->addDisplayGroup(array(
+            'xml_import_item_type',
+            'xml_import_collection_id', 
+            'xml_import_items_are_public',
+            'xml_import_items_are_featured',
+        ), 'recordtype'); 
+
         // Elements are html (for automatic import only)?
         $elementsAreHtml = new Zend_Form_Element_Checkbox('xml_import_elements_are_html');
-        $elementsAreHtml->setLabel('All imported elements are html?');
-        $elementsAreHtml->setDescription('Used only with automatic import via Omeka Csv Report.');
+        $elementsAreHtml
+            ->setLabel('All imported elements are html?')
+            ->setDescription('When elements are imported automatically, this checkbox allows to set their default format, raw text or html.');
         $form->addElement($elementsAreHtml);
+        $form->addDisplayGroup(array('xml_import_elements_are_html'), 'recordtypeno'); 
 
         // XSLT Stylesheet.
         $stylesheets = $this->_listDirectory(get_option('xml_import_xsl_directory'), 'xsl');
@@ -422,6 +448,15 @@ class XmlImport_UploadController extends Omeka_Controller_Action
             ->addMultiOptions($stylesheets)
             ->setValue(get_option('xml_import_stylesheet'));
         $form->addElement($stylesheet);
+
+        // XSLT parameters.
+        $stylesheetParametersElement = new Zend_Form_Element_Text('xml_import_stylesheet_parameters');
+        $stylesheetParametersElement
+            ->setLabel('Add specific parameters to use with this stylesheet')
+            ->setDescription('Format: parameter1_name|parameter1_value, parameter2_name|parameter2_value...')
+            ->setValue(get_option('xml_import_stylesheet_parameters'))
+            ->setAttrib('size', '80');
+        $form->addElement($stylesheetParametersElement);
 
         // Delimiter should be the one used the xsl sheet.
         // @see CsvImport_Form_Main::init() or CsvImport/models/CsvImport/import.php.
@@ -451,7 +486,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
         $form->addElement($delimiterName);
         // Second, a field to let user chooses.
         $form->addElement('text', 'xml_import_delimiter', array(
-            'description' => "Choose the character you want to use to separate columns in the imported file." . ' '
+            'description' => "Currently, XmlImport convert your files into a CSV file, that is automatically imported via CsvImport. Choose the character you want to use to separate columns in the imported file." . ' '
             . "If you want a specific one, choose 'Custom' in the drop-down list and fill the text field with a single character.",
             'value' => $delimiter,
             'size' => '1',
@@ -466,15 +501,6 @@ class XmlImport_UploadController extends Omeka_Controller_Action
                 )),
             ),
         ));
-
-        // XSLT parameters.
-        $stylesheetParametersElement = new Zend_Form_Element_Text('xml_import_stylesheet_parameters');
-        $stylesheetParametersElement
-            ->setLabel('Add specific parameters to use with your stylesheet')
-            ->setDescription('Format: parameter1_name|parameter1_value, parameter2_name|parameter2_value...')
-            ->setValue(get_option('xml_import_stylesheet_parameters'))
-            ->setAttrib('size', '80');
-        $form->addElement($stylesheetParametersElement);
 
         // Submit button.
         $form->addElement('submit', 'submit');

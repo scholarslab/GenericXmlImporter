@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Document : omeka-xml-output-v4-1_to_omeka-csv-report.xsl
+    Document : omeka-xml-output-v4-1_to_omeka-csv-report-kitchensister.xsl
     Created date : 11/11/2012
     Version : 1.0
     Author : Daniel Berthereau for Pop Up Archive (http://popuparchive.org)
@@ -39,11 +39,13 @@
 <!-- Headers are added by default. -->
 <xsl:param name="headers">true</xsl:param>
 <!-- Omeka main element sets. -->
-<xsl:param name="omeka_sets_file">omeka_sets.xml</xsl:param>
+<xsl:param name="omeka_sets_file">empty_sets.xml</xsl:param>
 <!-- User specific element sets. -->
-<xsl:param name="user_sets_file">user_sets.xml</xsl:param>
+<xsl:param name="user_sets_file">user_sets_kitchensisters.xml</xsl:param>
+<!-- These sets are used to convert a format to another one. Number of elements should be the number of the main and the user sets.-->
+<xsl:param name="convert_sets_file">convert_sets_kitchensisters.xml</xsl:param>
 <!-- Use full path (fullpath) or base name (basename) as original name of attached files. -->
-<xsl:param name="original_filename">fullpath</xsl:param>
+<xsl:param name="original_filename">convert</xsl:param>
 
 <!-- Constantes -->
 <xsl:variable name="line_start">
@@ -106,6 +108,10 @@
         <xsl:value-of select="$separator"/>
         <xsl:text>fileOrder</xsl:text>
 
+        <!-- Specific column for Kitchen Sister. -->
+        <xsl:value-of select="$separator"/>
+        <xsl:text>PBCore:Identifier</xsl:text>
+        
         <!-- All metadata headers. -->
         <xsl:call-template name="element_sets"/>
 
@@ -144,6 +150,11 @@
     <xsl:value-of select="$separator"/>
     <xsl:value-of select="$separator"/>
 
+    <!-- Specific column for Kitchen Sister. -->
+    <xsl:value-of select="$separator"/>
+    <xsl:text>http://kitchensisters.org/archive/items/show/</xsl:text>
+    <xsl:value-of select="@itemId"/>
+        
     <!-- Metadata of items. -->
     <xsl:call-template name="metadata_item">
         <xsl:with-param name="current_record" select="."/>
@@ -183,6 +194,23 @@
     <xsl:value-of select="@fileId"/>
     <xsl:value-of select="$separator"/>
     <xsl:choose>
+        <xsl:when test="$original_filename = 'convert'">        
+            <xsl:text>http://kitchensisters.org/archive/archive/files/</xsl:text>
+            <xsl:variable name="file">
+                <xsl:call-template name="basename">
+                     <xsl:with-param name="path" select="omeka:src"/>
+                 </xsl:call-template>
+            </xsl:variable>
+            <xsl:value-of select="substring-before($file, '.')"/>
+            <xsl:text>.</xsl:text>
+            <xsl:variable name="extension">
+                <xsl:if test="function-available('php:function')">
+                      <!-- TODO To be completed. Currently, we use direct call by a patch in CsvImport. -->
+                      <!-- <xsl:value-of select="php:function('item_file', 'id', '', 'array()', @fileId)"/> -->
+                </xsl:if>
+            </xsl:variable>
+            <xsl:value-of select="substring-after($extension, '.')"/>
+        </xsl:when>
         <xsl:when test="$original_filename != 'basename'">
             <xsl:value-of select="omeka:src"/>
         </xsl:when>
@@ -196,6 +224,9 @@
     <xsl:value-of select="$separator"/>
     <xsl:value-of select="@order"/>
 
+    <!-- Specific column for Kitchen Sister (item). -->
+    <xsl:value-of select="$separator"/>
+        
     <!-- Metadata for files. -->
     <xsl:call-template name="metadata_file">
         <xsl:with-param name="current_record" select="."/>
@@ -211,22 +242,38 @@
 
 <!-- Row for headers. -->
 <xsl:template name="element_sets">
-    <xsl:for-each select="$omeka_sets/XMLlist/elementSet">
-        <xsl:for-each select="element">
-            <xsl:value-of select="$separator"/>
-            <xsl:value-of select="../@setName"/>
-            <xsl:text>:</xsl:text>
-            <xsl:value-of select="."/>
-        </xsl:for-each>
-    </xsl:for-each>
-    <xsl:for-each select="$user_sets/XMLlist/elementSet">
-        <xsl:for-each select="element">
-            <xsl:value-of select="$separator"/>
-            <xsl:value-of select="../@setName"/>
-            <xsl:text>:</xsl:text>
-            <xsl:value-of select="."/>
-        </xsl:for-each>
-    </xsl:for-each>
+    <!-- Check if we convert element sets. -->
+    <xsl:choose>
+        <xsl:when test="$convert_sets_file = ''">        
+            <xsl:for-each select="$omeka_sets/XMLlist/elementSet">
+                <xsl:for-each select="element">
+                    <xsl:value-of select="$separator"/>
+                    <xsl:value-of select="../@setName"/>
+                    <xsl:text>:</xsl:text>
+                    <xsl:value-of select="."/>
+                </xsl:for-each>
+            </xsl:for-each>
+            <xsl:for-each select="$user_sets/XMLlist/elementSet">
+                <xsl:for-each select="element">
+                    <xsl:value-of select="$separator"/>
+                    <xsl:value-of select="../@setName"/>
+                    <xsl:text>:</xsl:text>
+                    <xsl:value-of select="."/>
+                </xsl:for-each>
+            </xsl:for-each>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:variable name="convert_sets" select="document($convert_sets_file)"/>
+            <xsl:for-each select="$convert_sets/XMLlist/elementSet">
+                <xsl:for-each select="element">
+                    <xsl:value-of select="$separator"/>
+                    <xsl:value-of select="../@setName"/>
+                    <xsl:text>:</xsl:text>
+                    <xsl:value-of select="."/>
+                </xsl:for-each>
+            </xsl:for-each>
+        </xsl:otherwise>
+    </xsl:choose>
 </xsl:template>
 
 <!-- Helper for list of tags of an item. -->
@@ -269,6 +316,12 @@
             <xsl:variable name="elementName" select="."/>
             <xsl:value-of select="$separator"/>
             <xsl:choose>
+                <!-- Exception: Dublin Core:Notes should be merged with Dublin Core:Format. -->
+                <xsl:when test="$setName = 'Dublin Core' and $elementName = 'Notes'">
+                    <xsl:value-of select="$current_record/omeka:elementSetContainer/omeka:elementSet[omeka:name = $setName]/omeka:elementContainer/omeka:element[omeka:name = 'Format']/omeka:elementTextContainer/omeka:elementText/omeka:text"/>
+                    <xsl:value-of select="$delimiter_multivalues_csvreport"/>
+                    <xsl:value-of select="$current_record/omeka:elementSetContainer/omeka:elementSet[omeka:name = $setName]/omeka:elementContainer/omeka:element[omeka:name = $elementName]/omeka:elementTextContainer/omeka:elementText/omeka:text"/>
+                </xsl:when>
                 <!-- Metadata for items and files (Dublin Core...). -->
                 <xsl:when test="../@recordType = 'All'">
                     <xsl:value-of select="$current_record/omeka:elementSetContainer/omeka:elementSet[omeka:name = $setName]/omeka:elementContainer/omeka:element[omeka:name = $elementName]/omeka:elementTextContainer/omeka:elementText/omeka:text"/>

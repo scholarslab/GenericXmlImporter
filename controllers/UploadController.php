@@ -662,7 +662,7 @@ class XmlImport_UploadController extends Omeka_Controller_Action
             if (!$file->isDot()
                     && !$file->isDir()
                     && $file->isReadable()
-                    && $file->getExtension() == $extension
+                    && pathinfo($file->getFilename(), PATHINFO_EXTENSION) == $extension
                 ) {
                 $filenames[$file->getPathname()] = $file->getFilename();
             }

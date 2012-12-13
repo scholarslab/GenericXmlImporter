@@ -100,13 +100,17 @@ class XmlImportPlugin extends Omeka_Plugin_Abstract
      */
     public function hookDefineAcl($acl)
     {
+        // Only allow super users and admins to import xml files.
         $acl->loadResourceList(array(
-            'XmlImport_Upload' => array(
+            'XmlImport_Index' => array(
                 'index',
                 'select-element',
-                'update',
+                'send',
             ),
         ));
+        // Hack to disable CRUD actions.
+        $acl->deny(null, 'XmlImport_Index', array('show', 'add', 'edit', 'delete'));
+        $acl->deny('admin', 'XmlImport_Index');
     }
 
     public function hookAdminThemeHeader($request)
@@ -125,8 +129,8 @@ class XmlImportPlugin extends Omeka_Plugin_Abstract
      */
     public static function filterAdminNavigationMain($tabs)
     {
-        if (get_acl()->isAllowed(current_user(), 'XmlImport_Upload', 'upload')) {
-            $tabs['XML Import'] = uri('xml-import/upload/');
+        if (get_acl()->isAllowed(current_user(), 'XmlImport_Index', 'index')) {
+            $tabs['XML Import'] = uri('xml-import');
         }
         return $tabs;
     }

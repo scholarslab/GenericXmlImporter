@@ -4,6 +4,7 @@
 <h1>XML Import</h1>
 
 <div id="primary">
+    <?php echo flash(); ?>
     <h2>Step 1B: Select Record Element</h2>
     <p>Use the drop down menu below to select the element name that represents the individual Omeka Item.</p>
     <?php echo $form; ?>

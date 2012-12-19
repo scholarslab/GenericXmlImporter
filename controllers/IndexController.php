@@ -57,6 +57,15 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         // Else prepare file list from the folder.
         elseif ($uploadedData['xmlfolder'] != '') {
             $fileList = $this->_listRecursiveDirectory($uploadedData['xmlfolder'], 'xml');
+            if ($fileList === false) {
+                $this->flashError('Error accessing directory "' . $uploadedData['xmlfolder'] . '". Verify that you have rights to access this folder and subfolders.');
+                return;
+            }
+            elseif (empty($fileList)) {
+                $this->flashError('The selected directory "' . $uploadedData['xmlfolder'] . '" is empty.');
+                return;
+            }
+
             $csvFilename = 'folder "' . $uploadedData['xmlfolder'] . '"';
 
             // @todo Upload each file? Currently, they are checked only
@@ -266,6 +275,13 @@ class XmlImport_IndexController extends Omeka_Controller_Action
                 }
             }
 
+            // Check resulted file.
+            if (filesize($csvFilePath) == 0) {
+                $this->flashError('The conversion of the xml file "' . basename($filepath) . '" to csv via the xslt style sheet "' . basename($stylesheet) . '" gives an empty file. Check your options and your files.');
+                $this->redirect->goto('index');
+                return;
+            }
+
             // Get the view.
             $view = $this->view;
 
@@ -461,35 +477,45 @@ class XmlImport_IndexController extends Omeka_Controller_Action
      * Iterates recursively through a directory to get all selected filepaths.
      *
      * @param $directory string Directory to check.
-     * @param $extension string Extension.
+     * @param $extensions string|array Extension or array of extensions.
      *
-     * @return associative array of filepath => filename.
+     * @return associative array of filepath => filename or false if error.
      */
-    private function _listRecursiveDirectory($directory, $extension)
+    private function _listRecursiveDirectory($directory, $extensions = array(), $recursive = true)
     {
-        if (empty($directory)) {
-            return array();
+        if (is_string($extensions)) {
+            $extensions = array($extensions);
         }
 
-        if ($extension == '') {
-            $this->flashError('Error selecting extension.');
-            return;
+        $files = @scandir($directory);
+        if ($files === false) {
+            return false;
         }
 
-        $Directory = new RecursiveDirectoryIterator($directory);
-        $Iterator = new RecursiveIteratorIterator($Directory);
-        $Regex = new RegexIterator($Iterator, '/^.+\.' . $extension . '$/i', RecursiveRegexIterator::GET_MATCH);
         $filenames = array();
-        try {
-            foreach($Regex as $name => $object){
-                $filenames[$name] = pathinfo($name, PATHINFO_BASENAME);
-            }
-        } catch (Exception $e) {
-            $this->flashError('Error accessing directory "' . $directory . '". Verify that you have rights to access this folder and subfolders.');
-            return;
-        }
 
-        natcasesort($filenames);
+        foreach ($files as $file) {
+            if ($file != '.' && $file != '..') {
+                $path = $directory . DIRECTORY_SEPARATOR . $file;
+                if (is_dir($path)) {
+                    if ($recursive == true) {
+                        $subdirectory = $this->_listRecursiveDirectory($path, $extensions);
+                        if ($subdirectory !== false) {
+                            $filenames = array_merge($filenames, $subdirectory);
+                        }
+                    }
+                }
+                else {
+                    foreach ($extensions as $extension) {
+                        if (preg_match('/^.+\.' . $extension . '$/i', $file)) {
+                            $filenames[$path] = $file;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        ksort($filenames);
         return $filenames;
     }
 

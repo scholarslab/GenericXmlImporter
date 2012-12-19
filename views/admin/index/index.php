@@ -4,6 +4,7 @@
 <h1>XML Import</h1>
 
 <div id="primary">
+    <?php echo flash(); ?>
     <h2>Step 1A: Select File or Folder and Item Settings</h2>
     <?php echo $form; ?>
     <script type="text/javascript">

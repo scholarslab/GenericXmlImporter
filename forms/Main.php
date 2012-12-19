@@ -115,10 +115,15 @@ class XmlImport_Form_Main extends Omeka_Form
 
         // XSLT Stylesheet.
         $stylesheets = $this->_listDirectory(get_option('xml_import_xsl_directory'), 'xsl');
+        // Don't return an error if the folder is unavailable, but simply set 
+        // an empty list.
+        if ($stylesheets === false) {
+            $stylesheets = array();
+        }
         $stylesheet = new Zend_Form_Element_Select('xml_import_stylesheet');
         $stylesheet
             ->setLabel('Stylesheet')
-            ->setDescription('The generic stylesheet is "xml-import-generic.xsl". It transforms a flat xml file with multiple records into a csv file with multiple rows.')
+            ->setDescription('The generic stylesheet is "xml-import-generic-for-item.xsl". It transforms a flat xml file with multiple records into a csv file with multiple rows to import via "Item" format.')
             ->setRequired(TRUE)
             ->addMultiOptions($stylesheets)
             ->setValue(get_option('xml_import_stylesheet'));
@@ -187,29 +192,58 @@ class XmlImport_Form_Main extends Omeka_Form
      * Iterates through a directory to get all files matching to an extension.
      *
      * @param $directory string Directory to check.
-     * @param $extension string Extension.
+     * @param $extensions string|array Extension or array of extensions.
      *
-     * @return associative array of filepath => filename.
+     * @return associative array of filepath => filename or false if error.
      */
-    private function _listDirectory($directory, $extension = '')
+    private function _listDirectory($directory, $extensions = array())
     {
-        if (empty($directory)) {
-            return array();
-        }
-        $filenames = array();
-        $paths = new DirectoryIterator($directory);
-        foreach ($paths as $file) {
-            if (!$file->isDot()
-                    && !$file->isDir()
-                    && $file->isReadable()
-                    && pathinfo($file->getFilename(), PATHINFO_EXTENSION) == $extension
-                ) {
-                $filenames[$file->getPathname()] = $file->getFilename();
-            }
+        return $this->_listRecursiveDirectory($directory, $extensions, false);
+    }
+
+    /**
+     * Iterates recursively through a directory to get all selected filepaths.
+     *
+     * @param $directory string Directory to check.
+     * @param $extensions string|array Extension or array of extensions.
+     *
+     * @return associative array of filepath => filename or false if error.
+     */
+    private function _listRecursiveDirectory($directory, $extensions = array(), $recursive = true)
+    {
+        if (is_string($extensions)) {
+            $extensions = array($extensions);
         }
 
-        // Sort the files by filenames.
-        natcasesort($filenames);
+        $files = @scandir($directory);
+        if ($files === false) {
+            return false;
+        }
+
+        $filenames = array();
+
+        foreach ($files as $file) {
+            if ($file != '.' && $file != '..') {
+                $path = $directory . DIRECTORY_SEPARATOR . $file;
+                if (is_dir($path)) {
+                    if ($recursive == true) {
+                        $subdirectory = $this->_listRecursiveDirectory($path, $extensions);
+                        if ($subdirectory !== false) {
+                            $filenames = array_merge($filenames, $subdirectory);
+                        }
+                    }
+                }
+                else {
+                    foreach ($extensions as $extension) {
+                        if (preg_match('/^.+\.' . $extension . '$/i', $file)) {
+                            $filenames[$path] = $file;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        ksort($filenames);
         return $filenames;
     }
 

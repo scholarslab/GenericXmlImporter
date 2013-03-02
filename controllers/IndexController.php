@@ -52,63 +52,65 @@ class XmlImport_IndexController extends Omeka_Controller_Action
                 return;
             }
             $csvFilename = pathinfo($form->xmldoc->getFileName(), PATHINFO_BASENAME);
+            // Create a file list with one value.
             $fileList = array($form->xmldoc->getFileName() => $csvFilename);
         }
-        // Else prepare file list from the folder.
+
+        // Else prepare full files list from the folder.
         elseif ($uploadedData['xmlfolder'] != '') {
             $fileList = $this->_listRecursiveDirectory($uploadedData['xmlfolder'], 'xml');
-            if ($fileList === false) {
-                $this->flashError('Error accessing directory "' . $uploadedData['xmlfolder'] . '". Verify that you have rights to access this folder and subfolders.');
-                return;
-            }
-            elseif (empty($fileList)) {
-                $this->flashError('The selected directory "' . $uploadedData['xmlfolder'] . '" is empty.');
-                return;
-            }
-
             $csvFilename = 'folder "' . $uploadedData['xmlfolder'] . '"';
 
             // @todo Upload each file? Currently, they are checked only
             // with DirectoryIterator.
         }
         else {
-            $this->flashError('Error receiving file or no file selected. Verify that it is an XML document.');
+            $this->flashError(__('Error receiving file or no file selected. Verify that it is an XML document.'));
             return;
         }
 
-        if (empty($fileList)) {
-            $this->flashError('Error receiving file or no file selected. Verify that it is an XML document.');
+        if ($fileList === false) {
+            $this->flashError(__('Error accessing directory "%s". Verify that you have rights to access this folder and subfolders.', $uploadedData['xmlfolder']));
+            return;
+        }
+        elseif (empty($fileList)) {
+            $this->flashError(__('Error receiving file or no file selected. Verify that file is an XML document or that the selected directory is not empty.'));
             return;
         }
 
         // Check content of each file via a simplexml parsing and hook.
         foreach ($fileList as $filepath => $filename) {
-            $xml_doc = new DomDocument;
-            $xml_doc->load($filepath);
+            try {
+                $xml_doc = $this->_domXmlLoad($filepath);
+            } catch (Exception $e) {
+                $this->flashError($e->getMessage());
+                return;
+            }
+
+            // Check if the xml is well formed.
             if (simplexml_import_dom($xml_doc)) {
                 $result = fire_plugin_hook('xml_import_validate_xml_file', $xml_doc);
                 // @todo Check result of the hook.
                 if (!isset($xml_doc)) {
-                    $this->flashError('Error validating XML document: "' . $filepath . '".');
+                    $this->flashError(__('Error validating XML document: "%s".', $filepath));
                     return;
                 }
             }
             else {
-                $this->flashError('Error parsing XML document: "' . $filepath . '".');
+                $this->flashError(__('Error parsing XML document: "%s".', $filepath));
                 return;
             }
         }
 
         // Check delimiter.
-        if ($uploadedData['xml_import_delimiter_name'] == 'custom') {
-            if ($uploadedData['xml_import_delimiter_name'] == '') {
-                $this->flashError('Error parsing XML document: "' . $filepath . '".');
-                return;
-            }
-        }
-        else {
+        if ($uploadedData['xml_import_delimiter_name'] != 'custom') {
             $listDelimiters = $this->_listDelimiters();
             $uploadedData['xml_import_delimiter'] = $listDelimiters[$uploadedData['xml_import_delimiter_name']];
+        }
+        // Check custom delimiter.
+        elseif ($uploadedData['xml_import_delimiter'] == '') {
+            $this->flashError(__('Custom delimiter cannot be empty.'));
+            return;
         }
 
         // Alright, go to next step.
@@ -183,7 +185,7 @@ class XmlImport_IndexController extends Omeka_Controller_Action
                 $this->_prepareCsvArguments($uploadedData);
             }
             else {
-                $this->flashError('Error receiving file or no file selected. Verify that it is an XML document.');
+                $this->flashError(__('Error receiving file or no file selected. Verify that it is an XML document.'));
             }
         }
     }
@@ -237,11 +239,12 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         $csvFilename = 'Via Xml Import: ' . $csvFilename;
 
         try {
-            // Add items of the custom fields. Allowed types are already checked.
+            // Add items of the custom fields. Allowed types are already
+            // checked.
             $parameters = array();
-            $parametersAdded = (trim($stylesheetParameters) == '')
-                ? array()
-                : array_values(array_map('trim', explode(',', $stylesheetParameters)));
+            $parametersAdded = (trim($stylesheetParameters) == '') ?
+                array() :
+                array_values(array_map('trim', explode(',', $stylesheetParameters)));
             foreach ($parametersAdded as $value) {
                 if (strpos($value, '|') !== FALSE) {
                     list($paramName, $paramValue) = explode('|', $value);
@@ -255,31 +258,39 @@ class XmlImport_IndexController extends Omeka_Controller_Action
 
             // Flag used to keep or remove headers in the first row.
             $flag_first = TRUE;
+            // Convert each xml file to csv with the selected stylesheet and
+            // parameters. A result can be empty for a file when there are no
+            // metadata to import or if the xml file is not a good one.
             foreach ($fileList as $filepath => $filename) {
                 $csvData = $this->_apply_xslt($filepath, $stylesheet, $parameters);
+                if ($csvData === false) {
+                    $this->flashError(__('Error when transforming xml file "%s" with the xsl sheet "%s".', $filepath, $stylesheet));
+                    $this->redirect->goto('index');
+                }
 
+                // Let headers only for the first file.
                 if ($flag_first) {
                     $flag_first = FALSE;
                 }
+                // Remove first line for all other files.
                 else {
+                    // "\n" is used as a end of line delimiter, because xslt
+                    // stylesheet is unix one.
                     $csvData = substr($csvData, strpos($csvData, "\n") + 1);
                 }
 
                 // @todo Use Zend/Omeka api.
                 $result = $this->_append_data_to_file($csvFilePath, $csvData);
                 if ($result === FALSE) {
-                    // TODO Display error message before return.
-                    $this->flashError('Error saving data, because the filepath is not writable ("' . $filepath . '").');
+                    $this->flashError(__('Error saving data, because the filepath "%s" is not writable.', $filepath));
                     $this->redirect->goto('index');
-                    return;
                 }
             }
 
-            // Check resulted file.
+            // Check final resulted file.
             if (filesize($csvFilePath) == 0) {
-                $this->flashError('The conversion of the xml file "' . basename($filepath) . '" to csv via the xslt style sheet "' . basename($stylesheet) . '" gives an empty file. Check your options and your files.');
+                $this->flashError(__('The conversion of the xml file "%s" to csv via the xslt style sheet "%s" gives an empty file. Check your options and your files.', basename($filepath), basename($stylesheet)));
                 $this->redirect->goto('index');
-                return;
             }
 
             // Get the view.
@@ -288,42 +299,39 @@ class XmlImport_IndexController extends Omeka_Controller_Action
             // Set up CsvImport validation and column mapping if needed.
             $file = new CsvImport_File($csvFilePath, $delimiter);
             if (!$file->parse()) {
-                // TODO Display error message before return.
-                $this->flashError('Your CSV file is incorrectly formatted. ' . $file->getErrorString());
+                $this->flashError(__('Your CSV file is incorrectly formatted.') . ' ' . $file->getErrorString());
                 $this->redirect->goto('index');
-                return;
             }
+
             // Go directly to the correct view of CsvImport plugin.
+            $csvImportSession = new Zend_Session_Namespace('CsvImport');
+
+            // @see CsvImport_IndexController::indexAction().
+            $csvImportSession->setExpirationHops(2);
+            $csvImportSession->originalFilename = $csvFilename;
+            $csvImportSession->filePath = $csvFilePath;
+            $csvImportSession->columnDelimiter = $delimiter;
+
+            $csvImportSession->recordTypeId = $recordTypeId;
+            $csvImportSession->itemTypeId = empty($itemTypeId) ? 0 : $itemTypeId;
+            $csvImportSession->collectionId = $collectionId;
+            $csvImportSession->itemsArePublic = ($itemsArePublic == '1');
+            $csvImportSession->itemsAreFeatured = ($itemsAreFeatured == '1');
+            $csvImportSession->elementsAreHtml = ($elementsAreHtml == '1');
+            $csvImportSession->columnNames = $file->getColumnNames();
+            $csvImportSession->columnExamples = $file->getColumnExamples();
+            // A bug appears in CsvImport when examples contain UTF-8
+            // characters like 'ГЧ„чŁ'.
+            foreach ($csvImportSession->columnExamples as &$value) {
+                $value = iconv('ISO-8859-15', 'UTF-8', @iconv('UTF-8', 'ISO-8859-15' . '//IGNORE', $value));
+            }
+            $csvImportSession->ownerId = $this->getInvokeArg('bootstrap')->currentuser->id;
+
+            if ($recordTypeId == 1) {
+                $this->redirect->goto('check-omeka-csv', 'index', 'csv-import');
+            }
             else {
-                $csvImportSession = new Zend_Session_Namespace('CsvImport');
-
-                // @see CsvImport_IndexController::indexAction().
-                $csvImportSession->setExpirationHops(2);
-                $csvImportSession->originalFilename = $csvFilename;
-                $csvImportSession->filePath = $csvFilePath;
-                $csvImportSession->columnDelimiter = $delimiter;
-
-                $csvImportSession->recordTypeId = $recordTypeId;
-                $csvImportSession->itemTypeId = empty($itemTypeId) ? 0 : $itemTypeId;
-                $csvImportSession->collectionId = $collectionId;
-                $csvImportSession->itemsArePublic = ($itemsArePublic == '1');
-                $csvImportSession->itemsAreFeatured = ($itemsAreFeatured == '1');
-                $csvImportSession->elementsAreHtml = ($elementsAreHtml == '1');
-                $csvImportSession->columnNames = $file->getColumnNames();
-                $csvImportSession->columnExamples = $file->getColumnExamples();
-                // A bug appears in CsvImport when examples contain UTF-8
-                // characters like 'ГЧ„чŁ'.
-                foreach ($csvImportSession->columnExamples as &$value) {
-                    $value = iconv('ISO-8859-15', 'UTF-8', @iconv('UTF-8', 'ISO-8859-15' . '//IGNORE', $value));
-                }
-                $csvImportSession->ownerId = $this->getInvokeArg('bootstrap')->currentuser->id;
-
-                if ($recordTypeId == 1) {
-                    $this->redirect->goto('check-omeka-csv', 'index', 'csv-import');
-                }
-                else {
-                    $this->redirect->goto('map-columns', 'index', 'csv-import');
-                }
+                $this->redirect->goto('map-columns', 'index', 'csv-import');
             }
         } catch (Exception $e) {
             $this->view->error = $e->getMessage();
@@ -363,8 +371,14 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         // Get first level nodes of first file in order to choose document name.
         // TODO Add the root element name, because some formats use it.
         reset($fileList);
-        $doc = new DomDocument;
-        $doc->load(key($fileList));
+        $filepath = key($fileList);
+        try {
+            $doc = $this->_domXmlLoad($filepath);
+        } catch (Exception $e) {
+            $this->flashError($e->getMessage());
+            return;
+        }
+
         foreach ($doc->childNodes as $pri) {
             $elementSet = $this->cycleNodes($pri, $elementList = array(), $num = 0);
         }
@@ -476,47 +490,145 @@ class XmlImport_IndexController extends Omeka_Controller_Action
     /**
      * Iterates recursively through a directory to get all selected filepaths.
      *
-     * @param $directory string Directory to check.
-     * @param $extensions string|array Extension or array of extensions.
+     * @param string $directory Directory to check.
+     * @param string $extension Extension.
+     * @param boolean $recursive Recursive or not in subfolder.
      *
      * @return associative array of filepath => filename or false if error.
      */
-    private function _listRecursiveDirectory($directory, $extensions = array(), $recursive = true)
+    private function _listRecursiveDirectory($directory, $extension = '', $recursive = true)
     {
-        if (is_string($extensions)) {
-            $extensions = array($extensions);
-        }
-
-        $files = @scandir($directory);
-        if ($files === false) {
-            return false;
-        }
-
         $filenames = array();
 
-        foreach ($files as $file) {
-            if ($file != '.' && $file != '..') {
-                $path = $directory . DIRECTORY_SEPARATOR . $file;
-                if (is_dir($path)) {
-                    if ($recursive == true) {
-                        $subdirectory = $this->_listRecursiveDirectory($path, $extensions);
-                        if ($subdirectory !== false) {
-                            $filenames = array_merge($filenames, $subdirectory);
-                        }
-                    }
-                }
-                else {
-                    foreach ($extensions as $extension) {
-                        if (preg_match('/^.+\.' . $extension . '$/i', $file)) {
-                            $filenames[$path] = $file;
-                            break;
-                        }
-                    }
+        // Prepare extension.
+        if (!empty($extension) && substr($extension, 0, 1) != '.') {
+            $extension = '.' . $extension;
+        }
+
+        // Get directories and files via http or via file system.
+        // Get via http/https.
+        if (parse_url($directory, PHP_URL_SCHEME) == 'http' || parse_url($directory, PHP_URL_SCHEME) == 'https') {
+            $result = $this->_scandirOverHttp($directory, $extension);
+            if (empty($result)) {
+                return $filenames;
+            }
+            $dirs = &$result['dirs'];
+            $files = &$result['files'];
+        }
+        // Get via file system.
+        else {
+            $dirs = glob($directory . '/*', GLOB_ONLYDIR);
+            $files = glob($directory . '/*' . $extension, GLOB_MARK);
+            // Remove directories because glob() has no flag to get only files.
+            foreach ($files as $key => $file) {
+                if (substr($file, -1) != '/') {
+                    unset($files[$key]);
                 }
             }
         }
+
+        // Recursive call to this function for subdirectories.
+        if ($recursive == true) {
+            foreach ($dirs as $dir) {
+                $subdirectory = $this->_listRecursiveDirectory($dir, $extension);
+                if ($subdirectory !== false) {
+                    $filenames = array_merge($filenames, $subdirectory);
+                }
+            }
+        }
+
+        // Return filenames in a formatted array.
+        foreach ($files as $file) {
+            $filenames[$file] = basename($file);
+        }
+
         ksort($filenames);
         return $filenames;
+    }
+
+    /**
+     * Scan a directory available only via http (web pages).
+     *
+     * @param $directory string Directory to check.
+     * @param string $extension Extension.
+     *
+     * @return associative array of directories and filepaths.
+     */
+    private function _scandirOverHttp($directory, $extension = '')
+    {
+        $page = file_get_contents($directory);
+
+        if (empty($page)) {
+            return false;
+        }
+
+        $dirs = array();
+        $files = array();
+
+        // Prepare extension.
+        if (substr($extension, 0, 1) == '.') {
+            $extension = substr($extension, 1);
+        }
+
+        // Add a slash to the url in order to append relative filenames easily.
+        if (substr($directory, -1) != '/') {
+            $directory .= '/';
+        }
+
+        // Get parent directory.
+        $parent = dirname($directory) . '/';
+
+        // Get the domain if needed.
+        $domain = parse_url($directory);
+        $user = ($domain['user'] . ':' . $domain['pass'] != ':') ? $domain['user'] . ':' . $domain['pass'] . '@' : '';
+        $port = !empty($domain['port']) ? ':' . $domain['port'] : '';
+        $domain = $domain['scheme'] . '://' . $user . $domain['host'] . $port;
+
+        // List all links.
+        $matches = array();
+        preg_match_all("/(a href\=\")([^\?\"]*)(\")/i", $page, $matches);
+        // Remove duplicates.
+        $matches = array_combine($matches[2], $matches[2]);
+
+        // Check list of urls.
+        foreach ($matches as $match) {
+            // Add base url to relative ones.
+            $urlScheme = parse_url($match, PHP_URL_SCHEME);
+            if ($urlScheme != 'http' && $urlScheme != 'https') {
+                // Add only domain to absolute url without domain.
+                if (substr($match, 0, 1) == '/') {
+                    $match = $domain . $match;
+                }
+                else {
+                    $match = $directory . $match;
+                }
+            }
+
+            // Remove parent and current directory.
+            if ($match == $parent
+                    || $match == $directory
+                    || ($match . '/') == $parent
+                    || ($match . '/') == $directory
+                ) {
+                // Don't add it.
+            }
+            // Check if this a directory.
+            elseif (substr($match, -1) == '/') {
+                $dirs[] = $match;
+            }
+            elseif (empty($extension)) {
+                $files[] = $match;
+            }
+            // Check the extension.
+            elseif (preg_match('/^.+\.' . $extension . '$/i', $match)) {
+                $files[] = $match;
+            }
+        }
+
+        return array(
+            'dirs' => $dirs,
+            'files' => $files,
+        );
     }
 
     /**
@@ -534,8 +646,12 @@ class XmlImport_IndexController extends Omeka_Controller_Action
      */
     private function _apply_xslt($xml_file, $xsl_file, $parameters = array())
     {
-        $DomXml = DomDocument::load($xml_file);
-        $DomXsl = DomDocument::load($xsl_file);
+        try {
+            $DomXml = $this->_domXmlLoad($xml_file);
+            $DomXsl = $this->_domXmlLoad($xsl_file);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
 
         $proc = new XSLTProcessor;
         // Php functions are needed, because php doesn't use XSLT 2.0 and
@@ -547,6 +663,39 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         $proc->setParameter('', $parameters);
 
         return $proc->transformToXML($DomXml);
+    }
+
+    /**
+     * Load a xml or xslt file into a Dom document via file system or http.
+     *
+     * @param string $filepath Path of xml file on file system or via http.
+     *
+     * @return DomDocument or throw error message.
+     */
+    private function _DomXmlLoad($filepath)
+    {
+        $domDocument = new DomDocument;
+
+        // Default import via file system.
+        if (parse_url($filepath, PHP_URL_SCHEME) != 'http' && parse_url($filepath, PHP_URL_SCHEME) != 'https') {
+            $domDocument->load($filepath);
+        }
+
+        // If xml file is over http, need to get it locally to process xslt.
+        else {
+            $xmlContent = file_get_contents($filepath);
+            if ($xmlContent === false) {
+                $message = __('Enable to load "%s". Verify that you have rights to access this folder and subfolders.', $filepath);
+                throw new Exception($message);
+            }
+            elseif (empty($xmlContent)) {
+                $message = __('The file "%s" is empty. Process is aborted.', $filepath);
+                throw new Exception($message);
+            }
+            $domDocument->loadXML($xmlContent);
+        }
+
+        return $domDocument;
     }
 
     /**

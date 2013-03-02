@@ -20,6 +20,9 @@ For more information on Omeka, see [Omeka][2].
 Installation
 ------------
 
+Install CsvImport ([original][3] or [fork][1], depending on the version of
+XmlImport you use).
+
 Uncompress files and rename plugin folder "XmlImport".
 
 Then install it like any other Omeka plugin and follow the config instructions.
@@ -36,13 +39,13 @@ It's always recommended to backup your database so you can roll back if needed.
 Troubleshooting
 ---------------
 
-See online issues on [GitHub][3].
+See online issues on [GitHub][4].
 
 
 License
 -------
 
-This plugin is published under [Apache licence v2][4].
+This plugin is published under [Apache licence v2][5].
 
 
 Contact
@@ -50,26 +53,27 @@ Contact
 
 Current maintainers:
 
-* Daniel Berthereau (see [Daniel-KM][5])
-* Scholars' Lab (see [Scholars' Lab][6])
+* Daniel Berthereau (see [Daniel-KM][6])
+* Scholars' Lab (see [Scholars' Lab][7])
 
-First version of this plugin has been built by [Scholars' Lab of University of Virginia Library][6].
-
-This plugin has been updated for École des Ponts ParisTech (see [ENPC][7]).
+First version of this plugin has been built by [Scholars' Lab of University of Virginia Library][8].
+This plugin has been updated for [ENPC / École des Ponts ParisTech][9]) and [Pop Up Archive][10]).
 
 
 Copyright
 ---------
 
-* Copyright Daniel Berthereau for École des Ponts ParisTech, 2012
+* Copyright Daniel Berthereau, 2012-2013
 * Copyright Scholars' Lab, 2010 [GenericXmlImporter v1.0]
 
 
 [1]: https://github.com/Daniel-KM/CsvImport "CsvImport fork"
-[2]: http://www.omeka.org "Omeka.org"
-[3]: https://github.com/Daniel-KM/XmlImport/Issues "GitHub XmlImport"
-[4]: https://www.apache.org/licenses/LICENSE-2.0.html "Apache licence v2"
-[5]: http://github.com/Daniel-KM "Daniel Berthereau"
-[6]: https://github.com/scholarslab "Scholars' Lab"
-[7]: http://www.scholarslab.org/research/omeka-plugins/ "Scholars' Lab of University of Virginia Library"
-[8]: http://bibliotheque.enpc.fr "École des Ponts ParisTech"
+[2]: https://omeka.org "Omeka.org"
+[3]: https://github.com/omeka/plugin-CsvImport "Omeka plugin CsvImport"
+[4]: https://github.com/Daniel-KM/XmlImport/Issues "GitHub XmlImport"
+[5]: https://www.apache.org/licenses/LICENSE-2.0.html "Apache licence v2"
+[6]: https://github.com/Daniel-KM "Daniel Berthereau"
+[7]: https://github.com/scholarslab "Scholars' Lab"
+[8]: http://www.scholarslab.org/research/omeka-plugins/ "Scholars' Lab of University of Virginia Library"
+[9]: http://bibliotheque.enpc.fr "École des Ponts ParisTech"
+[10]: http://popuparchive.org/ "Pop Up Archive"

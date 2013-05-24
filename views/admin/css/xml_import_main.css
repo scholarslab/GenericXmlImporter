@@ -1,3 +1,17 @@
-.zend_form>dd {
-    margin-bottom:20px;
+#xml_import_file_import-label,
+#xml_import_format-label {
+    width: 500px;
+}
+#xmlimport dd,
+#xmlimport dt,
+#xmlimport ul.error,
+#xmlimport input,
+#xmlimport #fieldset-singlefile,
+#xmlimport #fieldset-multiplefiles,
+#xmlimport #fieldset-format,
+#xmlimport #fieldset-formatno {
+  clear:both;
+}
+#xmlimport ul.errors li {
+  color: #914E33;
 }

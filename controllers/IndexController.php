@@ -1,15 +1,5 @@
 <?php
 /**
- * @version $Id$
- * @copyright Daniel Berthereau for École des Ponts ParisTech, 2012
- * @copyright Scholars' Lab, 2010 [GenericXmlImporter v.1.0]
- * @license http://www.apache.org/licenses/LICENSE-2.0.html
- * @package XmlImport
- * @author Daniel Berthereau
- * @author Ethan Gruber: ewg4x at virginia dot edu
- */
-
-/**
  * The plugin controller for index pages.
  *
  * Technical notes
@@ -17,13 +7,18 @@
  * 1. Select XML file to upload and import options
  * 2. Form accepts and parses XML file, processes it and sends user to next step
  * with a drop down menu with elements that appear to be the document record
- * 3. User selects document record.  Variables passed to CsvImport session, user
+ * 3. User selects document record. Variables passed to CsvImport session, user
  * redirected to CsvImport column mapping
  *
+ * @copyright Daniel Berthereau, 2012-2013
+ * @copyright Scholars' Lab, 2010 [GenericXmlImporter v.1.0]
+ * @license http://www.apache.org/licenses/LICENSE-2.0.html
  * @package XmlImport
  */
-class XmlImport_IndexController extends Omeka_Controller_Action
+class XmlImport_IndexController extends Omeka_Controller_AbstractActionController
 {
+    protected $_pluginConfig = array();
+
     /**
      * Displays main form (step 1).
      */
@@ -37,44 +32,62 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         }
 
         if (!$form->isValid($this->getRequest()->getPost())) {
-            $this->flashError('Invalid form input. Please see errors below and try again.');
+            $this->_helper->flashMessenger(__('Invalid form input. Please see errors below and try again.'), 'error');
             return;
         }
 
         $uploadedData = $form->getValues();
-        $uploadedData['xmlfolder'] = trim($uploadedData['xmlfolder']);
+        $uploadedData['xml_import_folder'] = trim($uploadedData['xml_import_folder']);
         $fileList = array();
 
-        // If one file is selected, fill the file list with it.
-        if ($uploadedData['xmldoc'] != '') {
-            if (!$form->xmldoc->receive()) {
-                $this->flashError("Error uploading file. Please try again.");
+        switch ($uploadedData['xml_import_file_import']) {
+            case 'file':
+                // If one file is selected, fill the file list with it.
+                if ($uploadedData['xml_import_file'] != '') {
+                    if (!$form->xml_import_file->receive()) {
+                        $this->_helper->flashMessenger(__('Error uploading file. Please try again.'), 'error');
+                        return;
+                    }
+                    $csvFilename = pathinfo($form->xml_import_file->getFileName(), PATHINFO_BASENAME);
+                    // Create a file list with one value.
+                    $fileList = array($form->xml_import_file->getFileName() => $csvFilename);
+                }
+                else {
+                    $this->_helper->flashMessenger(__('Error receiving file or no file selected. Verify that it is an XML document.'), 'error');
+                    return;
+                }
+                break;
+            case 'folder':
+            case 'recursive':
+                // Else prepare full files list from the folder.
+                if ($uploadedData['xml_import_folder'] != '') {
+                    if ($uploadedData['xml_import_file_import'] == 'folder') {
+                        $fileList = $this->_listRecursiveDirectory($uploadedData['xml_import_folder'], 'xml', FALSE);
+                        $csvFilename = 'folder "' . $uploadedData['xml_import_folder'] . '"';
+                    }
+                    else {
+                        $fileList = $this->_listRecursiveDirectory($uploadedData['xml_import_folder'], 'xml', TRUE);
+                        $csvFilename = 'recursive folder "' . $uploadedData['xml_import_folder'] . '"';
+                    }
+                    // TODO Upload each file? Currently, they are checked only
+                    // with DirectoryIterator.
+                }
+                else {
+                    $this->_helper->flashMessenger(__('Error receiving file or no file selected. Verify that it is an XML document.'), 'error');
+                    return;
+                }
+                break;
+            default:
+                $this->_helper->flashMessenger(__('Error: you need to choose if you import an xml file or a list of xml files in a folder.'), 'error');
                 return;
-            }
-            $csvFilename = pathinfo($form->xmldoc->getFileName(), PATHINFO_BASENAME);
-            // Create a file list with one value.
-            $fileList = array($form->xmldoc->getFileName() => $csvFilename);
-        }
-
-        // Else prepare full files list from the folder.
-        elseif ($uploadedData['xmlfolder'] != '') {
-            $fileList = $this->_listRecursiveDirectory($uploadedData['xmlfolder'], 'xml');
-            $csvFilename = 'folder "' . $uploadedData['xmlfolder'] . '"';
-
-            // @todo Upload each file? Currently, they are checked only
-            // with DirectoryIterator.
-        }
-        else {
-            $this->flashError(__('Error receiving file or no file selected. Verify that it is an XML document.'));
-            return;
         }
 
         if ($fileList === false) {
-            $this->flashError(__('Error accessing directory "%s". Verify that you have rights to access this folder and subfolders.', $uploadedData['xmlfolder']));
+            $this->_helper->flashMessenger(__('Error accessing directory "%s". Verify that you have rights to access this folder and subfolders.', $uploadedData['xml_import_folder']), 'error');
             return;
         }
         elseif (empty($fileList)) {
-            $this->flashError(__('Error receiving file or no file selected. Verify that file is an XML document or that the selected directory is not empty.'));
+            $this->_helper->flashMessenger(__('Error receiving file or no file selected. Verify that file is an XML document or that the selected directory is not empty.'), 'error');
             return;
         }
 
@@ -83,34 +96,23 @@ class XmlImport_IndexController extends Omeka_Controller_Action
             try {
                 $xml_doc = $this->_domXmlLoad($filepath);
             } catch (Exception $e) {
-                $this->flashError($e->getMessage());
+                $this->_helper->flashMessenger($e->getMessage(), 'error');
                 return;
             }
 
             // Check if the xml is well formed.
             if (simplexml_import_dom($xml_doc)) {
-                $result = fire_plugin_hook('xml_import_validate_xml_file', $xml_doc);
-                // @todo Check result of the hook.
+                // TODO Check result of the hook.
+                // $result = fire_plugin_hook('xml_import_validate_xml_file', $xml_doc);
                 if (!isset($xml_doc)) {
-                    $this->flashError(__('Error validating XML document: "%s".', $filepath));
+                    $this->_helper->flashMessenger(__('Error validating XML document: "%s".', $filepath), 'error');
                     return;
                 }
             }
             else {
-                $this->flashError(__('Error parsing XML document: "%s".', $filepath));
+                $this->_helper->flashMessenger(__('Error parsing XML document: "%s".', $filepath), 'error');
                 return;
             }
-        }
-
-        // Check delimiter.
-        if ($uploadedData['xml_import_delimiter_name'] != 'custom') {
-            $listDelimiters = $this->_listDelimiters();
-            $uploadedData['xml_import_delimiter'] = $listDelimiters[$uploadedData['xml_import_delimiter_name']];
-        }
-        // Check custom delimiter.
-        elseif ($uploadedData['xml_import_delimiter'] == '') {
-            $this->flashError(__('Custom delimiter cannot be empty.'));
-            return;
         }
 
         // Alright, go to next step.
@@ -128,24 +130,24 @@ class XmlImport_IndexController extends Omeka_Controller_Action
             $xmlImportSession = new Zend_Session_Namespace('XmlImport');
             $xmlImportSession->file_list = $fileList;
             $xmlImportSession->csv_filename = $csvFilename;
-            $xmlImportSession->record_type_id = $uploadedData['xml_import_record_type'];
+            $xmlImportSession->format = $uploadedData['xml_import_format'];
             $xmlImportSession->item_type_id = $itemTypeId;
             $xmlImportSession->collection_id = $collectionId;
             $xmlImportSession->public = $uploadedData['xml_import_items_are_public'];
             $xmlImportSession->featured = $uploadedData['xml_import_items_are_featured'];
             $xmlImportSession->html_elements = $uploadedData['xml_import_elements_are_html'];
             $xmlImportSession->stylesheet = $uploadedData['xml_import_stylesheet'];
-            $xmlImportSession->delimiter = $uploadedData['xml_import_delimiter'];
             $xmlImportSession->stylesheet_parameters = $uploadedData['xml_import_stylesheet_parameters'];
 
-            $this->redirect->goto('select-element');
+            $this->_helper->redirector->goto('select-element');
         } catch (Exception $e) {
             $this->view->error = $e->getMessage();
         }
     }
 
     /**
-     * Displays second form to choose element (step 2).
+     * Displays second form to choose element (step 1 bis, used only for the
+     * generic sheet).
      */
     public function selectElementAction()
     {
@@ -166,7 +168,7 @@ class XmlImport_IndexController extends Omeka_Controller_Action
     }
 
     /**
-     * Generates csv file (step 3).
+     * Generates csv file (step 2).
      */
     public function sendAction()
     {
@@ -185,7 +187,7 @@ class XmlImport_IndexController extends Omeka_Controller_Action
                 $this->_prepareCsvArguments($uploadedData);
             }
             else {
-                $this->flashError(__('Error receiving file or no file selected. Verify that it is an XML document.'));
+                $this->_helper->flashMessenger(__('Error receiving file or no file selected. Verify that it is an XML document.'), 'error');
             }
         }
     }
@@ -198,20 +200,18 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         $args['file_list'] = unserialize($uploadedData['xml_import_file_list']);
         $args['csv_filename'] = $uploadedData['xml_import_csv_filename'];
         $args['tag_name'] = $uploadedData['xml_import_tag_name'];
-        $args['record_type_id'] = $uploadedData['xml_import_record_type'];
+        $args['format'] = $uploadedData['xml_import_format'];
         $args['item_type_id'] = $uploadedData['xml_import_item_type'];
         $args['collection_id'] = $uploadedData['xml_import_collection_id'];
         $args['public'] = $uploadedData['xml_import_items_are_public'];
         $args['featured'] = $uploadedData['xml_import_items_are_featured'];
         $args['html_elements'] = $uploadedData['xml_import_elements_are_html'];
         $args['stylesheet'] = $uploadedData['xml_import_stylesheet'];
-        $args['delimiter'] = $uploadedData['xml_import_delimiter'];
         $args['stylesheet_parameters'] = $uploadedData['xml_import_stylesheet_parameters'];
 
+        set_option('xml_import_format', $args['format']);
         set_option('xml_import_stylesheet', $args['stylesheet']);
-        set_option('xml_import_delimiter', $args['delimiter']);
         set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
-        set_option('csv_import_html_elements', $args['html_elements']);
 
         $this->_generateCsv($args);
     }
@@ -221,10 +221,16 @@ class XmlImport_IndexController extends Omeka_Controller_Action
      */
     private function _generateCsv($args)
     {
+        // List of special characters used to convert xml to csv (those
+        // available in xml 1.0).
+        $delimiter = "\t";
+        $delimiter_multivalues = "\r";
+        $end_of_line = "\n";
+
         // Get variables from args array passed into detached process.
         $fileList = $args['file_list'];
         $csvFilename = $args['csv_filename'];
-        $recordTypeId = $args['record_type_id'];
+        $format = $args['format'];
         $itemTypeId = $args['item_type_id'];
         $collectionId = $args['collection_id'];
         $itemsArePublic = $args['public'];
@@ -232,8 +238,8 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         $elementsAreHtml = $args['html_elements'];
         $tagName = $args['tag_name'];
         $stylesheet = $args['stylesheet'];
-        $delimiter = $args['delimiter'];
         $stylesheetParameters = $args['stylesheet_parameters'];
+
 
         $csvFilePath = sys_get_temp_dir() . '/' . 'omeka_xml_import_' . date('Ymd-His') . '_' . $this->_sanitizeString($csvFilename) . '.csv';
         $csvFilename = 'Via Xml Import: ' . $csvFilename;
@@ -254,7 +260,6 @@ class XmlImport_IndexController extends Omeka_Controller_Action
                 }
             }
             $parameters['node'] = $tagName;
-            $parameters['delimiter'] = $delimiter;
 
             // Flag used to keep or remove headers in the first row.
             $flag_first = TRUE;
@@ -263,9 +268,9 @@ class XmlImport_IndexController extends Omeka_Controller_Action
             // metadata to import or if the xml file is not a good one.
             foreach ($fileList as $filepath => $filename) {
                 $csvData = $this->_apply_xslt($filepath, $stylesheet, $parameters);
-                if ($csvData === false) {
-                    $this->flashError(__('Error when transforming xml file "%s" with the xsl sheet "%s".', $filepath, $stylesheet));
-                    $this->redirect->goto('index');
+                if ($csvData === FALSE) {
+                    $this->_helper->flashMessenger(__('Error when transforming xml file "%s" with the xsl sheet "%s".', $filepath, $stylesheet), 'error');
+                    $this->_helper->redirector->goto('index');
                 }
 
                 // Let headers only for the first file.
@@ -274,23 +279,22 @@ class XmlImport_IndexController extends Omeka_Controller_Action
                 }
                 // Remove first line for all other files.
                 else {
-                    // "\n" is used as a end of line delimiter, because xslt
-                    // stylesheet is unix one.
+                    // Ascii 10 (Line feed) is used as end of line.
                     $csvData = substr($csvData, strpos($csvData, "\n") + 1);
                 }
 
                 // @todo Use Zend/Omeka api.
                 $result = $this->_append_data_to_file($csvFilePath, $csvData);
                 if ($result === FALSE) {
-                    $this->flashError(__('Error saving data, because the filepath "%s" is not writable.', $filepath));
-                    $this->redirect->goto('index');
+                    $this->_helper->flashMessenger(__('Error saving data, because the filepath "%s" is not writable.', $filepath), 'error');
+                    $this->_helper->redirector->goto('index');
                 }
             }
 
             // Check final resulted file.
             if (filesize($csvFilePath) == 0) {
-                $this->flashError(__('The conversion of the xml file "%s" to csv via the xslt style sheet "%s" gives an empty file. Check your options and your files.', basename($filepath), basename($stylesheet)));
-                $this->redirect->goto('index');
+                $this->_helper->flashMessenger(__('The conversion of the xml file "%s" to csv via the xslt style sheet "%s" gives an empty file. Check your options and your files.', basename($filepath), basename($stylesheet)), 'error');
+                $this->_helper->redirector->goto('index');
             }
 
             // Get the view.
@@ -299,8 +303,8 @@ class XmlImport_IndexController extends Omeka_Controller_Action
             // Set up CsvImport validation and column mapping if needed.
             $file = new CsvImport_File($csvFilePath, $delimiter);
             if (!$file->parse()) {
-                $this->flashError(__('Your CSV file is incorrectly formatted.') . ' ' . $file->getErrorString());
-                $this->redirect->goto('index');
+                $this->_helper->flashMessenger(__('Your CSV file is incorrectly formatted.') . ' ' . $file->getErrorString(), 'error');
+                $this->_helper->redirector->goto('index');
             }
 
             // Go directly to the correct view of CsvImport plugin.
@@ -310,28 +314,38 @@ class XmlImport_IndexController extends Omeka_Controller_Action
             $csvImportSession->setExpirationHops(2);
             $csvImportSession->originalFilename = $csvFilename;
             $csvImportSession->filePath = $csvFilePath;
-            $csvImportSession->columnDelimiter = $delimiter;
 
-            $csvImportSession->recordTypeId = $recordTypeId;
-            $csvImportSession->itemTypeId = empty($itemTypeId) ? 0 : $itemTypeId;
-            $csvImportSession->collectionId = $collectionId;
-            $csvImportSession->itemsArePublic = ($itemsArePublic == '1');
-            $csvImportSession->itemsAreFeatured = ($itemsAreFeatured == '1');
-            $csvImportSession->elementsAreHtml = ($elementsAreHtml == '1');
+            $csvImportSession->columnDelimiter = $delimiter;
             $csvImportSession->columnNames = $file->getColumnNames();
             $csvImportSession->columnExamples = $file->getColumnExamples();
-            // A bug appears in CsvImport when examples contain UTF-8
-            // characters like 'ГЧ„чŁ'.
+            // A bug appears in CsvImport when examples contain UTF-8 characters
+            // like 'ГЧ„чŁ'.
             foreach ($csvImportSession->columnExamples as &$value) {
                 $value = iconv('ISO-8859-15', 'UTF-8', @iconv('UTF-8', 'ISO-8859-15' . '//IGNORE', $value));
             }
+
+            $csvImportSession->fileDelimiter = $delimiter_multivalues;
+            $csvImportSession->tagDelimiter = $delimiter_multivalues;
+            $csvImportSession->elementDelimiter = $delimiter_multivalues;
+
+            $csvImportSession->itemTypeId = $itemTypeId;
+            $csvImportSession->itemsArePublic = $itemsArePublic;
+            $csvImportSession->itemsAreFeatured = $itemsAreFeatured;
+            $csvImportSession->collectionId = $collectionId;
+
+            $csvImportSession->automapColumnNamesToElements = 1;
+
             $csvImportSession->ownerId = $this->getInvokeArg('bootstrap')->currentuser->id;
 
-            if ($recordTypeId == 1) {
-                $this->redirect->goto('check-omeka-csv', 'index', 'csv-import');
+            // Options used with full Csv Import.
+            $csvImportSession->format = $format;
+            $csvImportSession->elementsAreHtml = $elementsAreHtml;
+
+            if ($format == 'Csv Report') {
+                $this->_helper->redirector->goto('check-omeka-csv', 'index', 'csv-import');
             }
             else {
-                $this->redirect->goto('map-columns', 'index', 'csv-import');
+                $this->_helper->redirector->goto('map-columns', 'index', 'csv-import');
             }
         } catch (Exception $e) {
             $this->view->error = $e->getMessage();
@@ -341,11 +355,32 @@ class XmlImport_IndexController extends Omeka_Controller_Action
     /**
      * Helper to prepare main form for step 1.
      */
-    private function _getMainForm()
+    protected function _getMainForm()
     {
         require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'forms' . DIRECTORY_SEPARATOR . 'Main.php';
-        $form = new XmlImport_Form_Main();
+        $csvConfig = $this->_getPluginConfig();
+        $form = new XmlImport_Form_Main($csvConfig);
         return $form;
+    }
+
+    /**
+      * Returns the plugin configuration
+      *
+      * @return array
+      */
+    protected function _getPluginConfig()
+    {
+        if (!$this->_pluginConfig) {
+            $config = $this->getInvokeArg('bootstrap')->config->plugins;
+            if ($config && isset($config->CsvImport)) {
+                $this->_pluginConfig = $config->CsvImport->toArray();
+            }
+            if (!array_key_exists('fileDestination', $this->_pluginConfig)) {
+                $this->_pluginConfig['fileDestination'] =
+                    Zend_Registry::get('storage')->getTempDir();
+            }
+        }
+        return $this->_pluginConfig;
     }
 
     /**
@@ -358,14 +393,13 @@ class XmlImport_IndexController extends Omeka_Controller_Action
     {
         $fileList = $xmlImportSession->file_list;
         $csvFilename = $xmlImportSession->csv_filename;
-        $recordTypeId = $xmlImportSession->record_type_id;
+        $format = $xmlImportSession->format;
         $itemTypeId = $xmlImportSession->item_type_id;
         $collectionId = $xmlImportSession->collection_id;
         $public = $xmlImportSession->public;
         $featured = $xmlImportSession->featured;
         $htmlElements = $xmlImportSession->html_elements;
         $stylesheet = $xmlImportSession->stylesheet;
-        $delimiter = $xmlImportSession->delimiter;
         $stylesheetParameters = $xmlImportSession->stylesheet_parameters;
 
         // Get first level nodes of first file in order to choose document name.
@@ -375,7 +409,7 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         try {
             $doc = $this->_domXmlLoad($filepath);
         } catch (Exception $e) {
-            $this->flashError($e->getMessage());
+            $this->_helper->flashMessenger($e->getMessage(), 'error');
             return;
         }
 
@@ -390,19 +424,27 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         $form->setAction('send');
         $form->setMethod('post');
 
-        // Available record elements inside xml file.
+        // Check available record elements inside xml file. This is used only
+        // with generic sheets. The tag will not be used in other cases.
         // Automatic import via Omeka CSV Report.
-        if ($recordTypeId == 1) {
+        if ($format == 'Csv Report') {
             $tagNameElement = new Zend_Form_Element_Hidden('xml_import_tag_name');
             $tagNameElement->setValue('item');
         }
-        // Only one document.
+        // Only one first level tag.
         elseif (count($elementSet) == 1) {
             reset($elementSet);
             $tagNameElement = new Zend_Form_Element_Hidden('xml_import_tag_name');
             $tagNameElement->setValue(key($elementSet));
         }
-        // Multiple possibilities.
+        // Multiple possibilities but not a generic sheet, so take any tag,
+        // because it won't be used.
+        elseif (substr(basename($stylesheet), 0, 19) !== 'xml_import_generic_') {
+            reset($elementSet);
+            $tagNameElement = new Zend_Form_Element_Hidden('xml_import_tag_name');
+            $tagNameElement->setValue(key($elementSet));
+        }
+        // Multiple possibilities, so the generic xsl can't choose.
         else {
             $tagNameElement = new Zend_Form_Element_Select('xml_import_tag_name');
             $tagNameElement
@@ -419,9 +461,9 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         $csvFilenameElement->setValue($csvFilename);
         $form->addElement($csvFilenameElement);
 
-        $recordTypeElement = new Zend_Form_Element_Hidden('xml_import_record_type');
-        $recordTypeElement->setValue($recordTypeId);
-        $form->addElement($recordTypeElement);
+        $formatElement = new Zend_Form_Element_Hidden('xml_import_format');
+        $formatElement->setValue($format);
+        $form->addElement($formatElement);
 
         $itemTypeElement = new Zend_Form_Element_Hidden('xml_import_item_type');
         $itemTypeElement->setValue($itemTypeId);
@@ -446,10 +488,6 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         $stylesheetElement = new Zend_Form_Element_Hidden('xml_import_stylesheet');
         $stylesheetElement->setValue($stylesheet);
         $form->addElement($stylesheetElement);
-
-        $delimiterElement = new Zend_Form_Element_Hidden('xml_import_delimiter');
-        $delimiterElement->setValue($delimiter);
-        $form->addElement($delimiterElement);
 
         $stylesheetParametersElement = new Zend_Form_Element_Hidden('xml_import_stylesheet_parameters');
         $stylesheetParametersElement->setValue($stylesheetParameters);
@@ -732,17 +770,5 @@ class XmlImport_IndexController extends Omeka_Controller_Action
         $string = preg_replace('#\&[^;]+\;#', '_', $string);
         $string = preg_replace('/[^[:alnum:]\(\)\[\]_\-\.#~@+:]/', '_', $string);
         return preg_replace('/_+/', '_', $string);
-    }
-
-    private function _listDelimiters()
-    {
-        return array(
-            'comma'      => ',',
-            'semi-colon' => ';',
-            'tabulation' => "\t",
-            'pipe'       => '|',
-            'space'      => ' ',
-            'custom'     => 'custom',
-        );
     }
 }

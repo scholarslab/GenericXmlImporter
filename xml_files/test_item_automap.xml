@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Xml file used to check if Xml Import works fine with automap. -->
+<documents>
+    <record>
+        <Title set="Dublin Core">Walden</Title>
+        <Creator set="Dublin Core">Henry David Thoreau</Creator>
+        <Description set="Dublin Core">A man seeks simplicity.</Description>
+        <Tag>
+            <Tag>book</Tag>
+            <Tag>classic</Tag>
+            <Tag>New England</Tag>
+        </Tag>
+        <URL set="Item Type Metadata">
+            <URL>http://upload.wikimedia.org/wikipedia/commons/2/25/Walden_Thoreau.jpg</URL>
+            <URL>http://upload.wikimedia.org/wikipedia/commons/b/ba/Henry_David_Thoreau.jpg</URL>
+        </URL>
+        <Date set="Dublin Core" />
+    </record>
+    <record>
+        <Title set="Dublin Core">
+            <Title>Le comte de Monte-Cristo</Title>
+            <Title>The Count of Monte Cristo</Title>
+        </Title>
+        <Creator set="Dublin Core">Alexandre Dumas</Creator>
+        <Description set="Dublin Core">A man seeks revenge.</Description>
+        <Tag>
+            <Tag>book</Tag>
+            <Tag>classic</Tag>
+            <Tag>France</Tag>
+        </Tag>
+        <URL set="Item Type Metadata">
+            <URL>http://upload.wikimedia.org/wikipedia/commons/c/c3/Edmond_Dant%C3%A8s.JPG</URL>
+        </URL>
+        <Date set="Dublin Core">1844</Date>
+    </record>
+    <record>
+        <Title set="Dublin Core">Narrative of the Life of Frederick Douglass</Title>
+        <Creator set="Dublin Core">Frederick Douglass</Creator>
+        <Description set="Dublin Core">A man seeks freedom.</Description>
+        <Tag>
+            <Tag>book</Tag>
+            <Tag>classic</Tag>
+            <Tag>Maryland</Tag>
+        </Tag>
+        <URL set="Item Type Metadata">
+            <URL>http://upload.wikimedia.org/wikipedia/commons/f/f5/Sketchofdouglass.jpg</URL>
+        </URL>
+        <Date set="Dublin Core" />
+    </record>
+</documents>
+

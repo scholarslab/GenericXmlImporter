@@ -1,6 +1,10 @@
 <?php
-
-class XmlImport_generateCsv extends ProcessAbstract
+/**
+ * Standalone version to generate a Csv file via XmlImport and via a xsl sheet.
+ *
+ * @todo This class is not used by the plugin and was not checked for Omeka 2.0.
+ */
+class XmlImport_generateCsv extends Process
 {
     public function run($args)
     {
@@ -44,9 +48,9 @@ class XmlImport_generateCsv extends ProcessAbstract
                 fclose($documentFile);
 
                 //$this->_initializeCsvImport($basename, $itemsArePublic, $itemsAreFeatured, $collectionId);
-                $this->flashSuccess("Successfully generated CSV File");
+                $this->_helper->flashMessenger(__('Successfully generated CSV File'));
             } else {
-                $this->flashError("Could not transform XML file.  Be sure your XML document is valid.");
+                $this->_helper->flashMessenger(__('Could not transform XML file.  Be sure your XML document is valid.'), 'error');
             }
         } catch (Exception $e){
             $this->view->error = $e->getMessage();

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Xml file used to check if Xml Import works fine. -->
+<documents>
+    <record>
+        <title>Walden</title>
+        <author>Henry David Thoreau</author>
+        <abstract>A man seeks simplicity.</abstract>
+        <keyword>
+            <keyword>book</keyword>
+            <keyword>classic</keyword>
+            <keyword>New England</keyword>
+        </keyword>
+        <file>
+            <file>http://upload.wikimedia.org/wikipedia/commons/2/25/Walden_Thoreau.jpg</file>
+            <file>http://upload.wikimedia.org/wikipedia/commons/b/ba/Henry_David_Thoreau.jpg</file>
+        </file>
+        <date />
+    </record>
+    <record>
+        <title>
+            <title>Le comte de Monte-Cristo</title>
+            <title>The Count of Monte Cristo</title>
+        </title>
+        <author>Alexandre Dumas</author>
+        <abstract>A man seeks revenge.</abstract>
+        <keyword>
+            <keyword>book</keyword>
+            <keyword>classic</keyword>
+            <keyword>France</keyword>
+            <keyword>France</keyword>
+        </keyword>
+        <file>
+            <file>http://upload.wikimedia.org/wikipedia/commons/c/c3/Edmond_Dant%C3%A8s.JPG</file>
+        </file>
+        <date>1844</date>
+    </record>
+    <record>
+        <title>Narrative of the Life of Frederick Douglass</title>
+        <author>Frederick Douglass</author>
+        <abstract>A man seeks freedom.</abstract>
+        <keyword>
+            <keyword>book</keyword>
+            <keyword>classic</keyword>
+            <keyword>Maryland</keyword>
+        </keyword>
+        <file>
+            <file>http://upload.wikimedia.org/wikipedia/commons/f/f5/Sketchofdouglass.jpg</file>
+        </file>
+        <date />
+    </record>
+</documents>
+

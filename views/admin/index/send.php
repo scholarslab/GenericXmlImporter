@@ -1,18 +1,13 @@
 <?php
-    head(array('title' => 'XML Import', 'bodyclass' => 'primary', 'content_class' => 'horizontal-nav'));
+    echo head(array('title' => 'Xml Import', 'bodyclass' => 'primary', 'content_class' => 'horizontal-nav'));
 ?>
-<h1>XML Import</h1>
-
 <div id="primary">
     <?php echo flash(); ?>
-    <?php
-        if (!empty($err)) {
-            echo '<p class="error">' . html_escape($err) . '</p>';
-        }
-    ?>
-    <p><a href="../upload/">Return to form</a>.</p>
+    <?php if (!empty($err)) {
+        echo '<p class="error">' . html_escape($err) . '</p>';
+    } ?>
+    <p><a href="../upload/"><?php echo __('Return to form'); ?></a>.</p>
 </div>
-
 <?php
-    foot();
+    echo foot();
 ?>

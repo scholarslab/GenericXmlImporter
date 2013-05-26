@@ -763,12 +763,44 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      */
     private function _sanitizeString($string)
     {
-        $string = trim(strip_tags($string));
+        return  substr($this->_convertNameToAscii($string), -200);
+    }
+
+    /**
+     * Returns a sanitized string for folder or file path.
+     *
+     * The string should be a simple name, not a full path or url, because "/",
+     * "\" and ":" are removed (so a path should be sanitized by part).
+     *
+     * @param string $string The string to sanitize.
+     *
+     * @return string The sanitized string.
+     */
+    private function _sanitizeName($string)
+    {
+        $string = strip_tags($string);
+        $string = trim($string, ' /\\?<>:*%|"\'`&;');
+        $string = preg_replace('/[\(\{]/', '[', $string);
+        $string = preg_replace('/[\)\}]/', ']', $string);
+        $string = preg_replace('/[[:cntrl:]\/\\\_\?<>:\*\%\|\"\'`\&\;#+\^\$\s]/', ' ', $string);
+        return substr(preg_replace('/\s+/', ' ', $string), -250);
+    }
+
+    /**
+     * Returns a sanitized and unaccentued string for folder or file name.
+     *
+     * @param string $string The string to convert to ascii.
+     *
+     * @return string The converted string to use as a folder or a file name.
+     */
+    private function _convertNameToAscii($string)
+    {
+        $string = $this->_sanitizeName($string);
         $string = htmlentities($string, ENT_NOQUOTES, 'utf-8');
-        $string = preg_replace('#\&([A-Za-z])(?:uml|circ|tilde|acute|grave|cedil|ring)\;#', '\1', $string);
+        $string = preg_replace('#\&([A-Za-z])(?:acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml)\;#', '\1', $string);
         $string = preg_replace('#\&([A-Za-z]{2})(?:lig)\;#', '\1', $string);
         $string = preg_replace('#\&[^;]+\;#', '_', $string);
-        $string = preg_replace('/[^[:alnum:]\(\)\[\]_\-\.#~@+:]/', '_', $string);
-        return preg_replace('/_+/', '_', $string);
+        $string = preg_replace('/[^[:alnum:]\[\]_\-\.#~@+:]/', '_', $string);
+        return substr(preg_replace('/_+/', '_', $string), -250);
     }
 }

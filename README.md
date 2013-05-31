@@ -6,18 +6,19 @@ Summary
 -------
 
 This plugin for [Omeka] allows to import data and files from one or multiple XML
-files via a generic or a custom XSLT sheet.
+files via a generic or a custom XSLT sheet. It's usefull to import documents and
+records from other places or from an older installation of Omeka.
 
 Process uses [Csv Import], so all imports can be managed in one place.
 
 This release allows import of metadata of files. To use this feature, you need
-to install the [Full Csv Import] fork.
+to install the [Csv Import Full] fork.
 
 
 Installation
 ------------
 
-Install the plugin [Csv Import] or [Full Csv Import], then install the
+Install the plugin [Csv Import] or [Csv Import Full], then install the
 [Xml Import] plugin: uncompress files and rename plugin folder "XmlImport",
 then follow the config instructions.
 
@@ -25,36 +26,43 @@ then follow the config instructions.
 Examples
 --------
 
-Two examples of xml files are available in the xml_files folder:
+Three examples of xml files are available in the xml_files folder:
 
-* `test_item.xml`: a basic list of three books with images of Wikipedia, with
-non Dublin Core tags.
-* `test_automap_item.xml`: the same list with some Dublin Core attributes in
-order to automap the xml tags with the Omeka fields.
+* `test_generic_item.xml`: a basic list of three books with images of Wikipedia,
+with non Dublin Core tags.
+* `test_generic_item_automap.xml`: the same list with some Dublin Core
+attributes in order to automap the xml tags with the Omeka fields.
+* `test_omeka_xml_output_v5.xml`: an export of two different items with files and
+files metadata.
 
-To try them, you need to choose options "One xml file", "Item metadata", the
-type "Text" for the first file and "Hyperlink" for the second and the xsl sheet
+To try the first two, choose options "One xml file", "Item metadata", the type
+"Text" for the first file and "Hyperlink" for the second and the xsl sheet
 `xml_import_generic_for_item.xsl`.
 
-Two other sheets are available:
+To try the last, use one of the three other sheets:
 
-* `omeka_xml_output_v4.1_item.xsl`
-* `omeka_xml_output_v4.1_report.xsl`
+* `omeka_xml_output_v4_report.xsl`
+* `omeka_xml_output_v4_item.xsl`
+* `omeka_xml_output_v5_mixed.xsl`
 
 They allow to import Omeka Xml output files (version 4.0 and 4.1, included in
-Omeka 1.5), that you can get when you export your records to this format (simply
-click on the link at the bottom of the admin/items page, or on the link in each
-item page).
-_Warning_: Currently, these sheets can manage repeatable fields only for tags
-and files.
+Omeka 1.5, and version 5.0, included in Omeka 2.0), that you can get when you
+export your records to this format (simply click on the link at the bottom of
+the admin/items page, or on the link in each item page). The last one is
+recommanded with light or heavy and simple or complex data. First sheets don't
+manage files metadata. Collections should be created before import (none in the
+xml test files). Note that Omeka 1.5 outputs only urls of fullsize files, so you
+may change them before import.
 
-If your xsl sheet builds a csv file with CsvReport format, you can import it
-directly without mapping. This format is useful too if you want to import
-multiple types of documents (text, image, video...) in one time.
+If your xsl sheet builds a csv file with "Csv Report" or "Mixed records" format,
+you can import it directly without mapping. The second format can be used only
+with the [Csv Import Full] fork. These formats are useful too if you want to
+import multiple types of documents (text, image, video...) and their metadata in
+one time.
 
-These xsl sheet can be chained or adapted to any needs and xml formats.
+Import of files metadata is possible only with the [Csv Import Full] fork.
 
-Import of files metadata is possible only with the [Full Csv Import] fork.
+These xsl sheets can be chained or adapted to any needs and xml formats.
 
 
 Warning
@@ -96,9 +104,10 @@ Copyright
 * Copyright Daniel Berthereau, 2012-2013
 * Copyright Scholars' Lab, 2010 (GenericXmlImporter v1.0)
 
+
 [Omeka]: https://omeka.org "Omeka.org"
 [Csv Import]: https://github.com/omeka/plugin-CsvImport "Omeka plugin Csv Import"
-[Full Csv Import]: https://github.com/Daniel-KM/CsvImport "Full Csv Import"
+[Csv Import Full]: https://github.com/Daniel-KM/CsvImport "Csv Import Full"
 [Xml Import issues]: https://github.com/Daniel-KM/XmlImport/Issues "GitHub Xml Import"
 [Apache licence v2]: https://www.apache.org/licenses/LICENSE-2.0.html
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"

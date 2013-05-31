@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description : List of legacy sets of Omeka v1.5.
+
+    These three sets, specific for files, have been removed in Omeka 2.0. They are kept
+    only to allow import of old data into a new installation.
+
+    @copyright Daniel Berthereau, 2012-2013
+    @license http://www.apache.org/licenses/LICENSE-2.0.html
+    @package XmlImport
+-->
+
+<XMLlist>
+    <elementSet setName="Omeka Legacy File" recordType="File">
+        <element>Additional Creator</element>
+        <element>Transcriber</element>
+        <element>Producer</element>
+        <element>Render Device</element>
+        <element>Render Details</element>
+        <element>Capture Date</element>
+        <element>Capture Device</element>
+        <element>Capture Details</element>
+        <element>Change History</element>
+        <element>Watermark</element>
+        <element>Encryption</element>
+        <element>Compression</element>
+        <element>Post Processing</element>
+    </elementSet>
+
+    <elementSet setName="Omeka Image File" recordType="File">
+        <element>Width</element>
+        <element>Height</element>
+        <element>Bit Depth</element>
+        <element>Channels</element>
+        <element>Exif String</element>
+        <element>Exif Array</element>
+        <element>IPTC String</element>
+        <element>IPTC Array</element>
+    </elementSet>
+
+    <elementSet setName="Omeka Video File" recordType="File">
+        <element>Bitrate</element>
+        <element>Duration</element>
+        <element>Sample Rate</element>
+        <element>Codec</element>
+        <element>Width</element>
+        <element>Height</element>
+    </elementSet>
+</XMLlist>

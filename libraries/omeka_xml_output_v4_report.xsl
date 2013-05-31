@@ -1,20 +1,21 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Description : Convert an Omeka Xml output (version 4.1) to CSV format in order to import
-    it automatically into Omeka via Csv Import with the CsvReport format.
+    Description : Convert an Omeka Xml output (version 4.0/4.1) to "CSV Report"
+    format in order to import it automatically into Omeka via Csv Import.
 
     @copyright Daniel Berthereau, 2012-2013
     @license http://www.apache.org/licenses/LICENSE-2.0.html
     @package XmlImport
 
     Notes
-    - This sheet is compatible with Omeka Xml output 4.0.
+    - This sheet is compatible with Omeka xml output v5: just change the namespace from
+        xmlns:omeka="http://omeka.org/schemas/omeka-xml/v4"
+    to
+        xmlns:omeka="http://omeka.org/schemas/omeka-xml/v5"
     - This sheet doesn't manage html fields (neither Omeka Xml output).
-    - This sheet doesn't manage repetition of fields, except for tags and files.
 
     TODO
-    - Make more generic for all repeated fields.
-    - Warning: enclosure, delimiter, delimiter for multi-values and end of line are hard
+    - Warning: enclosure, delimiter (column, element, tag and file) and end of line are hard
     coded in Xml Import and in the Csv Report format.
 -->
 
@@ -28,20 +29,19 @@
     <xsl:param name="headers">true</xsl:param>
 
     <!-- Default enclosure. -->
-    <!-- No enclusure is needed when tabulation is used. -->
-    <xsl:param name="enclosure"></xsl:param>
+    <xsl:param name="enclosure">"</xsl:param>
 
-    <!-- Default delimiter. -->
-    <!-- Tabulation is used by default, because it never appears in current files.
-    Csv Import works fine with it, even if it's not allowed. -->
-    <xsl:param name="delimiter"><xsl:text>&#x09;</xsl:text></xsl:param>
+    <!-- Default delimiter for columns. -->
+    <xsl:param name="delimiter">,</xsl:param>
 
-    <!-- Default delimiter for multivalued fields: control character 13 (Carriage return), the
-    only allowed character in xml 1.0, with Tabulation and Line feed. -->
-    <xsl:param name="delimiter_multivalues">,</xsl:param>
+    <!-- Default delimiter for elements. -->
+    <xsl:param name="delimiter_element">^^</xsl:param>
 
-    <!-- Csv Import uses a different delimiter for the Csv Report format (except for tags and files). -->
-    <xsl:param name="delimiter_multivalues_csvreport">^^</xsl:param>
+    <!-- Default delimiter for tags. -->
+    <xsl:param name="delimiter_tag">,</xsl:param>
+
+    <!-- Default delimiter for files. -->
+    <xsl:param name="delimiter_file">,</xsl:param>
 
     <!-- End of line (the Linux one, because it's simpler and smarter). -->
     <xsl:param name="end_of_line"><xsl:text>&#x0A;</xsl:text></xsl:param>
@@ -49,8 +49,14 @@
     <!-- Omeka main element sets. -->
     <xsl:param name="omeka_sets_file">omeka_sets.xml</xsl:param>
 
+    <!-- Omeka legacy element sets. -->
+    <xsl:param name="omeka_legacy_sets_file">omeka_legacy_sets.xml</xsl:param>
+
     <!-- User specific element sets. -->
     <xsl:param name="specific_sets_file">specific_sets.xml</xsl:param>
+
+    <!-- Support of Omeka legacy elements. -->
+    <xsl:param name="legacy_elements">false</xsl:param>
 
     <!-- Constantes -->
     <xsl:variable name="line_start">
@@ -67,6 +73,8 @@
     </xsl:variable>
     <!-- Omeka element sets. -->
     <xsl:variable name="omeka_sets" select="document($omeka_sets_file)"/>
+    <!-- Omeka legacy element sets. -->
+    <xsl:variable name="omeka_legacy_sets" select="document($omeka_legacy_sets_file)"/>
     <!-- User specific element sets. -->
     <xsl:variable name="specific_sets" select="document($specific_sets_file)"/>
 
@@ -79,7 +87,7 @@
         <xsl:apply-templates/>
     </xsl:template>
 
-    <!-- Row for headers. -->
+    <!-- Template for headers. -->
     <xsl:template name="headers">
         <xsl:value-of select="$line_start"/>
 
@@ -97,7 +105,7 @@
         <xsl:text>file</xsl:text>
 
         <!-- Standard metadata headers. -->
-        <xsl:for-each select="$omeka_sets/XMLlist/elementSet[@recordType != 'File']">
+        <xsl:for-each select="$omeka_sets/XMLlist/elementSet">
             <xsl:for-each select="element">
                 <xsl:value-of select="$separator"/>
                 <xsl:value-of select="../@setName"/>
@@ -105,6 +113,17 @@
                 <xsl:value-of select="."/>
             </xsl:for-each>
         </xsl:for-each>
+        <!-- Legacy metadata headers. -->
+        <xsl:if test="$legacy_elements = 'true'">
+            <xsl:for-each select="$omeka_legacy_sets/XMLlist/elementSet">
+                <xsl:for-each select="element">
+                    <xsl:value-of select="$separator"/>
+                    <xsl:value-of select="../@setName"/>
+                    <xsl:text>:</xsl:text>
+                    <xsl:value-of select="."/>
+                </xsl:for-each>
+            </xsl:for-each>
+        </xsl:if>
         <!-- Specific metadata headers. -->
         <xsl:for-each select="$specific_sets/XMLlist/elementSet">
             <xsl:for-each select="element">
@@ -122,15 +141,21 @@
     <xsl:template match="omeka:item">
         <xsl:value-of select="$line_start"/>
 
-        <xsl:call-template name="item_base" />
-        <xsl:call-template name="item_tags" />
-        <xsl:call-template name="item_filenames" />
+        <xsl:call-template name="base_item" />
+        <xsl:call-template name="tags_item" />
+        <xsl:call-template name="filenames_item" />
 
         <!-- Metadata. -->
         <xsl:call-template name="metadata_item">
             <xsl:with-param name="current_record" select="."/>
             <xsl:with-param name="sets" select="$omeka_sets"/>
         </xsl:call-template>
+        <xsl:if test="$legacy_elements = 'true'">
+            <xsl:call-template name="metadata_item">
+                <xsl:with-param name="current_record" select="."/>
+                <xsl:with-param name="sets" select="$omeka_legacy_sets"/>
+            </xsl:call-template>
+        </xsl:if>
         <xsl:call-template name="metadata_item">
             <xsl:with-param name="current_record" select="."/>
             <xsl:with-param name="sets" select="$specific_sets"/>
@@ -141,7 +166,7 @@
 
     <!-- Helpers. -->
 
-    <xsl:template name="item_base">
+    <xsl:template name="base_item">
         <!-- No separator because this is the first column. -->
         <!-- Compatibility check to import a file from Omeka 1.5: "Document" is now "Text" in Omeka 2.0. -->
         <xsl:choose>
@@ -161,31 +186,25 @@
     </xsl:template>
 
     <!-- Helper for list of tags of an item. -->
-    <xsl:template name="item_tags">
+    <xsl:template name="tags_item">
         <xsl:value-of select="$separator"/>
-        <xsl:variable name="tags">
-            <xsl:for-each select="omeka:tagContainer/omeka:tag">
-                <xsl:value-of select="omeka:name"/>
-                <xsl:value-of select="$delimiter_multivalues"/>
-            </xsl:for-each>
-        </xsl:variable>
-        <xsl:if test="string-length($tags) > 0">
-            <xsl:value-of select="substring($tags, 1, string-length($tags) - 1)"/>
-        </xsl:if>
+        <xsl:for-each select="omeka:tagContainer/omeka:tag">
+            <xsl:value-of select="omeka:name"/>
+            <xsl:if test="not(position() = last())">
+                <xsl:value-of select="$delimiter_tag"/>
+            </xsl:if>
+        </xsl:for-each>
     </xsl:template>
 
     <!-- Helper for list of files of an item. -->
-    <xsl:template name="item_filenames">
+    <xsl:template name="filenames_item">
         <xsl:value-of select="$separator"/>
-        <xsl:variable name="filenames">
-            <xsl:for-each select="omeka:fileContainer/omeka:file">
-                <xsl:value-of select="omeka:src"/>
-                <xsl:value-of select="$delimiter_multivalues"/>
-            </xsl:for-each>
-        </xsl:variable>
-        <xsl:if test="string-length($filenames) > 0">
-            <xsl:value-of select="substring($filenames, 1, string-length($filenames) - 1)"/>
-        </xsl:if>
+        <xsl:for-each select="omeka:fileContainer/omeka:file">
+            <xsl:value-of select="omeka:src"/>
+            <xsl:if test="not(position() = last())">
+                <xsl:value-of select="$delimiter_file"/>
+            </xsl:if>
+        </xsl:for-each>
     </xsl:template>
 
     <!-- Helper to get metadata of an item. -->
@@ -194,7 +213,7 @@
         <xsl:param name="sets"/>
 
         <!-- All metadata (only for items). -->
-        <xsl:for-each select="$sets/XMLlist/elementSet[@recordType != 'File']">
+        <xsl:for-each select="$sets/XMLlist/elementSet">
             <xsl:variable name="setName" select="@setName"/>
             <xsl:for-each select="element">
                 <xsl:variable name="elementName" select="."/>
@@ -202,11 +221,21 @@
                 <xsl:choose>
                     <!-- Metadata for items and files (Dublin Core...). -->
                     <xsl:when test="../@recordType = 'All'">
-                        <xsl:value-of select="$current_record/omeka:elementSetContainer/omeka:elementSet[omeka:name = $setName]/omeka:elementContainer/omeka:element[omeka:name = $elementName]/omeka:elementTextContainer/omeka:elementText/omeka:text"/>
+                        <xsl:for-each select="$current_record/omeka:elementSetContainer/omeka:elementSet[omeka:name = $setName]/omeka:elementContainer/omeka:element[omeka:name = $elementName]/omeka:elementTextContainer/omeka:elementText/omeka:text">
+                            <xsl:value-of select="."/>
+                            <xsl:if test="not(position() = last())">
+                                <xsl:value-of select="$delimiter_element"/>
+                            </xsl:if>
+                        </xsl:for-each>
                     </xsl:when>
                     <!-- Metadata for items. -->
                     <xsl:when test="../@recordType = 'Item'">
-                          <xsl:value-of select="$current_record/omeka:itemType/omeka:elementContainer/omeka:element[omeka:name = $elementName]/omeka:elementTextContainer/omeka:elementText/omeka:text"/>
+                          <xsl:for-each select="$current_record/omeka:itemType/omeka:elementContainer/omeka:element[omeka:name = $elementName]/omeka:elementTextContainer/omeka:elementText/omeka:text">
+                            <xsl:value-of select="."/>
+                            <xsl:if test="not(position() = last())">
+                                <xsl:value-of select="$delimiter_element"/>
+                            </xsl:if>
+                        </xsl:for-each>
                     </xsl:when>
                 </xsl:choose>
             </xsl:for-each>

@@ -29,7 +29,7 @@ class XmlImport_Form_Main extends Omeka_Form
             ->setMethod('post');
 
         // Radio button for selecting record type.
-        $this->addElement('radio', 'xml_import_file_import', array(
+        $this->addElement('radio', 'file_import', array(
             'label' => __('How many files do you want to import?'),
             'multiOptions' => array(
                 'file' => __('One xml file'),
@@ -43,33 +43,30 @@ class XmlImport_Form_Main extends Omeka_Form
 
         // One xml file upload.
         $this->_addFileElement();
-        $this->addDisplayGroup(array('xml_import_file'), 'singlefile');
 
         // Multiple files.
-        $xmlFolderElement = new Zend_Form_Element_Text('xml_import_folder');
-        $xmlFolderElement
-            ->setAttrib('size', '60')
-            ->setDescription(__('The server should be able to access to this url or uri.'));
-        $this->addElement($xmlFolderElement);
-        $this->addDisplayGroup(array('xml_import_folder'), 'multiplefiles');
+        $this->addElement('text', 'xml_folder', array(
+            'description' => __('The server should be able to access to this uri.'),
+        ));
 
         // Radio button for selecting record type.
         if ($this->_fullCsvImport) {
             $values = array(
-                'Csv Report' => __('Export from Omeka CSV Report'),
-                'Item' => __('Item metadata'),
-                'File' => __('File metadata'),
+                'Report' => __('Omeka CSV Report'),
+                'Item' => __('Items'),
+                'File' => __('Files metadata'),
+                'Mix' => __('Mixed records'),
             );
             $description = '';
         }
         else {
             $values = array(
-                'Csv Report' => __('Export from Omeka CSV Report'),
-                'Item' => __('Item metadata'),
+                'Report' => __('Omeka CSV Report'),
+                'Item' => __('Items'),
             );
             $description = __('Metadata of files cannot be imported, because you are using standard Csv Import.');
         }
-        $this->addElement('radio', 'xml_import_format', array(
+        $this->addElement('radio', 'format', array(
             'label'=> __('Choose the type of record you want to import (according to the xsl sheet below):'),
             'description'=> $description,
             'multiOptions' => $values,
@@ -77,76 +74,54 @@ class XmlImport_Form_Main extends Omeka_Form
             'required' => TRUE,
         ));
 
-        // Get item types and load into array.
         $values = get_db()->getTable('ItemType')->findPairsForSelectForm();
         $values = array('' => __('Select item type')) + $values;
-        $itemTypeElement = new Zend_Form_Element_Select('xml_import_item_type');
-        $itemTypeElement
-            ->setLabel(__('Select item type'))
-            ->addMultiOptions($values);
-        $this->addElement($itemTypeElement);
+        $this->addElement('select', 'item_type_id', array(
+            'label' => __('Select item type'),
+            'multiOptions' => $values,
+        ));
 
-        // Get collections table and load into array.
         $values = get_db()->getTable('Collection')->findPairsForSelectForm();
         $values = array('' => __('Select collection')) + $values;
-        $collectionElement = new Zend_Form_Element_Select('xml_import_collection_id');
-        $collectionElement
-            ->setLabel(__('Select collection'))
-            ->addMultiOptions($values);
-        $this->addElement($collectionElement);
+        $this->addElement('select', 'collection_id', array(
+            'label' => __('Select collection'),
+            'multiOptions' => $values,
+        ));
 
-        // Items are public?
-        $itemsArePublic = new Zend_Form_Element_Checkbox('xml_import_items_are_public');
-        $itemsArePublic
-            ->setLabel(__('Make all items public?'));
-        $this->addElement($itemsArePublic);
+        $this->addElement('checkbox', 'items_are_public', array(
+            'label' => __('Make all items public?'),
+        ));
 
-        // Items are featured?
-        $itemsAreFeatured = new Zend_Form_Element_Checkbox('xml_import_items_are_featured');
-        $itemsAreFeatured
-            ->setLabel(__('Feature all items?'));
-        $this->addElement($itemsAreFeatured);
+        $this->addElement('checkbox', 'items_are_featured', array(
+            'label' => __('Feature all items?'),
+        ));
 
-        // Used to hide some elements when format is set to 'Csv Report'.
-        $this->addDisplayGroup(array(
-            'xml_import_item_type',
-            'xml_import_collection_id',
-            'xml_import_items_are_public',
-            'xml_import_items_are_featured',
-        ), 'format');
-
-        // Elements are html (for automatic import only)?
-        $elementsAreHtml = new Zend_Form_Element_Checkbox('xml_import_elements_are_html');
-        $elementsAreHtml
-            ->setLabel(__('All imported elements are html?'))
-            ->setDescription(__('When elements are imported automatically, this checkbox allows to set their default format, raw text or html.'));
-        $this->addElement($elementsAreHtml);
-        $this->addDisplayGroup(array('xml_import_elements_are_html'), 'formatno');
+        $this->addElement('checkbox', 'elements_are_html', array(
+            'label' => __('All imported elements are html?'),
+            'description' => 'This checkbox allows to set default format of all imported elements as raw text or html.',
+            'value' => get_option('csv_import_html_elements'),
+        ));
 
         // XSLT Stylesheet.
-        $stylesheets = $this->_listDirectory(get_option('xml_import_xsl_directory'), 'xsl');
-        // Don't return an error if the folder is unavailable, but simply set
-        // an empty list.
-        if ($stylesheets === false) {
-            $stylesheets = array();
+        $values = $this->_listDirectory(get_option('xml_import_xsl_directory'), 'xsl');
+        // Don't return an error if the folder is unavailable, but simply set an
+        // empty list.
+        if ($values === false) {
+            $values = array();
         }
-        $stylesheet = new Zend_Form_Element_Select('xml_import_stylesheet');
-        $stylesheet
-            ->setLabel(__('Xsl sheet'))
-            ->setDescription(__('The generic xsl sheet is "xml_import_generic_item.xsl". It transforms a flat xml file with multiple records into a csv file with multiple rows to import via "Item" format.'))
-            ->setRequired(TRUE)
-            ->addMultiOptions($stylesheets)
-            ->setValue(get_option('xml_import_stylesheet'));
-        $this->addElement($stylesheet);
+        $this->addElement('select', 'stylesheet', array(
+            'label' => __('Xsl sheet'),
+            'description' => __('The generic xsl sheet is "xml_import_generic_item.xsl". It transforms a flat xml file with multiple records into a csv file with multiple rows to import via "Item" format.'),
+            'multiOptions' => $values,
+            'required' => true,
+            'value' => get_option('xml_import_stylesheet'),
+        ));
 
-        // XSLT parameters.
-        $stylesheetParametersElement = new Zend_Form_Element_Text('xml_import_stylesheet_parameters');
-        $stylesheetParametersElement
-            ->setLabel(__('Add specific parameters to use with this xsl sheet'))
-            ->setDescription(__('Format: parameter1_name|parameter1_value, parameter2_name|parameter2_value...'))
-            ->setValue(get_option('xml_import_stylesheet_parameters'))
-            ->setAttrib('size', '60');
-        $this->addElement($stylesheetParametersElement);
+        $this->addElement('text', 'stylesheet_parameters', array(
+            'label' => __('Add specific parameters to use with this xsl sheet'),
+            'description' => __('Format: "parameter 1 name|parameter 1 value", "parameter 2 name|parameter 2 value"...'),
+            'value' => get_option('xml_import_stylesheet_parameters'),
+        ));
 
         $this->applyOmekaStyles();
         $this->setAutoApplyOmekaStyles(false);
@@ -158,8 +133,9 @@ class XmlImport_Form_Main extends Omeka_Form
         ));
         $submit->setDecorators(array('ViewHelper',
             array('HtmlTag',
-                array('tag' => 'div'),
-        )));
+                array('tag' => 'div',
+                    'class' => 'xmlimportupload',
+        ))));
         $this->addElement($submit);
     }
 
@@ -188,7 +164,7 @@ class XmlImport_Form_Main extends Omeka_Form
         // Random filename in the temporary directory to prevent race condition.
         $filter = new Zend_Filter_File_Rename($this->_fileDestinationDir
             . '/' . md5(mt_rand() + microtime(true)));
-        $this->addElement('file', 'xml_import_file', array(
+        $this->addElement('file', 'xml_file', array(
             'validators' => $fileValidators,
             'destination' => $this->_fileDestinationDir,
             'description' => __("Maximum file size is %s.", $size->toString())

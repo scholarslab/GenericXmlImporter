@@ -10,10 +10,11 @@
             <Tag>classic</Tag>
             <Tag>New England</Tag>
         </Tag>
-        <URL set="Item Type Metadata">
-            <URL>http://upload.wikimedia.org/wikipedia/commons/2/25/Walden_Thoreau.jpg</URL>
-            <URL>http://upload.wikimedia.org/wikipedia/commons/b/ba/Henry_David_Thoreau.jpg</URL>
-        </URL>
+        <URL set="Item Type Metadata">https://en.wikipedia.org/wiki/Walden</URL>
+        <File>
+            <File>http://upload.wikimedia.org/wikipedia/commons/2/25/Walden_Thoreau.jpg</File>
+            <File>http://upload.wikimedia.org/wikipedia/commons/b/ba/Henry_David_Thoreau.jpg</File>
+        </File>
         <Date set="Dublin Core" />
     </record>
     <record>
@@ -28,9 +29,8 @@
             <Tag>classic</Tag>
             <Tag>France</Tag>
         </Tag>
-        <URL set="Item Type Metadata">
-            <URL>http://upload.wikimedia.org/wikipedia/commons/c/c3/Edmond_Dant%C3%A8s.JPG</URL>
-        </URL>
+        <URL set="Item Type Metadata">https://fr.wikipedia.org/wiki/Edmond_Dant%C3%A8s</URL>
+        <File>http://upload.wikimedia.org/wikipedia/commons/c/c3/Edmond_Dant%C3%A8s.JPG</File>
         <Date set="Dublin Core">1844</Date>
     </record>
     <record>
@@ -42,9 +42,8 @@
             <Tag>classic</Tag>
             <Tag>Maryland</Tag>
         </Tag>
-        <URL set="Item Type Metadata">
-            <URL>http://upload.wikimedia.org/wikipedia/commons/f/f5/Sketchofdouglass.jpg</URL>
-        </URL>
+        <URL set="Item Type Metadata">https://en.wikipedia.org/wiki/Frederick_Douglass</URL>
+        <File>http://upload.wikimedia.org/wikipedia/commons/f/f5/Sketchofdouglass.jpg</File>
         <Date set="Dublin Core" />
     </record>
 </documents>

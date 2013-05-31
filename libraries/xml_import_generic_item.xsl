@@ -11,8 +11,8 @@
     Notes
     - This sheet works only if all tags that are present in the first record are present in all
     records, even empty, and always in the same order.
-    - Look the example xml_import_test.xml and the xml_import_test_automap.xml.
-    - Warning: enclosure, delimiter, delimiter for multi-values and end of line are hard
+    - Look the example test_item.xml and the test_item_automap.xml.
+    - Warning: enclosure, delimiter (column, element, tag and file) and end of line are hard
     coded in Xml Import.
 
     TODO
@@ -27,18 +27,28 @@
     <!-- Default tag for each item. -->
     <xsl:param name="node" select="'record'"/>
 
+    <!-- Headers are added by default. -->
+    <xsl:param name="headers">true</xsl:param>
+
     <!-- Default enclosure. -->
     <!-- No enclusure is needed when tabulation is used. -->
     <xsl:param name="enclosure"></xsl:param>
 
-    <!-- Default delimiter. -->
+    <!-- Default delimiter for columns. -->
     <!-- Tabulation is used by default, because it never appears in current files.
-    CsvImport works fine with it, even if it's not allowed. -->
+    Csv Import works fine with it, even if it's not allowed. -->
     <xsl:param name="delimiter"><xsl:text>&#x09;</xsl:text></xsl:param>
 
-    <!-- Default delimiter for multivalued fields: control character 13 (Carriage return), the
-    only allowed character in xml 1.0, with Tabulation and Line feed. -->
-    <xsl:param name="delimiter_multivalues"><xsl:text>&#x0D;</xsl:text></xsl:param>
+    <!-- Default delimiter for elements. -->
+    <!-- Control character 13 (Carriage return), the only allowed character in xml 1.0, with
+    Tabulation and Line feed. -->
+    <xsl:param name="delimiter_element"><xsl:text>&#x0D;</xsl:text></xsl:param>
+
+    <!-- Default delimiter for tags. -->
+    <xsl:param name="delimiter_tag"><xsl:text>&#x0D;</xsl:text></xsl:param>
+
+    <!-- Default delimiter for files. -->
+    <xsl:param name="delimiter_file"><xsl:text>&#x0D;</xsl:text></xsl:param>
 
     <!-- End of line (Linux one because it's simpler and smarter). -->
     <xsl:param name="end_of_line"><xsl:text>&#x0A;</xsl:text></xsl:param>
@@ -49,8 +59,8 @@
     </xsl:template>
 
     <xsl:template match="node()" mode="record">
-        <!-- Headers for the first node only. -->
-        <xsl:if test="position() = 1">
+        <!-- Headers for the first node only and if wanted. -->
+        <xsl:if test="($headers = 'true') and (position() = 1)">
             <xsl:for-each select="child::node()[name()]">
                 <xsl:value-of select="$enclosure" />
                 <xsl:if test="@set">
@@ -78,7 +88,17 @@
                     <xsl:for-each select="child::node()[name()]">
                         <xsl:value-of select="normalize-space(.)"/>
                         <xsl:if test="not(position() = last())">
-                            <xsl:value-of select="$delimiter_multivalues" />
+                            <xsl:choose>
+                                <xsl:when test="name() = 'Tag'">
+                                    <xsl:value-of select="$delimiter_tag" />
+                                </xsl:when>
+                                <xsl:when test="name() = 'File'">
+                                    <xsl:value-of select="$delimiter_file" />
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:value-of select="$delimiter_element" />
+                                </xsl:otherwise>
+                            </xsl:choose>
                         </xsl:if>
                     </xsl:for-each>
                 </xsl:otherwise>

@@ -1,17 +1,7 @@
-#xml_import_file_import-label,
-#xml_import_format-label {
-    width: 500px;
+#xmlimport #file_import-label,
+#xmlimport #format-label {
+    width: auto;
 }
-#xmlimport dd,
-#xmlimport dt,
-#xmlimport ul.error,
-#xmlimport input,
-#xmlimport #fieldset-singlefile,
-#xmlimport #fieldset-multiplefiles,
-#xmlimport #fieldset-format,
-#xmlimport #fieldset-formatno {
+div.xmlimportupload {
   clear:both;
-}
-#xmlimport ul.errors li {
-  color: #914E33;
 }

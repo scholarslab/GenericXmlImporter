@@ -62,7 +62,7 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
             throw new Zend_Exception(__('This plugin requires XSLT support.'));
         }
 
-        self::_installOptions();
+        $this->_installOptions();
     }
 
     /**

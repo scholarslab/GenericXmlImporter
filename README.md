@@ -95,7 +95,7 @@ Current maintainers:
 
 First version of this plugin has been built by [Ethan Gruber] for [Scholars' Lab]
 of University of Virginia Library (see [Scholars' Lab Omeka plugins] page).
-This plugin has been updated for [École des Ponts ParisTech]) and [Pop Up Archive]).
+This plugin has been updated for [École des Ponts ParisTech] and [Pop Up Archive].
 
 
 Copyright

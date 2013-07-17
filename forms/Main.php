@@ -63,6 +63,8 @@ class XmlImport_Form_Main extends Omeka_Form
             $values = array(
                 'Report' => __('Omeka CSV Report'),
                 'Item' => __('Items'),
+                'File' => __('Files metadata (only if CsvImport full is enabled.)'),
+                'Mix' => __('Mixed records (only if CsvImport full is enabled.)'),
             );
             $description = __('Metadata of files cannot be imported, because you are using standard Csv Import.');
         }

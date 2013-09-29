@@ -16,8 +16,6 @@ class XmlImport_Form_Main extends Omeka_Form
     // TODO There is a warning when this is enabled.
     // private $_requiredMimeTypes = 'application/xml,text/xml';
 
-    private $_fullCsvImport = FALSE;
-
     /**
      * Initialize the form.
      */
@@ -29,9 +27,6 @@ class XmlImport_Form_Main extends Omeka_Form
         $this->_elementDelimiter = CsvImport_ColumnMap_Element::getDefaultElementDelimiter();
         $this->_tagDelimiter = CsvImport_ColumnMap_Tag::getDefaultTagDelimiter();
         $this->_fileDelimiter = CsvImport_ColumnMap_File::getDefaultFileDelimiter();
-
-        // Check to add full import options or not.
-        $this->_fullCsvImport = (substr(get_plugin_ini('CsvImport', 'version'), -5) == '-full');
 
         $this->setName('xmlimport')
             ->setAttrib('id', 'xmlimport')
@@ -59,12 +54,13 @@ class XmlImport_Form_Main extends Omeka_Form
         ));
 
         // Radio button for selecting record type.
-        if ($this->_fullCsvImport) {
+        if (XmlImportPlugin::isFullCsvImport()) {
             $values = array(
                 'Report' => __('Omeka CSV Report'),
                 'Item' => __('Items'),
                 'File' => __('Files metadata'),
                 'Mix' => __('Mixed records'),
+                'Update' => __('Update records'),
             );
             $description = '';
         }
@@ -74,8 +70,9 @@ class XmlImport_Form_Main extends Omeka_Form
                 'Item' => __('Items'),
                 'File' => __('Files metadata (only if CsvImport full is enabled.)'),
                 'Mix' => __('Mixed records (only if CsvImport full is enabled.)'),
+                'Update' => __('Update records (only if CsvImport full is enabled.)'),
             );
-            $description = __('Metadata of files cannot be imported, because you are using standard Csv Import.');
+            $description = __('Metadata of files cannot be imported and nothing can be updated, because you are using standard Csv Import.');
         }
         $this->addElement('radio', 'format', array(
             'label'=> __('Choose the type of record you want to import (according to the xsl sheet below):'),
@@ -88,14 +85,14 @@ class XmlImport_Form_Main extends Omeka_Form
         $values = get_db()->getTable('ItemType')->findPairsForSelectForm();
         $values = array('' => __('Select item type')) + $values;
         $this->addElement('select', 'item_type_id', array(
-            'label' => __('Select item type'),
+            'label' => __('Select default item type'),
             'multiOptions' => $values,
         ));
 
         $values = get_db()->getTable('Collection')->findPairsForSelectForm();
         $values = array('' => __('Select collection')) + $values;
         $this->addElement('select', 'collection_id', array(
-            'label' => __('Select collection'),
+            'label' => __('Select default collection'),
             'multiOptions' => $values,
         ));
 

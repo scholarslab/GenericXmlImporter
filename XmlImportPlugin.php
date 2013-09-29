@@ -1,18 +1,18 @@
 <?php
 /**
+ * Xml Import
+ *
  * Allows to import one or multiple XML files via generic or custom XSLT sheet.
  * Process ends with CsvImport, so all imports can be managed in one place.
- *
- * @see README.md
  *
  * @copyright Daniel Berthereau, 2012-2013
  * @copyright Scholars' Lab, 2010 [GenericXmlImporter v.1.0]
  * @license http://www.apache.org/licenses/LICENSE-2.0.html
- * @package XmlImport
  */
 
 /**
- * Xml Import plugin.
+ * The Xml Import plugin.
+ * @package Omeka\Plugins\XmlImport
  */
 class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
 {
@@ -94,10 +94,10 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookConfigForm()
     {
-        // Check to add full import options or not.
-        $fullCsvImport = (substr(get_plugin_ini('CsvImport', 'version'), -5) == '-full');
-
-        require 'config_form.php';
+        echo get_view()->partial(
+            'plugins/xml-import-config-form.php',
+            array('full_csv_import' => $this->isFullCsvImport())
+        );
     }
 
     /**
@@ -162,5 +162,17 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
             'privilege' => 'index'
         );
         return $nav;
+    }
+
+    /**
+     * Determine if the CsvImport Full is installed.
+     *
+     * Some import options are unailable if CsvImport Full is not installed.
+     *
+     * @return boolean
+     */
+    static public function isFullCsvImport()
+    {
+        return (substr(get_plugin_ini('CsvImport', 'version'), -5) == '-full');
     }
 }

@@ -17,6 +17,7 @@ jQuery(document).ready(function () {
     jQuery('#format-Item').click(Omeka.XmlImport.updateImportOptions);
     jQuery('#format-File').click(Omeka.XmlImport.updateImportOptions);
     jQuery('#format-Mix').click(Omeka.XmlImport.updateImportOptions);
+    jQuery('#format-Update').click(Omeka.XmlImport.updateImportOptions);
     Omeka.XmlImport.updateOnLoad(); // Need this to reset invalid forms.
 });
 //]]>

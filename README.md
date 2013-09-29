@@ -5,14 +5,15 @@ Xml Import (plugin for Omeka)
 Summary
 -------
 
-This plugin for [Omeka] allows to import data and files from one or multiple XML
-files via a generic or a custom XSLT sheet. It's usefull to import documents and
-records from other places or from an older installation of Omeka.
+This plugin for [Omeka] allows to import data and files and to update records
+from one or multiple XML files via a generic or a custom XSLT sheet. It's
+usefull to import documents and records from other places or from an older
+installation of Omeka.
 
 Process uses [Csv Import], so all imports can be managed in one place.
 
-This release allows import of metadata of files. To use this feature, you need
-to install the [Csv Import Full] fork.
+Currently, to import metadata of files and to update records, the
+[Csv Import Full] fork should be used.
 
 
 Installation
@@ -60,9 +61,18 @@ with the [Csv Import Full] fork. These formats are useful too if you want to
 import multiple types of documents (text, image, video...) and their metadata in
 one time.
 
-Import of files metadata is possible only with the [Csv Import Full] fork.
+Import of files metadata and update of records are possible only with the
+[Csv Import Full] fork.
 
 These xsl sheets can be chained or adapted to any needs and xml formats.
+
+Note about delimiters:
+As Xml Import uses Csv Import, delimiters are used. Recommended delimiters are
+special characters allowed in xml 1.0: tabulation "\t" for column delimiter,
+carriage return "\r"  for element, tag and file delimiters, with the Unix end
+of line "\n" (line feed).
+If fields contain paragraphs, another element delimiter should be used,
+preferably another Ascii character, like pipe "|".
 
 
 Warning

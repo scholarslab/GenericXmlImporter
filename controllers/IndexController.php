@@ -247,13 +247,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $tagDelimiter = $args['tag_delimiter'];
         $fileDelimiter = $args['file_delimiter'];
 
-        // List of delimiters used in csv file.
         // Delimiters for Csv Report are fixed.
-        // For other formats, special characters allowed in xml 1.0 are
-        // recommanded:  tabulation "\t" for column delimiter and carriage
-        // return "\r"  for element, tag and file delimiters, with the Unix end
-        //  of line "\n". If fields contain paragraphs, another element
-        // delimiter should be used.
         if ($format == 'Report') {
             $columnDelimiter = ',';
             $elementDelimiter = CsvImport_ColumnMap_ExportedElement::DEFAULT_ELEMENT_DELIMITER;
@@ -385,6 +379,8 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                     $this->_helper->redirector->goto('check-omeka-csv', 'index', 'csv-import');
                 case 'Mix':
                     $this->_helper->redirector->goto('check-mix-csv', 'index', 'csv-import');
+                case 'Update':
+                    $this->_helper->redirector->goto('check-update-csv', 'index', 'csv-import');
                 default:
                     $this->_helper->redirector->goto('map-columns', 'index', 'csv-import');
             }
@@ -626,7 +622,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $files = glob($directory . '/*' . $extension, GLOB_MARK);
             // Remove directories because glob() has no flag to get only files.
             foreach ($files as $key => $file) {
-                if (substr($file, -1) != '/') {
+                if (substr($file, -1) == '/') {
                     unset($files[$key]);
                 }
             }

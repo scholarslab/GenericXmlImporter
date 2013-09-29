@@ -1,5 +1,6 @@
 #xmlimport #file_import-label,
 #xmlimport #format-label {
+    clear:both;
     width: auto;
 }
 div.xmlimportupload {

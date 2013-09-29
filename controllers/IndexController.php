@@ -129,6 +129,24 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $xmlImportSession->stylesheet = $uploadedData['stylesheet'];
             $xmlImportSession->stylesheet_parameters = $uploadedData['stylesheet_parameters'];
 
+            $delimitersList = self::getDelimitersList();
+            $columnDelimiterName = $uploadedData['column_delimiter_name'];
+            $xmlImportSession->column_delimiter = isset($delimitersList[$columnDelimiterName])
+                ? $delimitersList[$columnDelimiterName]
+                : $uploadedData['column_delimiter'];
+            $elementDelimiterName = $uploadedData['element_delimiter_name'];
+            $xmlImportSession->element_delimiter = isset($delimitersList[$elementDelimiterName])
+                ? $delimitersList[$elementDelimiterName]
+                : $uploadedData['element_delimiter'];
+            $tagDelimiterName = $uploadedData['tag_delimiter_name'];
+            $xmlImportSession->tag_delimiter = isset($delimitersList[$tagDelimiterName])
+                ? $delimitersList[$tagDelimiterName]
+                : $uploadedData['tag_delimiter'];
+            $fileDelimiterName = $uploadedData['file_delimiter_name'];
+            $xmlImportSession->file_delimiter = isset($delimitersList[$fileDelimiterName])
+                ? $delimitersList[$fileDelimiterName]
+                : $uploadedData['file_delimiter'];
+
             $this->_helper->redirector->goto('select-element');
         } catch (Exception $e) {
             $this->view->error = $e->getMessage();
@@ -199,6 +217,10 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $args['tag_name'] = $uploadedData['tag_name'];
         $args['stylesheet'] = $uploadedData['stylesheet'];
         $args['stylesheet_parameters'] = $uploadedData['stylesheet_parameters'];
+        $args['column_delimiter'] = $uploadedData['column_delimiter'];
+        $args['element_delimiter'] = $uploadedData['element_delimiter'];
+        $args['tag_delimiter'] = $uploadedData['tag_delimiter'];
+        $args['file_delimiter'] = $uploadedData['file_delimiter'];
 
         $this->_generateCsv($args);
     }
@@ -220,22 +242,25 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $tagName = $args['tag_name'];
         $stylesheet = $args['stylesheet'];
         $stylesheetParameters = $args['stylesheet_parameters'];
+        $columnDelimiter = $args['column_delimiter'];
+        $elementDelimiter = $args['element_delimiter'];
+        $tagDelimiter = $args['tag_delimiter'];
+        $fileDelimiter = $args['file_delimiter'];
 
         // List of delimiters used in csv file.
+        // Delimiters for Csv Report are fixed.
+        // For other formats, special characters allowed in xml 1.0 are
+        // recommanded:  tabulation "\t" for column delimiter and carriage
+        // return "\r"  for element, tag and file delimiters, with the Unix end
+        //  of line "\n". If fields contain paragraphs, another element
+        // delimiter should be used.
         if ($format == 'Report') {
-            $delimiter = ',';
-            $delimiterElement = CsvImport_ColumnMap_ExportedElement::DEFAULT_ELEMENT_DELIMITER;
-            $delimiterTag = ',';
-            $delimiterFile = ',';
+            $columnDelimiter = ',';
+            $elementDelimiter = CsvImport_ColumnMap_ExportedElement::DEFAULT_ELEMENT_DELIMITER;
+            $tagDelimiter = ',';
+            $fileDelimiter = ',';
         }
-        // For other formats, special characters allowed in xml 1.0 are used.
-        else {
-            $delimiter = "\t";
-            $delimiterElement = "\r";
-            $delimiterTag = "\r";
-            $delimiterFile = "\r";
-        }
-        $end_of_line = "\n";
+        $endOfLine = "\n";
 
         // No paramater for this option: fields are always automapped.
         $automapColumns = 1;
@@ -243,23 +268,29 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $csvFilePath = sys_get_temp_dir() . '/' . 'omeka_xml_import_' . date('Ymd-His') . '_' . $this->_sanitizeString($csvFilename) . '.csv';
         $csvFilename = 'Via Xml Import: ' . $csvFilename;
 
-        try {
-            // Add items of the custom fields. Allowed types are already
-            // checked.
-            $parameters = array();
-            $parametersAdded = (trim($stylesheetParameters) == '') ?
-                array() :
-                array_values(array_map('trim', explode(',', $stylesheetParameters)));
-            foreach ($parametersAdded as $value) {
-                if (strpos($value, '|') !== FALSE) {
-                    list($paramName, $paramValue) = explode('|', $value);
-                    if ($paramName != '') {
-                        $parameters[$paramName] = $paramValue;
-                    }
+        // Prepare parameters for the stylesheet.
+        $parameters = array(
+            'delimiter' => $columnDelimiter,
+            'delimiter_element' => $elementDelimiter,
+            'delimiter_tag' => $tagDelimiter,
+            'delimiter_file' => $fileDelimiter,
+            'end_of_line' => $endOfLine,
+            'node' => $tagName,
+        );
+        // Add custom parameters. Allowed types are already checked.
+        $parametersAdded = (trim($stylesheetParameters) == '')
+            ? array()
+            : array_values(array_map('trim', explode(',', $stylesheetParameters)));
+        foreach ($parametersAdded as $value) {
+            if (strpos($value, '|') !== FALSE) {
+                list($paramName, $paramValue) = explode('|', $value);
+                if ($paramName != '') {
+                    $parameters[$paramName] = $paramValue;
                 }
             }
-            $parameters['node'] = $tagName;
+        }
 
+        try {
             // Flag used to keep or remove headers in the first row.
             $flag_first = TRUE;
             // Convert each xml file to csv with the selected stylesheet and
@@ -278,8 +309,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                 }
                 // Remove first line for all other files.
                 else {
-                    // Ascii 10 (Line feed) is used as end of line.
-                    $csvData = substr($csvData, strpos($csvData, "\n") + 1);
+                    $csvData = substr($csvData, strpos($csvData, $endOfLine) + 1);
                 }
 
                 // @todo Use Zend/Omeka api.
@@ -300,7 +330,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $view = $this->view;
 
             // Set up CsvImport validation and column mapping if needed.
-            $file = new CsvImport_File($csvFilePath, $delimiter);
+            $file = new CsvImport_File($csvFilePath, $columnDelimiter);
             if (!$file->parse()) {
                 $msg = __('Your CSV file is incorrectly formatted.')
                     . ' ' . $file->getErrorString();
@@ -327,7 +357,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $csvImportSession->automapColumns = $automapColumns;
             // Option used with Csv Import standard only.
             $csvImportSession->automapColumnNamesToElements = $automapColumns;
-            $csvImportSession->columnDelimiter = $delimiter;
+            $csvImportSession->columnDelimiter = $columnDelimiter;
             $csvImportSession->columnNames = $file->getColumnNames();
             $csvImportSession->columnExamples = $file->getColumnExamples();
             // A bug appears in CsvImport when examples contain UTF-8 characters
@@ -335,16 +365,20 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             foreach ($csvImportSession->columnExamples as &$value) {
                 $value = iconv('ISO-8859-15', 'UTF-8', @iconv('UTF-8', 'ISO-8859-15' . '//IGNORE', $value));
             }
-            $csvImportSession->elementDelimiter = $delimiterElement;
-            $csvImportSession->tagDelimiter = $delimiterTag;
-            $csvImportSession->fileDelimiter = $delimiterFile;
+            $csvImportSession->elementDelimiter = $elementDelimiter;
+            $csvImportSession->tagDelimiter = $tagDelimiter;
+            $csvImportSession->fileDelimiter = $fileDelimiter;
             $csvImportSession->ownerId = $this->getInvokeArg('bootstrap')->currentuser->id;
 
             // All is valid, so we save settings.
-            set_option('xml_import_format', $format);
-            set_option('csv_import_html_elements', $elementsAreHtml);
+            set_option('xml_import_format', $args['format']);
+            set_option('csv_import_html_elements', $args['html_elements']);
             set_option('xml_import_stylesheet', $args['stylesheet']);
             set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
+            set_option(CsvImport_RowIterator::COLUMN_DELIMITER_OPTION_NAME, $args['column_delimiter']);
+            set_option(CsvImport_ColumnMap_Element::ELEMENT_DELIMITER_OPTION_NAME, $args['element_delimiter']);
+            set_option(CsvImport_ColumnMap_Tag::TAG_DELIMITER_OPTION_NAME, $args['tag_delimiter']);
+            set_option(CsvImport_ColumnMap_File::FILE_DELIMITER_OPTION_NAME, $args['file_delimiter']);
 
             switch ($format) {
                 case 'Report':
@@ -413,6 +447,10 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $htmlElements = $xmlImportSession->html_elements;
         $stylesheet = $xmlImportSession->stylesheet;
         $stylesheetParameters = $xmlImportSession->stylesheet_parameters;
+        $columnDelimiter = $xmlImportSession->column_delimiter;
+        $elementDelimiter = $xmlImportSession->element_delimiter;
+        $tagDelimiter = $xmlImportSession->tag_delimiter;
+        $fileDelimiter = $xmlImportSession->file_delimiter;
 
         // Get first level nodes of first file in order to choose document name.
         // TODO Add the root element name, because some formats use it.
@@ -505,8 +543,24 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $stylesheetParametersElement->setValue($stylesheetParameters);
         $form->addElement($stylesheetParametersElement);
 
+        $columnDelimiterElement = new Zend_Form_Element_Hidden('column_delimiter');
+        $columnDelimiterElement->setValue($columnDelimiter);
+        $form->addElement($columnDelimiterElement);
+
+        $elementDelimiterElement = new Zend_Form_Element_Hidden('element_delimiter');
+        $elementDelimiterElement->setValue($elementDelimiter);
+        $form->addElement($elementDelimiterElement);
+
+        $tagDelimiterElement = new Zend_Form_Element_Hidden('tag_delimiter');
+        $tagDelimiterElement->setValue($tagDelimiter);
+        $form->addElement($tagDelimiterElement);
+
+        $fileDelimiterElement = new Zend_Form_Element_Hidden('file_delimiter');
+        $fileDelimiterElement->setValue($fileDelimiter);
+        $form->addElement($fileDelimiterElement);
+
         // Submit button.
-        $form->addElement('submit','submit');
+        $form->addElement('submit', 'submit');
         $submitElement = $form->getElement('submit');
         $submitElement->setLabel(__('Next'));
 
@@ -815,5 +869,24 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $string = preg_replace('#\&[^;]+\;#', '_', $string);
         $string = preg_replace('/[^[:alnum:]\[\]_\-\.#~@+:]/', '_', $string);
         return substr(preg_replace('/_+/', '_', $string), -250);
+    }
+
+    /**
+     * Return the list of standard delimiters.
+     *
+     * @return array The list of standard delimiters.
+     */
+    public static function getDelimitersList()
+    {
+        return array(
+            'comma'        => ',',
+            'semi-colon'   => ';',
+            'pipe'         => '|',
+            'tabulation'   => "\t",
+            'carriage return' => "\r",
+            'space'        => ' ',
+            'double space' => '  ',
+            'empty'        => '',
+        );
     }
 }

@@ -70,7 +70,8 @@ Warning
 
 Use it at your own risk.
 
-It's always recommended to backup your database so you can roll back if needed.
+It's always recommended to backup your files and database so you can roll back
+if needed.
 
 
 Troubleshooting
@@ -95,7 +96,8 @@ Current maintainers:
 
 First version of this plugin has been built by [Ethan Gruber] for [Scholars' Lab]
 of University of Virginia Library (see [Scholars' Lab Omeka plugins] page).
-This plugin has been updated for [École des Ponts ParisTech] and [Pop Up Archive].
+This plugin has been updated for [École des Ponts ParisTech], [Pop Up Archive]
+and [Mines ParisTech].
 
 
 Copyright
@@ -116,3 +118,4 @@ Copyright
 [Scholars' Lab Omeka plugins]: http://www.scholarslab.org/research/omeka-plugins/ "Omeka plugins of Scholars' Lab of University of Virginia Library"
 [École des Ponts ParisTech]: http://bibliotheque.enpc.fr "École des Ponts ParisTech / ENPC"
 [Pop Up Archive]: http://popuparchive.org/
+[Mines ParisTech]: http://bib.mines-paristech.fr "Mines ParisTech / ENSMP"

@@ -291,23 +291,24 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             // parameters. A result can be empty for a file when there are no
             // metadata to import or if the xml file is not a good one.
             foreach ($fileList as $filepath => $filename) {
-                $csvData = $this->_apply_xslt($filepath, $stylesheet, $parameters);
-                if ($csvData === FALSE) {
-                    $this->_helper->flashMessenger(__('Error when transforming xml file "%s" with the xsl sheet "%s".', $filepath, $stylesheet), 'error');
-                    $this->_helper->redirector->goto('index');
-                }
-
                 // Let headers only for the first file.
                 if ($flag_first) {
                     $flag_first = FALSE;
                 }
                 // Remove first line for all other files.
                 else {
-                    $csvData = substr($csvData, strpos($csvData, $endOfLine) + 1);
+                    $parameters['headers'] = 'false';
                 }
 
+                $result = $this->_apply_xslt_and_save($filepath, $stylesheet, '', $parameters);
+                if ($result === NULL) {
+                    $this->_helper->flashMessenger(__('Error when transforming xml file "%s" with the xsl sheet "%s".', $filepath, $stylesheet), 'error');
+                    $this->_helper->redirector->goto('index');
+                }
+                $output = $result;
+
                 // @todo Use Zend/Omeka api.
-                $result = $this->_append_data_to_file($csvFilePath, $csvData);
+                $result = $this->_append_file($csvFilePath, $output);
                 if ($result === FALSE) {
                     $this->_helper->flashMessenger(__('Error saving data, because the filepath "%s" is not writable.', $filepath), 'error');
                     $this->_helper->redirector->goto('index');
@@ -739,31 +740,61 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      *   Path of xml file.
      * @param string $xsl_file
      *   Path of the xslt file.
+     * @param string $output
+     *   Path of the output file. If none, a temp file will be used.
      * @param array $parameters
      *   Parameters array.
      *
-     * @return string
-     *   Transformed data.
+     * @return string|null
+     *   Path to the output file if ok, null else.
      */
-    private function _apply_xslt($xml_file, $xsl_file, $parameters = array())
+    private function _apply_xslt_and_save($xml_file, $xsl_file, $output = '', $parameters = array())
     {
-        try {
-            $DomXml = $this->_domXmlLoad($xml_file);
-            $DomXsl = $this->_domXmlLoad($xsl_file);
-        } catch (Exception $e) {
-            throw new Exception($e->getMessage());
+        if (empty($output)) {
+            $output = tempnam(sys_get_temp_dir(), 'xmlimport_');
         }
 
-        $proc = new XSLTProcessor;
-        // Php functions are needed, because php doesn't use XSLT 2.0 and
-        // because we need to check existence of a file.
-        if (get_plugin_ini('XmlImport', 'xml_import_allow_php_in_xsl') == 'TRUE') {
-            $proc->registerPHPFunctions();
-        }
-        $proc->importStyleSheet($DomXsl);
-        $proc->setParameter('', $parameters);
+        switch (basename(get_option('xml_import_xslt_processor'))) {
+            case 'saxonb-xslt':
+                $command = array(
+                    'saxonb-xslt',
+                    '-ext:on',
+                    '-versionmsg:off',
+                    '-s:' . escapeshellarg($xml_file),
+                    '-xsl:' . escapeshellarg($xsl_file),
+                    '-o:' . escapeshellarg($output),
+                );
+                foreach ($parameters as $name => $parameter) {
+                    $command[] = escapeshellarg($name . '=' . $parameter);
+                }
+                $command = implode(' ', $command);
+                $result = (int)  shell_exec($command . ' 2>&- || echo 1');
+                chmod(escapeshellarg($output), 0644);
 
-        return $proc->transformToXML($DomXml);
+                return ($result == 1) ? NULL : $output;
+
+            default:
+                try {
+                    $DomXml = $this->_domXmlLoad($xml_file);
+                    $DomXsl = $this->_domXmlLoad($xsl_file);
+                } catch (Exception $e) {
+                    throw new Exception($e->getMessage());
+                }
+
+                $proc = new XSLTProcessor;
+                // Php functions are needed, because php doesn't use XSLT 2.0
+                // and because we need to check existence of a file.
+                if (get_plugin_ini('XmlImport', 'xml_import_allow_php_in_xsl') == 'TRUE') {
+                    $proc->registerPHPFunctions();
+                }
+                $proc->importStyleSheet($DomXsl);
+                $proc->setParameter('', $parameters);
+
+                $result = $proc->transformToURI($DomXml, $output);
+                chmod(escapeshellarg($output), 0644);
+
+                return ($result === FALSE) ? NULL : $output;
+        }
     }
 
     /**
@@ -803,14 +834,16 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      * Append and save a string into a file.
      *
      * @param string $filepath
-     * @param string $data
+     * @param string $filepath_to_append
      *
-     * @return
+     * @return string|boolean
      *   $filepath if no error, FALSE else.
      */
-    private function _append_data_to_file($filepath, $data)
+    private function _append_file($filepath, $filepath_to_append)
     {
-        if (file_put_contents($filepath, $data, FILE_APPEND | LOCK_EX) === FALSE) {
+        // Size of file to append is never bigger than some MB, so cat is not
+        // used.
+        if (file_put_contents($filepath, file_get_contents($filepath_to_append), FILE_APPEND | LOCK_EX) === FALSE) {
             return FALSE;
         }
         chmod($filepath, 0644);

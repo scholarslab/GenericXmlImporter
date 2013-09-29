@@ -19,3 +19,16 @@
         </p>
     </div>
 </div>
+<div class="field">
+    <div id="xml_import_xslt_processor_label" class="two columns alpha">
+        <label for="xml_import_xslt_processor">
+            <?php echo __('Path to the xslt processor'); ?>
+        </label>
+    </div>
+    <div class="inputs five columns omega">
+        <?php echo get_view()->formText('xml_import_xslt_processor', get_option('xml_import_xslt_processor'), array('size' => 50)); ?>
+        <p class="explanation">
+            <?php echo __('Path to the SaxonB xslt processor, quicker than the php one. Usually, this is "/usr/bin/saxonb-xslt". Let empty to use the php internal xslt processor.'); ?>
+        </p>
+    </div>
+</div>

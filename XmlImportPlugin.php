@@ -41,6 +41,7 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
      */
     protected $_options = array(
         'xml_import_xsl_directory' => 'libraries',
+        'xml_import_xslt_processor' => '',
         'xml_import_format' => 'Item',
         'xml_import_stylesheet' => 'xml_import_generic_item.xsl',
         'xml_import_stylesheet_parameters' => '',
@@ -114,6 +115,16 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
             $xsl_directory = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries';
         }
         set_option('xml_import_xsl_directory', $xsl_directory);
+
+        // Don't install if the xslt processor command doesn't exist.
+        $xslt_processor = trim($post['xml_import_xslt_processor']);
+        if ($xslt_processor == ''
+                || (int) shell_exec('ls ' . $xslt_processor .  ' 2>&- || echo 1') == 1
+            ) {
+            $xslt_processor = '';
+        }
+
+        set_option('xml_import_xslt_processor', $xslt_processor);
     }
 
     /**

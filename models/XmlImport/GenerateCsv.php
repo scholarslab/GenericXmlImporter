@@ -19,6 +19,7 @@ class XmlImport_generateCsv extends Process
         $itemTypeId = $args['item_type_id'];
         $tagName = $args['tag_name'];
         $delimiter = $args['delimiter'];
+        $enclosure = $args['enclosure'];
         $stylesheet = (isset($args['stylesheet']) && !empty($args['stylesheet']))
                 ? $args['stylesheet']
                 : get_option('xml_import_stylesheet');

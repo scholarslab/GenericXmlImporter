@@ -126,6 +126,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $xmlImportSession->public = $uploadedData['items_are_public'];
             $xmlImportSession->featured = $uploadedData['items_are_featured'];
             $xmlImportSession->html_elements = $uploadedData['elements_are_html'];
+            $xmlImportSession->enclosure = $uploadedData['enclosure'];
             $xmlImportSession->stylesheet = $uploadedData['stylesheet'];
             $xmlImportSession->stylesheet_parameters = $uploadedData['stylesheet_parameters'];
 
@@ -218,6 +219,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $args['stylesheet'] = $uploadedData['stylesheet'];
         $args['stylesheet_parameters'] = $uploadedData['stylesheet_parameters'];
         $args['column_delimiter'] = $uploadedData['column_delimiter'];
+        $args['enclosure'] = $uploadedData['enclosure'];
         $args['element_delimiter'] = $uploadedData['element_delimiter'];
         $args['tag_delimiter'] = $uploadedData['tag_delimiter'];
         $args['file_delimiter'] = $uploadedData['file_delimiter'];
@@ -243,6 +245,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $stylesheet = $args['stylesheet'];
         $stylesheetParameters = $args['stylesheet_parameters'];
         $columnDelimiter = $args['column_delimiter'];
+        $enclosure = $args['enclosure'];
         $elementDelimiter = $args['element_delimiter'];
         $tagDelimiter = $args['tag_delimiter'];
         $fileDelimiter = $args['file_delimiter'];
@@ -250,6 +253,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         // Delimiters for Csv Report are fixed.
         if ($format == 'Report') {
             $columnDelimiter = ',';
+            $enclosure = '"';
             $elementDelimiter = CsvImport_ColumnMap_ExportedElement::DEFAULT_ELEMENT_DELIMITER;
             $tagDelimiter = ',';
             $fileDelimiter = ',';
@@ -265,6 +269,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         // Prepare parameters for the stylesheet.
         $parameters = array(
             'delimiter' => $columnDelimiter,
+            'enclosure' => $enclosure,
             'delimiter_element' => $elementDelimiter,
             'delimiter_tag' => $tagDelimiter,
             'delimiter_file' => $fileDelimiter,
@@ -325,7 +330,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $view = $this->view;
 
             // Set up CsvImport validation and column mapping if needed.
-            $file = new CsvImport_File($csvFilePath, $columnDelimiter);
+            $file = new CsvImport_File($csvFilePath, $columnDelimiter, $enclosure);
             if (!$file->parse()) {
                 $msg = __('Your CSV file is incorrectly formatted.')
                     . ' ' . $file->getErrorString();
@@ -360,6 +365,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             foreach ($csvImportSession->columnExamples as &$value) {
                 $value = iconv('ISO-8859-15', 'UTF-8', @iconv('UTF-8', 'ISO-8859-15' . '//IGNORE', $value));
             }
+            $csvImportSession->enclosure = $enclosure;
             $csvImportSession->elementDelimiter = $elementDelimiter;
             $csvImportSession->tagDelimiter = $tagDelimiter;
             $csvImportSession->fileDelimiter = $fileDelimiter;
@@ -371,6 +377,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             set_option('xml_import_stylesheet', $args['stylesheet']);
             set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
             set_option(CsvImport_RowIterator::COLUMN_DELIMITER_OPTION_NAME, $args['column_delimiter']);
+            set_option(CsvImport_RowIterator::ENCLOSURE_OPTION_NAME, $args['enclosure']);
             set_option(CsvImport_ColumnMap_Element::ELEMENT_DELIMITER_OPTION_NAME, $args['element_delimiter']);
             set_option(CsvImport_ColumnMap_Tag::TAG_DELIMITER_OPTION_NAME, $args['tag_delimiter']);
             set_option(CsvImport_ColumnMap_File::FILE_DELIMITER_OPTION_NAME, $args['file_delimiter']);
@@ -445,6 +452,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $stylesheet = $xmlImportSession->stylesheet;
         $stylesheetParameters = $xmlImportSession->stylesheet_parameters;
         $columnDelimiter = $xmlImportSession->column_delimiter;
+        $enclosure = $xmlImportSession->enclosure;
         $elementDelimiter = $xmlImportSession->element_delimiter;
         $tagDelimiter = $xmlImportSession->tag_delimiter;
         $fileDelimiter = $xmlImportSession->file_delimiter;
@@ -543,6 +551,10 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $columnDelimiterElement = new Zend_Form_Element_Hidden('column_delimiter');
         $columnDelimiterElement->setValue($columnDelimiter);
         $form->addElement($columnDelimiterElement);
+
+        $enclosureElement = new Zend_Form_Element_Hidden('enclosure');
+        $enclosureElement->setValue($enclosure);
+        $form->addElement($enclosureElement);
 
         $elementDelimiterElement = new Zend_Form_Element_Hidden('element_delimiter');
         $elementDelimiterElement->setValue($elementDelimiter);

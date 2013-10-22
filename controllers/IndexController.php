@@ -91,7 +91,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             return;
         }
 
-        // Check content of each file via a simplexml parsing and hook.
+        // Check content of each file via a simple xml parsing and hook.
         foreach ($fileList as $filepath => $filename) {
             try {
                 $xml_doc = $this->_domXmlLoad($filepath);
@@ -100,19 +100,8 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                 return;
             }
 
-            // Check if the xml is well formed.
-            if (simplexml_import_dom($xml_doc)) {
-                // TODO Check result of the hook.
-                // $result = fire_plugin_hook('xml_import_validate_xml_file', $xml_doc);
-                if (!isset($xml_doc)) {
-                    $this->_helper->flashMessenger(__('Error validating XML document: "%s".', $filepath), 'error');
-                    return;
-                }
-            }
-            else {
-                $this->_helper->flashMessenger(__('Error parsing XML document: "%s".', $filepath), 'error');
-                return;
-            }
+            // TODO Check result of the hook.
+            // $result = fire_plugin_hook('xml_import_validate_xml_file', $xml_doc);
         }
 
         // Alright, go to next step.

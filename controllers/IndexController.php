@@ -319,7 +319,9 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $view = $this->view;
 
             // Set up CsvImport validation and column mapping if needed.
-            $file = new CsvImport_File($csvFilePath, $columnDelimiter, $enclosure);
+            $file = XmlImportPlugin::isFullCsvImport()
+                ? new CsvImport_File($csvFilePath, $columnDelimiter, $enclosure)
+                : new CsvImport_File($csvFilePath, $columnDelimiter);
             if (!$file->parse()) {
                 $msg = __('Your CSV file is incorrectly formatted.')
                     . ' ' . $file->getErrorString();
@@ -366,7 +368,9 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             set_option('xml_import_stylesheet', $args['stylesheet']);
             set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
             set_option(CsvImport_RowIterator::COLUMN_DELIMITER_OPTION_NAME, $args['column_delimiter']);
-            set_option(CsvImport_RowIterator::ENCLOSURE_OPTION_NAME, $args['enclosure']);
+            if (XmlImportPlugin::isFullCsvImport()) {
+                set_option(CsvImport_RowIterator::ENCLOSURE_OPTION_NAME, $args['enclosure']);
+            }
             set_option(CsvImport_ColumnMap_Element::ELEMENT_DELIMITER_OPTION_NAME, $args['element_delimiter']);
             set_option(CsvImport_ColumnMap_Tag::TAG_DELIMITER_OPTION_NAME, $args['tag_delimiter']);
             set_option(CsvImport_ColumnMap_File::FILE_DELIMITER_OPTION_NAME, $args['file_delimiter']);
@@ -769,9 +773,10 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                     $command[] = escapeshellarg($name . '=' . $parameter);
                 }
                 $command = implode(' ', $command);
-                $result = (int)  shell_exec($command . ' 2>&- || echo 1');
-                chmod(escapeshellarg($output), 0644);
+                $result = (int) shell_exec($command . ' 2>&- || echo 1');
+                @chmod(escapeshellarg($output), 0644);
 
+                // In Shell, 0 is a correct result.
                 return ($result == 1) ? NULL : $output;
 
             default:
@@ -792,7 +797,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                 $proc->setParameter('', $parameters);
 
                 $result = $proc->transformToURI($DomXml, $output);
-                chmod(escapeshellarg($output), 0644);
+                @chmod(escapeshellarg($output), 0644);
 
                 return ($result === FALSE) ? NULL : $output;
         }

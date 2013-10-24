@@ -25,7 +25,7 @@ class XmlImport_Form_Main extends Omeka_Form
         parent::init();
 
         $this->_columnDelimiter = CsvImport_RowIterator::getDefaultColumnDelimiter();
-        $this->_enclosure = CsvImport_RowIterator::getDefaultEnclosure();
+        $this->_enclosure = XmlImportPlugin::isFullCsvImport() ? CsvImport_RowIterator::getDefaultEnclosure() : '"';
         $this->_elementDelimiter = CsvImport_ColumnMap_Element::getDefaultElementDelimiter();
         $this->_tagDelimiter = CsvImport_ColumnMap_Tag::getDefaultTagDelimiter();
         $this->_fileDelimiter = CsvImport_ColumnMap_File::getDefaultFileDelimiter();
@@ -70,9 +70,9 @@ class XmlImport_Form_Main extends Omeka_Form
             $values = array(
                 'Report' => __('Omeka CSV Report'),
                 'Item' => __('Items'),
-                'File' => __('Files metadata (only if CsvImport full is enabled.)'),
-                'Mix' => __('Mixed records (only if CsvImport full is enabled.)'),
-                'Update' => __('Update records (only if CsvImport full is enabled.)'),
+                'File' => __('Files metadata (only if CsvImport full is enabled).'),
+                'Mix' => __('Mixed records (only if CsvImport full is enabled).'),
+                'Update' => __('Update records (only if CsvImport full is enabled).'),
             );
             $description = __('Metadata of files cannot be imported and nothing can be updated, because you are using standard Csv Import.');
         }
@@ -113,7 +113,14 @@ class XmlImport_Form_Main extends Omeka_Form
         ));
 
         $this->_addColumnDelimiterElement();
-        $this->_addEnclosureElement();
+        if (XmlImportPlugin::isFullCsvImport()) {
+            $this->_addEnclosureElement();
+        }
+        else {
+            $enclosureElement = new Zend_Form_Element_Hidden('enclosure');
+            $enclosureElement->setValue($this->_enclosure);
+            $this->addElement($enclosureElement);
+        }
         $this->_addElementDelimiterElement();
         $this->_addTagDelimiterElement();
         $this->_addFileDelimiterElement();

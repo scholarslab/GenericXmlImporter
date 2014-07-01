@@ -10,7 +10,7 @@
  * 3. User selects document record. Variables passed to CsvImport session, user
  * redirected to CsvImport column mapping
  *
- * @copyright Daniel Berthereau, 2012-2013
+ * @copyright Daniel Berthereau, 2012-2014
  * @copyright Scholars' Lab, 2010 [GenericXmlImporter v.1.0]
  * @license http://www.apache.org/licenses/LICENSE-2.0.html
  * @package XmlImport
@@ -18,6 +18,14 @@
 class XmlImport_IndexController extends Omeka_Controller_AbstractActionController
 {
     protected $_pluginConfig = array();
+
+    /**
+     * Initialize the controller.
+     */
+    public function init()
+    {
+        $this->session = new Zend_Session_Namespace('XmlImport');
+    }
 
     /**
      * Displays main form (step 1).
@@ -53,7 +61,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                     $fileList = array($form->xml_file->getFileName() => $csvFilename);
                 }
                 else {
-                    $this->_helper->flashMessenger(__('Error receiving file or no file selected. Verify that it is an XML document.'), 'error');
+                    $this->_helper->flashMessenger(__('Error receiving file or no file selected. Verify that there is an XML document.'), 'error');
                     return;
                 }
                 break;
@@ -61,19 +69,17 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             case 'recursive':
                 // Else prepare full files list from the folder.
                 if ($uploadedData['xml_folder'] != '') {
-                    if ($uploadedData['file_import'] == 'folder') {
-                        $fileList = $this->_listRecursiveDirectory($uploadedData['xml_folder'], 'xml', FALSE);
-                        $csvFilename = 'folder "' . $uploadedData['xml_folder'] . '"';
-                    }
-                    else {
-                        $fileList = $this->_listRecursiveDirectory($uploadedData['xml_folder'], 'xml', TRUE);
-                        $csvFilename = 'recursive folder "' . $uploadedData['xml_folder'] . '"';
-                    }
+                    $fileList = $this->_listRecursiveDirectory(
+                        $uploadedData['xml_folder'],
+                        'xml',
+                        ($uploadedData['file_import'] == 'recursive'));
+                    // The csv filename is used only to set the status.
+                    $csvFilename = $uploadedData['file_import'] . ' "' . $uploadedData['xml_folder'] . '"';
                     // TODO Upload each file? Currently, they are checked only
                     // with DirectoryIterator.
                 }
                 else {
-                    $this->_helper->flashMessenger(__('Error receiving file or no file selected. Verify that it is an XML document.'), 'error');
+                    $this->_helper->flashMessenger(__('Error receiving file or no file selected. Verify that an XML document exists.'), 'error');
                     return;
                 }
                 break;
@@ -104,9 +110,19 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             // $result = fire_plugin_hook('xml_import_validate_xml_file', $xml_doc);
         }
 
+        // To avoid the memory overload of the Zend session (often 64kb), only
+        // the first line is sent (this is a quick process).
+        if ($uploadedData['file_import'] != 'file') {
+            $value = reset($fileList);
+            $fileList = array(key($fileList) => $value);
+        }
+
         // Alright, go to next step.
         try {
-            $xmlImportSession = new Zend_Session_Namespace('XmlImport');
+            $xmlImportSession = $this->session;
+            $xmlImportSession->setExpirationHops(2);
+            $xmlImportSession->file_import = $uploadedData['file_import'];
+            $xmlImportSession->xml_folder = $uploadedData['xml_folder'];
             $xmlImportSession->file_list = $fileList;
             $xmlImportSession->csv_filename = $csvFilename;
             $xmlImportSession->format = $uploadedData['format'];
@@ -149,9 +165,8 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      */
     public function selectElementAction()
     {
-        $xmlImportSession = new Zend_Session_Namespace('XmlImport');
+        $xmlImportSession = $this->session;
         $view = $this->view;
-
         $form = $this->_elementForm($xmlImportSession);
 
         // When tag is not set, display the form to select one.
@@ -170,7 +185,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      */
     public function sendAction()
     {
-        $xmlImportSession = new Zend_Session_Namespace('XmlImport');
+        $xmlImportSession = $this->session;
 
         // Check if user comes directly here.
         if (!isset($xmlImportSession->file_list)) {
@@ -185,7 +200,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                 $this->_prepareCsvArguments($uploadedData);
             }
             else {
-                $this->_helper->flashMessenger(__('Error receiving file or no file selected. Verify that it is an XML document.'), 'error');
+                $this->_helper->flashMessenger(__('Error receiving file or no file selected. Verify the XML document.'), 'error');
             }
         }
     }
@@ -196,6 +211,8 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
     private function _prepareCsvArguments($uploadedData)
     {
         $args = array();
+        $args['file_import'] = $uploadedData['file_import'];
+        $args['xml_folder'] = $uploadedData['xml_folder'];
         $args['file_list'] = unserialize($uploadedData['file_list']);
         $args['csv_filename'] = $uploadedData['csv_filename'];
         $args['format'] = $uploadedData['format'];
@@ -222,7 +239,17 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
     private function _generateCsv($args)
     {
         // Get variables from args array passed into detached process.
-        $fileList = $args['file_list'];
+        $fileImport = $args['file_import'];
+        $xmlFolder = $args['xml_folder'];
+        if ($fileImport == 'file') {
+            $fileList = $args['file_list'];
+        }
+        else {
+            $fileList = $this->_listRecursiveDirectory(
+                $xmlFolder,
+                'xml',
+                ($fileImport == 'recursive'));
+        }
         $csvFilename = $args['csv_filename'];
         $format = $args['format'];
         $itemTypeId = $args['item_type_id'];
@@ -434,6 +461,8 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      */
     private function _elementForm($xmlImportSession)
     {
+        $fileImport = $xmlImportSession->file_import;
+        $xmlFolder = $xmlImportSession->xml_folder;
         $fileList = $xmlImportSession->file_list;
         $csvFilename = $xmlImportSession->csv_filename;
         $format = $xmlImportSession->format;
@@ -465,7 +494,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $elementSet = $this->cycleNodes($primary, $elementList = array(), $number = 0);
         }
 
-        require "Zend/Form/Element.php";
+        require_once "Zend/Form/Element.php";
 
         $form = new Omeka_Form();
         $form->setAttrib('id', 'xmlimport')
@@ -508,6 +537,14 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $csvFilenameElement = new Zend_Form_Element_Hidden('csv_filename');
         $csvFilenameElement->setValue($csvFilename);
         $form->addElement($csvFilenameElement);
+
+        $fileImportElement = new Zend_Form_Element_Hidden('file_import');
+        $fileImportElement->setValue($fileImport);
+        $form->addElement($fileImportElement);
+
+        $xmlFolderElement = new Zend_Form_Element_Hidden('xml_folder');
+        $xmlFolderElement->setValue($xmlFolder);
+        $form->addElement($xmlFolderElement);
 
         $formatElement = new Zend_Form_Element_Hidden('format');
         $formatElement->setValue($format);

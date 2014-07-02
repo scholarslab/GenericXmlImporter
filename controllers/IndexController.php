@@ -46,8 +46,11 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
 
         $uploadedData = $form->getValues();
         $uploadedData['xml_folder'] = trim($uploadedData['xml_folder']);
+        $uploadedData['format_filename'] = $this->_sanitizeName($uploadedData['format_filename']);
+        if (empty($uploadedData['format_filename'])) {
+            $uploadedData['format_filename'] = '.xml';
+        }
         $fileList = array();
-
         switch ($uploadedData['file_import']) {
             case 'file':
                 // If one file is selected, fill the file list with it.
@@ -71,7 +74,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                 if ($uploadedData['xml_folder'] != '') {
                     $fileList = $this->_listRecursiveDirectory(
                         $uploadedData['xml_folder'],
-                        'xml',
+                        $uploadedData['format_filename'],
                         ($uploadedData['file_import'] == 'recursive'));
                     // The csv filename is used only to set the status.
                     $csvFilename = $uploadedData['file_import'] . ' "' . $uploadedData['xml_folder'] . '"';
@@ -123,6 +126,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $xmlImportSession->setExpirationHops(2);
             $xmlImportSession->file_import = $uploadedData['file_import'];
             $xmlImportSession->xml_folder = $uploadedData['xml_folder'];
+            $xmlImportSession->format_filename = $uploadedData['format_filename'];
             $xmlImportSession->file_list = $fileList;
             $xmlImportSession->csv_filename = $csvFilename;
             $xmlImportSession->format = $uploadedData['format'];
@@ -213,6 +217,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $args = array();
         $args['file_import'] = $uploadedData['file_import'];
         $args['xml_folder'] = $uploadedData['xml_folder'];
+        $args['format_filename'] = $uploadedData['format_filename'];
         $args['file_list'] = unserialize($uploadedData['file_list']);
         $args['csv_filename'] = $uploadedData['csv_filename'];
         $args['format'] = $uploadedData['format'];
@@ -241,13 +246,14 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         // Get variables from args array passed into detached process.
         $fileImport = $args['file_import'];
         $xmlFolder = $args['xml_folder'];
+        $formatFilename = $args['format_filename'];
         if ($fileImport == 'file') {
             $fileList = $args['file_list'];
         }
         else {
             $fileList = $this->_listRecursiveDirectory(
                 $xmlFolder,
-                'xml',
+                $formatFilename,
                 ($fileImport == 'recursive'));
         }
         $csvFilename = $args['csv_filename'];
@@ -394,6 +400,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             set_option('csv_import_html_elements', $args['html_elements']);
             set_option('xml_import_stylesheet', $args['stylesheet']);
             set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
+            set_option('xml_import_format_filename', $args['format_filename']);
             set_option(CsvImport_RowIterator::COLUMN_DELIMITER_OPTION_NAME, $args['column_delimiter']);
             if (XmlImportPlugin::isFullCsvImport()) {
                 set_option(CsvImport_RowIterator::ENCLOSURE_OPTION_NAME, $args['enclosure']);
@@ -463,6 +470,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
     {
         $fileImport = $xmlImportSession->file_import;
         $xmlFolder = $xmlImportSession->xml_folder;
+        $formatFilename = $xmlImportSession->format_filename;
         $fileList = $xmlImportSession->file_list;
         $csvFilename = $xmlImportSession->csv_filename;
         $format = $xmlImportSession->format;
@@ -545,6 +553,10 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $xmlFolderElement = new Zend_Form_Element_Hidden('xml_folder');
         $xmlFolderElement->setValue($xmlFolder);
         $form->addElement($xmlFolderElement);
+
+        $formatFilenameElement = new Zend_Form_Element_Hidden('format_filename');
+        $formatFilenameElement->setValue($formatFilename);
+        $form->addElement($formatFilenameElement);
 
         $formatElement = new Zend_Form_Element_Hidden('format');
         $formatElement->setValue($format);
@@ -635,7 +647,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      * Iterates recursively through a directory to get all selected filepaths.
      *
      * @param string $directory Directory to check.
-     * @param string $extension Extension.
+     * @param string $extension Extension (with "." if needed).
      * @param boolean $recursive Recursive or not in subfolder.
      *
      * @return associative array of filepath => filename or false if error.
@@ -643,11 +655,6 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
     private function _listRecursiveDirectory($directory, $extension = '', $recursive = true)
     {
         $filenames = array();
-
-        // Prepare extension.
-        if (!empty($extension) && substr($extension, 0, 1) != '.') {
-            $extension = '.' . $extension;
-        }
 
         // Get directories and files via http or via file system.
         // Get via http/https.
@@ -694,7 +701,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      * Scan a directory available only via http (web pages).
      *
      * @param $directory string Directory to check.
-     * @param string $extension Extension.
+     * @param string $extension Extension (with "." if needed).
      *
      * @return associative array of directories and filepaths.
      */
@@ -709,10 +716,8 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $dirs = array();
         $files = array();
 
-        // Prepare extension.
-        if (substr($extension, 0, 1) == '.') {
-            $extension = substr($extension, 1);
-        }
+        // Prepare extension for regex.
+        $extension = preg_quote($extension);
 
         // Add a slash to the url in order to append relative filenames easily.
         if (substr($directory, -1) != '/') {
@@ -764,7 +769,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                 $files[] = $match;
             }
             // Check the extension.
-            elseif (preg_match('/^.+\.' . $extension . '$/i', $match)) {
+            elseif (preg_match('/^.+' . $extension . '$/i', $match)) {
                 $files[] = $match;
             }
         }

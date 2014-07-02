@@ -54,6 +54,12 @@ class XmlImport_Form_Main extends Omeka_Form
         $this->addElement('text', 'xml_folder', array(
             'description' => __('The server should be able to access to this uri.'),
         ));
+        // Helper to manage multiple files.
+        $this->addElement('text', 'format_filename', array(
+            'description' => __('The format of the filenames to search (format: "suffix.extension", for example "refnum.xml"; default: ".xml").')
+                . ' ' . __('This is useful especially when folders contains multiple xml files.'),
+            'value' => get_option('xml_import_format_filename'),
+        ));
 
         // Radio button for selecting record type.
         if (XmlImportPlugin::isFullCsvImport()) {

@@ -12,15 +12,19 @@ Omeka.XmlImport = {};
     Omeka.XmlImport.updateFileOptions = function () {
         var fieldsFile = $('div.field').has('#xml_file');
         var fieldsFolder = $('div.field').has('#xml_folder');
-        var fieldsAll = $('div.field').has('#xml_file, #xml_folder');
+        var fieldsFormat = $('div.field').has('#format_filename');
+        var fieldsAll = $('div.field').has('#xml_file, #xml_folder', '#format_filename');
         if ($('#file_import-file').is(':checked')) {
             fieldsFile.show();
             fieldsFolder.hide();
+            fieldsFormat.hide();
         } else if ($('#file_import-folder').is(':checked')) {
             fieldsFolder.show();
+            fieldsFormat.show();
             fieldsFile.hide();
         } else if ($('#file_import-recursive').is(':checked')) {
             fieldsFolder.show();
+            fieldsFormat.show();
             fieldsFile.hide();
         } else {
             fieldsAll.hide();

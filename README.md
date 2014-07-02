@@ -113,7 +113,7 @@ and [Mines ParisTech].
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2012-2013
+* Copyright Daniel Berthereau, 2012-2014
 * Copyright Scholars' Lab, 2010 (GenericXmlImporter v1.0)
 
 

@@ -45,6 +45,7 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
         'xml_import_format' => 'Item',
         'xml_import_stylesheet' => 'xml_import_generic_item.xsl',
         'xml_import_stylesheet_parameters' => '',
+        'xml_import_format_filename' => '.xml',
     );
 
     /**
@@ -170,7 +171,7 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
             'label' => __('Xml Import'),
             'uri' => url('xml-import'),
             'resource' => 'XmlImport_Index',
-            'privilege' => 'index'
+            'privilege' => 'index',
         );
         return $nav;
     }

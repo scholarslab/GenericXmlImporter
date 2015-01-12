@@ -2,7 +2,7 @@
 /**
  * Standalone version to generate a Csv file via XmlImport and via a xsl sheet.
  *
- * @todo This class is not used by the plugin and was not checked for Omeka 2.0.
+ * TODO This class is not used by the plugin and was not checked for Omeka 2.0.
  */
 class XmlImport_generateCsv extends Process
 {
@@ -10,22 +10,32 @@ class XmlImport_generateCsv extends Process
     {
         // Get variables from args array passed into detached process.
         $filepath = $args['filepath'];
-        $filename = (isset($args['filename']) && !empty($args['filename']))
-                ? $args['filename']
-                : pathinfo($filename, PATHINFO_BASENAME);
+        $filename = !empty($args['csv_filename'])
+            ? $args['csv_filename']
+            : pathinfo($filename, PATHINFO_BASENAME);
+
+        $format = $args['format'];
+        $itemTypeId = $args['item_type_id'];
+        $collectionId = $args['collection_id'];
+        $createCollections = $args['create_collections'];
         $itemsArePublic = $args['public'];
         $itemsAreFeatured = $args['featured'];
-        $collectionId = $args['collection_id'];
-        $itemTypeId = $args['item_type_id'];
+        $elementsAreHtml = $args['html_elements'];
+        $containsExtraData = $args['extra_data'];
         $tagName = $args['tag_name'];
-        $delimiter = $args['delimiter'];
+        $columnDelimiter = $args['column_delimiter'];
         $enclosure = $args['enclosure'];
-        $stylesheet = (isset($args['stylesheet']) && !empty($args['stylesheet']))
-                ? $args['stylesheet']
-                : get_option('xml_import_stylesheet');
-        $csvfilesdir = (isset($args['destination_dir']) && !empty($args['destination_dir']))
-                ? $args['destination_dir']
-                : sys_get_temp_dir();
+        $elementDelimiter = $args['element_delimiter'];
+        $tagDelimiter = $args['tag_delimiter'];
+        $fileDelimiter = $args['file_delimiter'];
+        $stylesheetParameters = $args['stylesheet_parameters'];
+
+        $stylesheet = !empty($args['stylesheet'])
+            ? $args['stylesheet']
+            : get_option('xml_import_stylesheet');
+        $csvfilesdir = !empty($args['destination_dir'])
+            ? $args['destination_dir']
+            : sys_get_temp_dir();
 
         // Create a DOM document and load the XML data.
         $xml_doc = new DomDocument;

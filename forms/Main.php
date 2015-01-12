@@ -6,6 +6,8 @@
  */
 class XmlImport_Form_Main extends Omeka_Form
 {
+    private $_createCollections;
+    private $_extraData;
     private $_columnDelimiter;
     private $_enclosure;
     private $_elementDelimiter;
@@ -24,6 +26,8 @@ class XmlImport_Form_Main extends Omeka_Form
     {
         parent::init();
 
+        $this->_createCollections = XmlImportPlugin::isFullCsvImport() ? get_option('csv_import_create_collections') : false;
+        $this->_extraData = XmlImportPlugin::isFullCsvImport() ? get_option('csv_import_extra_data') : 'no';
         $this->_columnDelimiter = CsvImport_RowIterator::getDefaultColumnDelimiter();
         $this->_enclosure = XmlImportPlugin::isFullCsvImport() ? CsvImport_RowIterator::getDefaultEnclosure() : '"';
         $this->_elementDelimiter = CsvImport_ColumnMap_Element::getDefaultElementDelimiter();
@@ -104,6 +108,20 @@ class XmlImport_Form_Main extends Omeka_Form
             'multiOptions' => $values,
         ));
 
+        if (XmlImportPlugin::isFullCsvImport()) {
+            $this->addElement('checkbox', 'create_collections', array(
+                'label' => __('Create collections?'),
+                'description' => __("If the collection of an item doesn't exist, it will be created.") . '<br />'
+                    .  __('Use "Update" to set metadata of a collection.'),
+                'value' => $this->_createCollections,
+            ));
+        }
+        else {
+            $createCollectionsElement = new Zend_Form_Element_Hidden('create_collections');
+            $createCollectionsElement->setValue($this->_createCollections);
+            $this->addElement($createCollectionsElement);
+        }
+
         $this->addElement('checkbox', 'items_are_public', array(
             'label' => __('Make all items public?'),
         ));
@@ -117,6 +135,24 @@ class XmlImport_Form_Main extends Omeka_Form
             'description' => 'This checkbox allows to set default format of all imported elements as raw text or html.',
             'value' => get_option('csv_import_html_elements'),
         ));
+
+        if (XmlImportPlugin::isFullCsvImport()) {
+           $this->addElement('select', 'contains_extra_data', array(
+                'label' => __('Contains extra data?'),
+                'description' => __('Other columns can be used as values for non standard data.'),
+                'multiOptions' =>array(
+                    'no' => __('No, so unrecognized column names will be noticed'),
+                    'ignore' => __('Ignore unrecognized columns name'),
+                    'yes' => __("Yes, so column names won't be checked"),
+                ),
+                'value' => $this->_extraData,
+            ));
+        }
+        else {
+            $extraDataElement = new Zend_Form_Element_Hidden('contains_extra_data');
+            $extraDataElement->setValue($this->_extraData);
+            $this->addElement($extraDataElement);
+        }
 
         $this->_addColumnDelimiterElement();
         if (XmlImportPlugin::isFullCsvImport()) {

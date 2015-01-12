@@ -1,5 +1,5 @@
 <?php
-    echo head(array('title' => 'Xml Import', 'bodyclass' => 'primary', 'content_class' => 'horizontal-nav'));
+    echo head(array('title' => __('Xml Import')));
 ?>
 <div id="primary">
     <?php echo flash(); ?>
@@ -18,6 +18,10 @@ jQuery(document).ready(function () {
     jQuery('#format-File').click(Omeka.XmlImport.updateImportOptions);
     jQuery('#format-Mix').click(Omeka.XmlImport.updateImportOptions);
     jQuery('#format-Update').click(Omeka.XmlImport.updateImportOptions);
+    jQuery('#column_delimiter_name').click(Omeka.XmlImport.updateColumnDelimiterField);
+    jQuery('#element_delimiter_name').click(Omeka.XmlImport.updateElementDelimiterField);
+    jQuery('#tag_delimiter_name').click(Omeka.XmlImport.updateTagDelimiterField);
+    jQuery('#file_delimiter_name').click(Omeka.XmlImport.updateFileDelimiterField);
     Omeka.XmlImport.updateOnLoad(); // Need this to reset invalid forms.
 });
 //]]>

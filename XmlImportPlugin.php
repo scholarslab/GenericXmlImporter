@@ -43,7 +43,7 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
         'xml_import_xsl_directory' => 'libraries',
         'xml_import_xslt_processor' => '',
         'xml_import_format' => 'Item',
-        'xml_import_stylesheet' => 'xml_import_generic_item.xsl',
+        'xml_import_stylesheet' => 'generic_item.xsl',
         'xml_import_stylesheet_parameters' => '',
         'xml_import_format_filename' => '.xml',
     );
@@ -55,7 +55,8 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
     {
         // Default stylesheet.
         $this->_options['xml_import_xsl_directory'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries';
-        $this->_options['xml_import_stylesheet'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries' . DIRECTORY_SEPARATOR . 'xml-import-generic.xsl';
+        $this->_options['xml_import_stylesheet'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries'
+            . DIRECTORY_SEPARATOR . (XmlImportPlugin::isFullCsvImport() ? 'generic_mixed.xsl' :  'generic_item.xsl');
 
         // Checks the ability to use XSLT.
         try {
@@ -91,14 +92,15 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
 
     /**
      * Shows plugin configuration page.
-     *
-     * @return void
      */
-    public function hookConfigForm()
+    public function hookConfigForm($args)
     {
-        echo get_view()->partial(
+        $view = get_view();
+        echo $view->partial(
             'plugins/xml-import-config-form.php',
-            array('full_csv_import' => $this->isFullCsvImport())
+            array(
+                'full_csv_import' => $this->isFullCsvImport(),
+            )
         );
     }
 
@@ -138,7 +140,6 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
         $acl = $args['acl'];
 
         $acl->addResource('XmlImport_Index');
-        $acl->allow(array('super', 'admin'), array('XmlImport_Index'));
 
         // Hack to disable CRUD actions.
         $acl->deny(null, 'XmlImport_Index', array('show', 'add', 'edit', 'delete'));
@@ -154,8 +155,8 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $request = Zend_Controller_Front::getInstance()->getRequest();
         if ($request->getModuleName() == 'xml-import') {
-            queue_css_file('xml_import_main');
-            queue_js_file('xml_import_main');
+            queue_css_file('xml-import');
+            queue_js_file('xml-import');
         }
     }
 

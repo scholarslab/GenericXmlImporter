@@ -38,7 +38,7 @@ files metadata.
 
 To try the first two, choose options "One xml file", "Item metadata", the type
 "Text" for the first file and "Hyperlink" for the second and the xsl sheet
-`xml_import_generic_for_item.xsl`.
+`generic_for_item.xsl`.
 
 To try the last, use one of the three other sheets:
 

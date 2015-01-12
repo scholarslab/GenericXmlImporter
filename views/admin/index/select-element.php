@@ -1,5 +1,5 @@
 <?php
-    echo head(array('title' => 'Xml Import', 'bodyclass' => 'primary', 'content_class' => 'horizontal-nav'));
+    echo head(array('title' => __('Xml Import')));
 ?>
 <div id="primary">
     <?php echo flash(); ?>

@@ -2,26 +2,25 @@ Xml Import (plugin for Omeka)
 =============================
 
 
-Summary
--------
-
-This plugin for [Omeka] allows to import data and files and to update records
-from one or multiple XML files via a generic or a custom XSLT sheet. It's
-usefull to import documents and records from other places or from an older
-installation of Omeka.
+[Xml Import] is a plugin for [Omeka] that allows to import data and files and to
+update records from one or multiple XML files via a generic or a custom XSLT
+sheet. It's usefull to import documents and records from other places or from an
+older installation of Omeka.
 
 Process uses [Csv Import], so all imports can be managed in one place.
 
-Currently, to import metadata of files and to update records, the
-[Csv Import Full] fork should be used.
+Currently, to import metadata of extra data of collections, items or files and
+to update any records, the [Csv Import Full] fork should be used.
 
 
 Installation
 ------------
 
-Install the plugin [Csv Import] or [Csv Import Full], then install the
-[Xml Import] plugin: uncompress files and rename plugin folder "XmlImport",
-then follow the config instructions.
+Install first the plugin [Csv Import] or [Csv Import Full].
+
+Then uncompress files and rename plugin folder "XmlImport".
+
+Then install it like any other Omeka plugin and follow the config instructions.
 
 
 Examples
@@ -80,14 +79,14 @@ Warning
 
 Use it at your own risk.
 
-It's always recommended to backup your files and database so you can roll back
-if needed.
+It's always recommended to backup your files and database regularly so you can
+roll back if needed.
 
 
 Troubleshooting
 ---------------
 
-See online issues on the [Xml Import issues] page on GitHub.
+See online issues on the [plugin issues] page on GitHub.
 
 
 License
@@ -102,7 +101,7 @@ Contact
 Current maintainers:
 
 * Daniel Berthereau (see [Daniel-KM])
-* Scholars' Lab (see [Scholars' Lab])
+* [Scholars' Lab]
 
 First version of this plugin has been built by [Ethan Gruber] for [Scholars' Lab]
 of University of Virginia Library (see [Scholars' Lab Omeka plugins] page).
@@ -113,19 +112,19 @@ and [Mines ParisTech].
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2012-2014
+* Copyright Daniel Berthereau, 2012-2015
 * Copyright Scholars' Lab, 2010 (GenericXmlImporter v1.0)
 
 
-[Omeka]: https://omeka.org "Omeka.org"
-[Csv Import]: https://github.com/omeka/plugin-CsvImport "Omeka plugin Csv Import"
-[Csv Import Full]: https://github.com/Daniel-KM/CsvImport "Csv Import Full"
-[Xml Import issues]: https://github.com/Daniel-KM/XmlImport/Issues "GitHub Xml Import"
+[Omeka]: https://omeka.org
+[Csv Import]: https://github.com/omeka/plugin-CsvImport
+[Csv Import Full]: https://github.com/Daniel-KM/CsvImport
+[plugin issues]: https://github.com/Daniel-KM/XmlImport/Issues
 [Apache licence v2]: https://www.apache.org/licenses/LICENSE-2.0.html
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
 [Ethan Gruber]: mailto:ewg4x@virginia.edu
 [Scholars' Lab]: https://github.com/scholarslab
-[Scholars' Lab Omeka plugins]: http://www.scholarslab.org/research/omeka-plugins/ "Omeka plugins of Scholars' Lab of University of Virginia Library"
-[École des Ponts ParisTech]: http://bibliotheque.enpc.fr "École des Ponts ParisTech / ENPC"
+[Scholars' Lab Omeka plugins]: http://www.scholarslab.org/research/omeka-plugins/
+[École des Ponts ParisTech]: http://bibliotheque.enpc.fr
 [Pop Up Archive]: http://popuparchive.org/
-[Mines ParisTech]: http://bib.mines-paristech.fr "Mines ParisTech / ENSMP"
+[Mines ParisTech]: http://bib.mines-paristech.fr

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description : List of default headers of the columns for CsvImport.
+
+    @copyright Daniel Berthereau, 2015
+    @license http://www.apache.org/licenses/LICENSE-2.0.html
+    @package XmlImport
+
+    Notes
+    - The column sourceItemId is defined by the process if needed.
+-->
+
+<XMLlist>
+    <!-- This column is currently defined by the process if needed. -->
+    <!-- <header mode="create">sourceItemId</header> -->
+    <header mode="update">updateMode</header>
+    <header mode="update">updateIdentifier</header>
+    <header mode="update">recordType</header>
+    <header mode="update">recordIdentifier</header>
+    <header>itemType</header>
+    <header>collection</header>
+    <header>public</header>
+    <header>featured</header>
+    <header>fileUrl</header>
+    <header>file</header>
+    <header>tags</header>
+</XMLlist>

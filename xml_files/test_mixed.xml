@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This somewhat flat Xml file is used to test Xml Import features.
+    It contains:
+    - creation of a collection when it doesn't exists
+    - automap
+    - extra data (with plugin Geolocation)
+    - multivalued content
+    - content with multiple lines (they will be put on one row during import;
+    use html content to import multiple lines)
+    Some missing data of records (collection, item, files) will be updated via
+    the update file.
+    All attributes of records can be set as `<data set="xxx">value</data>`,
+    but this should be done for all records (don't mix format). Here, an
+    example is done for "featured".
+-->
+<documents>
+    <record collection="Architectural Heritage" itemType="Still Image">
+        <data set="featured">1</data>
+        <data set="Dublin Core" element="Title">Cattedrale di Santa Maria del Fiore</data>
+        <data set="Dublin Core" element="Title">English: Florence Cathedral of Santa Maria del Fiore</data>
+        <data set="Dublin Core" element="Creator">Arnolfo di Cambio</data>
+        <data set="Dublin Core" element="Creator">Filippo Brunelleschi</data>
+        <data set="Dublin Core" element="Date">1436</data>
+        <data set="Dublin Core" element="Description"><![CDATA[From Wikipedia, the free encyclopedia
+The Basilica di Santa Maria del Fiore (English, "Basilica of Saint Mary of the Flower") is the main church of Florence, Italy. Il Duomo di Firenze, as it is ordinarily called, was begun in 1296 in the Gothic style to the design of Arnolfo di Cambio and completed structurally in 1436 with the dome engineered by Filippo Brunelleschi. The exterior of the basilica is faced with polychrome marble panels in various shades of green and pink bordered by white and has an elaborate 19th-century Gothic Revival façade by Emilio De Fabris.
+The cathedral complex, located in Piazza del Duomo, includes the Baptistery and Giotto's Campanile. The three buildings are part of the UNESCO World Heritage Site covering the historic centre of Florence and are a major attraction to tourists visiting the region of Tuscany. The basilica is one of Italy's largest churches, and until development of new structural materials in the modern era, the dome was the largest in the world. It remains the largest brick dome ever constructed.
+The cathedral is the mother church of the Roman Catholic Archdiocese of Florence, whose archbishop is currently Giuseppe Betori.]]></data>
+        <data set="Item Type Metadata" element="Physical Dimensions">Height: 114.5 m</data>
+        <data set="geolocation" element="latitude">43.773145</data>
+        <data set="geolocation" element="longitude">11.2559602</data>
+        <data set="geolocation" element="zoom_level">18</data>
+        <data set="geolocation" element="map_type" />
+        <data set="geolocation" element="address" />
+        <record fileUrl="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/The_Cathedral_panoramic_view_from_Vecchio_Palace_Florence_Italy.jpg/1280px-The_Cathedral_panoramic_view_from_Vecchio_Palace_Florence_Italy.jpg">
+            <data set="Dublin Core" element="Title">The Cathedral panoramic view from Vecchio Palace, Florence, Italy</data>
+        </record>
+        <data set="tags">Church</data>
+        <data set="tags">Quattrocento</data>
+    </record>
+    <record collection="Architectural Heritage" itemType="Still Image">
+        <data set="Dublin Core" element="Title">Salisbury Cathedral</data>
+        <data set="Dublin Core" element="Creator">Unknown</data>
+    </record>
+</documents>
+

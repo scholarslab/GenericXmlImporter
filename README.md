@@ -26,7 +26,7 @@ Then install it like any other Omeka plugin and follow the config instructions.
 Examples
 --------
 
-Three examples of xml files are available in the xml_files folder:
+Five examples of xml files are available in the xml_files folder:
 
 * `test_generic_item.xml`: a basic list of three books with images of Wikipedia,
 with non Dublin Core tags.
@@ -39,11 +39,8 @@ To try the first two, choose options "One xml file", "Item metadata", the type
 "Text" for the first file and "Hyperlink" for the second and the xsl sheet
 `generic_for_item.xsl`.
 
-To try the last, use one of the three other sheets:
-
-* `omeka_xml_output_v4_report.xsl`
-* `omeka_xml_output_v4_item.xsl`
-* `omeka_xml_output_v5_mixed.xsl`
+To try the last, use one of the three other sheets: `omeka_xml_output_v4_report.xsl`,
+`omeka_xml_output_v4_item.xsl`, `omeka_xml_output_v5_mixed.xsl`.
 
 They allow to import Omeka Xml output files (version 4.0 and 4.1, included in
 Omeka 1.5, and version 5.0, included in Omeka 2.0), that you can get when you
@@ -53,6 +50,16 @@ recommanded with light or heavy and simple or complex data. First sheets don't
 manage files metadata. Collections should be created before import (none in the
 xml test files). Note that Omeka 1.5 outputs only urls of fullsize files, so you
 may change them before import.
+
+* `test_mixed.xml`: a full example of all features of [Csv Import Full] via Xml.
+* `test_mixed_update.xml`: an example to update the previous one.
+
+To try them, use format "Mixed" for the first and "Update" for the second, check
+the options "Create collections" and "Contains extra data", use `tabulation` as
+separator, no enclosure, `carriage return` as delimiter and `advanced_mixed.xsl`
+as xsl sheet. If [Geolocation] is installed, it will be used to set the location
+of items.
+
 
 If your xsl sheet builds a csv file with "Csv Report" or "Mixed records" format,
 you can import it directly without mapping. The second format can be used only
@@ -119,6 +126,7 @@ Copyright
 [Omeka]: https://omeka.org
 [Csv Import]: https://github.com/omeka/plugin-CsvImport
 [Csv Import Full]: https://github.com/Daniel-KM/CsvImport
+[Geolocation]: http://omeka.org/add-ons/plugins/geolocation
 [plugin issues]: https://github.com/Daniel-KM/XmlImport/Issues
 [Apache licence v2]: https://www.apache.org/licenses/LICENSE-2.0.html
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Xml file used to check if Xml Import features work fine.
+    This file updates or replaces the previously imported records.
+
+    Note:
+    In case of update, extra data may be set unchanged one more time, because
+    plugins manage them differently. So the update mode is not managed. Here,
+    the geolocation data of the first item are copied from the import file.
+-->
+<documents>
+    <record updateIdentifier="Dublin Core:Title" recordType="Collection" recordIdentifier="Architectural Heritage">
+        <data set="Dublin Core" element="Description">Some well known buildings.</data>
+    </record>
+    <record updateIdentifier="Dublin Core:Title" recordIdentifier="Cattedrale di Santa Maria del Fiore">
+        <data set="Dublin Core" element="Creator">Filippo Brunelleschi</data>
+        <data set="geolocation" element="latitude">43.773145</data>
+        <data set="geolocation" element="longitude">11.2559602</data>
+        <data set="geolocation" element="zoom_level">18</data>
+        <data set="geolocation" element="map_type" />
+        <data set="geolocation" element="address" />
+    </record>
+    <record updateIdentifier="original_filename" recordIdentifier="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/The_Cathedral_panoramic_view_from_Vecchio_Palace_Florence_Italy.jpg/1280px-The_Cathedral_panoramic_view_from_Vecchio_Palace_Florence_Italy.jpg">
+        <data set="Dublin Core" element="Date">ca. 1890 and ca. 1900</data>
+        <data set="Dublin Core" element="Rights">Public Domain</data>
+    </record>
+    <record updateMode="Replace" updateIdentifier="Dublin Core:Title" recordIdentifier="Salisbury Cathedral">
+        <data set="Dublin Core" element="Creator">Bishop Richard Poore</data>
+        <data set="Dublin Core" element="Creator">Elias of Dereham</data>
+    </record>
+    <record updateIdentifier="Dublin Core:Title" recordIdentifier="Salisbury Cathedral">
+        <data set="Dublin Core" element="Title">Cathedral Church of the Blessed Virgin Mary</data>
+        <data set="Dublin Core" element="Date">1220-1320</data>
+        <data set="Dublin Core" element="Description"><![CDATA[From Wikipedia, the free encyclopedia
+Salisbury Cathedral, formally known as the Cathedral Church of the Blessed Virgin Mary, is an Anglican cathedral in Salisbury, England, and one of the leading examples of Early English architecture.[1] The main body of the cathedral was completed in only 38 years, from 1220 to 1258.
+The cathedral has the tallest church spire in the United Kingdom (123m/404 ft). Visitors can take the "Tower Tour" where the interior of the hollow spire, with its ancient wood scaffolding, can be viewed. The cathedral also has the largest cloister and the largest cathedral close in Britain (80 acres (320,000 m2)).[1] It contains the world's oldest working clock (from AD 1386) and has the best surviving of the four original copies of Magna Carta (all four original copies are in England).[1] In 2008, the cathedral celebrated the 750th anniversary of its consecration.[2]
+The cathedral is the mother church of the Diocese of Salisbury and seat of the Bishop of Salisbury, the Rt Revd Nick Holtam.]]></data>
+        <data set="Item Type Metadata" element="Physical Dimensions">Height: 123 m</data>
+        <data set="geolocation" element="latitude">51.0649085</data>
+        <data set="geolocation" element="longitude">-1.7972886</data>
+        <data set="geolocation" element="zoom_level">15</data>
+        <data set="geolocation" element="map_type" />
+        <data set="geolocation" element="address" />
+        <data set="file">https://upload.wikimedia.org/wikipedia/commons/4/46/Salisbury_Cathedral_from_the_Bishop_Grounds_c.1825.jpg</data>
+        <data set="tags">Church</data>
+        <data set="tags">Middle Age</data>
+    </record>
+    <record updateIdentifier="original_filename" recordIdentifier="https://upload.wikimedia.org/wikipedia/commons/4/46/Salisbury_Cathedral_from_the_Bishop_Grounds_c.1825.jpg">
+        <data set="Dublin Core" element="Title">Salisbury Cathedral from the Bishop Grounds</data>
+        <data set="Dublin Core" element="Creator">John Constable</data>
+        <data set="Dublin Core" element="Date">c. 1825</data>
+        <data set="Dublin Core" element="Rights">Public Domain</data>
+    </record>
+</documents>
+

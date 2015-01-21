@@ -321,12 +321,12 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         // Add custom parameters. Allowed types are already checked.
         $parametersAdded = (trim($stylesheetParameters) == '')
             ? array()
-            : array_values(array_map('trim', explode(',', $stylesheetParameters)));
+            : array_values(array_map('trim', explode('><', trim($stylesheetParameters, ' <>'))));
         foreach ($parametersAdded as $value) {
-            if (strpos($value, '|') !== FALSE) {
-                list($paramName, $paramValue) = explode('|', $value);
+            if (strpos($value, '=') !== FALSE) {
+                list($paramName, $paramValue) = explode('=', $value);
                 if ($paramName != '') {
-                    $parameters[$paramName] = $paramValue;
+                    $parameters[trim($paramName)] = trim($paramValue);
                 }
             }
         }

@@ -225,7 +225,7 @@ class XmlImport_Form_Main extends Omeka_Form
 
         $this->addElement('text', 'stylesheet_parameters', array(
             'label' => __('Add specific parameters to use with this xsl sheet'),
-            'description' => __('Format: "parameter 1 name|parameter 1 value", "parameter 2 name|parameter 2 value"...'),
+            'description' => __('Format: "< parameter_1_name = parameter 1 value >< parameter_2_name = parameter 2 value >"...'),
             'value' => get_option('xml_import_stylesheet_parameters'),
         ));
 

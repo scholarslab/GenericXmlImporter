@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+    For xslt: "advanced_mixed.xsl".
+
     This somewhat flat Xml file is used to test Xml Import features.
     It contains:
     - creation of a collection when it doesn't exists
@@ -20,7 +22,6 @@
         <data set="Dublin Core" element="Title">Cattedrale di Santa Maria del Fiore</data>
         <data set="Dublin Core" element="Title">English: Florence Cathedral of Santa Maria del Fiore</data>
         <data set="Dublin Core" element="Creator">Arnolfo di Cambio</data>
-        <data set="Dublin Core" element="Creator">Filippo Brunelleschi</data>
         <data set="Dublin Core" element="Date">1436</data>
         <data set="Dublin Core" element="Description"><![CDATA[From Wikipedia, the free encyclopedia
 The Basilica di Santa Maria del Fiore (English, "Basilica of Saint Mary of the Flower") is the main church of Florence, Italy. Il Duomo di Firenze, as it is ordinarily called, was begun in 1296 in the Gothic style to the design of Arnolfo di Cambio and completed structurally in 1436 with the dome engineered by Filippo Brunelleschi. The exterior of the basilica is faced with polychrome marble panels in various shades of green and pink bordered by white and has an elaborate 19th-century Gothic Revival façade by Emilio De Fabris.
@@ -43,4 +44,3 @@ The cathedral is the mother church of the Roman Catholic Archdiocese of Florence
         <data set="Dublin Core" element="Creator">Unknown</data>
     </record>
 </documents>
-

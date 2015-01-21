@@ -10,12 +10,11 @@
     @copyright Daniel Berthereau, 2012-2015
     @license http://www.apache.org/licenses/LICENSE-2.0.html
     @package Omeka/Plugins/XmlImport
-
 -->
 
 <xsl:stylesheet version="1.1"
-    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:omeka="http://omeka.org/schemas/omeka-xml/v5">
+        xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+        xmlns:omeka="http://omeka.org/schemas/omeka-xml/v5">
     <xsl:output method="text" encoding="UTF-8"/>
 
     <!-- Parameters -->
@@ -97,18 +96,18 @@
     <xsl:template name="list_all_attributes">
         <!-- Set as column all normal attributes of records. -->
         <xsl:for-each select="//record/@*[
-            local-name() = 'updateMode'
-            or local-name() = 'updateIdentifier'
-            or local-name() = 'recordType'
-            or local-name() = 'recordIdentifier'
-            or local-name() = 'itemType'
-            or local-name() = 'collection'
-            or local-name() = 'public'
-            or local-name() = 'featured'
-            or local-name() = 'fileUrl'
-            or local-name() = 'file'
-            or local-name() = 'tags'
-            ]">
+                local-name() = 'updateMode'
+                or local-name() = 'updateIdentifier'
+                or local-name() = 'recordType'
+                or local-name() = 'recordIdentifier'
+                or local-name() = 'itemType'
+                or local-name() = 'collection'
+                or local-name() = 'public'
+                or local-name() = 'featured'
+                or local-name() = 'fileUrl'
+                or local-name() = 'file'
+                or local-name() = 'tags'
+                ]">
             <xsl:element name="column">
                 <xsl:attribute name="name">
                     <xsl:value-of select="name()" />
@@ -240,4 +239,3 @@
     <xsl:template match="text()" />
 
 </xsl:stylesheet>
-

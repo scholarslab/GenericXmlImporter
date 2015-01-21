@@ -272,7 +272,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $csvFilename = $args['csv_filename'];
         $format = $args['format'];
         $action = $args['action'];
-        $identifierField = $args['identifierField'];
+        $identifierField = $args['identifier_field'];
         $itemTypeId = $args['item_type_id'];
         $collectionId = $args['collection_id'];
         $recordsArePublic = $args['public'];
@@ -315,6 +315,9 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             'end_of_line' => $endOfLine,
             'node' => $tagName,
         );
+        if ($format == 'Manage') {
+            $parameters['identifier_field'] = $identifierField;
+        }
         // Add custom parameters. Allowed types are already checked.
         $parametersAdded = (trim($stylesheetParameters) == '')
             ? array()

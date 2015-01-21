@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+    For xslt: "advanced_mixed.xsl".
+
     Xml file used to check if Xml Import features work fine.
     This file updates or replaces the previously imported records.
 
@@ -52,4 +54,3 @@ The cathedral is the mother church of the Diocese of Salisbury and seat of the B
         <data set="Dublin Core" element="Rights">Public Domain</data>
     </record>
 </documents>
-

@@ -13,12 +13,14 @@ jQuery(document).ready(function () {
     jQuery('#file_import-file').click(Omeka.XmlImport.updateFileOptions);
     jQuery('#file_import-folder').click(Omeka.XmlImport.updateFileOptions);
     jQuery('#file_import-recursive').click(Omeka.XmlImport.updateFileOptions);
+    jQuery('#format-Manage').click(Omeka.XmlImport.updateImportOptions);
     jQuery('#format-Report').click(Omeka.XmlImport.updateImportOptions);
     jQuery('#format-Item').click(Omeka.XmlImport.updateImportOptions);
     jQuery('#format-File').click(Omeka.XmlImport.updateImportOptions);
     jQuery('#format-Mix').click(Omeka.XmlImport.updateImportOptions);
     jQuery('#format-Update').click(Omeka.XmlImport.updateImportOptions);
     jQuery('#column_delimiter_name').click(Omeka.XmlImport.updateColumnDelimiterField);
+    jQuery('#enclosure_name').click(Omeka.XmlImport.updateEnclosureField);
     jQuery('#element_delimiter_name').click(Omeka.XmlImport.updateElementDelimiterField);
     jQuery('#tag_delimiter_name').click(Omeka.XmlImport.updateTagDelimiterField);
     jQuery('#file_delimiter_name').click(Omeka.XmlImport.updateFileDelimiterField);

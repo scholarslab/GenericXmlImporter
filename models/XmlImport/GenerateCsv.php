@@ -18,8 +18,8 @@ class XmlImport_generateCsv extends Process
         $itemTypeId = $args['item_type_id'];
         $collectionId = $args['collection_id'];
         $createCollections = $args['create_collections'];
-        $itemsArePublic = $args['public'];
-        $itemsAreFeatured = $args['featured'];
+        $recordsArePublic = $args['public'];
+        $recordsAreFeatured = $args['featured'];
         $elementsAreHtml = $args['html_elements'];
         $containsExtraData = $args['extra_data'];
         $tagName = $args['tag_name'];
@@ -58,7 +58,7 @@ class XmlImport_generateCsv extends Process
                 fwrite($documentFile, $doc);
                 fclose($documentFile);
 
-                //$this->_initializeCsvImport($basename, $itemsArePublic, $itemsAreFeatured, $collectionId);
+                //$this->_initializeCsvImport($basename, $recordsArePublic, $recordsAreFeatured, $collectionId);
                 $this->_helper->flashMessenger(__('Successfully generated CSV File'));
             } else {
                 $this->_helper->flashMessenger(__('Could not transform XML file.  Be sure your XML document is valid.'), 'error');

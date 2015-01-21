@@ -131,14 +131,15 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $xmlImportSession->file_list = $fileList;
             $xmlImportSession->csv_filename = $csvFilename;
             $xmlImportSession->format = $uploadedData['format'];
+            $xmlImportSession->action = $uploadedData['action'];
+            $xmlImportSession->identifier_field = $this->_elementNameFromPost($uploadedData['identifier_field']);
             $xmlImportSession->item_type_id = $uploadedData['item_type_id'];
             $xmlImportSession->collection_id = $uploadedData['collection_id'];
-            $xmlImportSession->create_collections = $uploadedData['create_collections'];
-            $xmlImportSession->public = $uploadedData['items_are_public'];
-            $xmlImportSession->featured = $uploadedData['items_are_featured'];
+            $xmlImportSession->public = $uploadedData['records_are_public'];
+            $xmlImportSession->featured = $uploadedData['records_are_featured'];
             $xmlImportSession->html_elements = $uploadedData['elements_are_html'];
+            $xmlImportSession->create_collections = $uploadedData['create_collections'];
             $xmlImportSession->contains_extra_data = $uploadedData['contains_extra_data'];
-            $xmlImportSession->enclosure = $uploadedData['enclosure'];
             $xmlImportSession->stylesheet = $uploadedData['stylesheet'];
             $xmlImportSession->stylesheet_parameters = $uploadedData['stylesheet_parameters'];
 
@@ -147,6 +148,11 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $xmlImportSession->column_delimiter = isset($delimitersList[$columnDelimiterName])
                 ? $delimitersList[$columnDelimiterName]
                 : $uploadedData['column_delimiter'];
+            $enclosuresList = self::getEnclosuresList();
+            $enclosureName = $uploadedData['enclosure_name'];
+            $xmlImportSession->enclosure = isset($enclosuresList[$enclosureName])
+                ? $enclosuresList[$enclosureName]
+                : $uploadedData['enclosure'];
             $elementDelimiterName = $uploadedData['element_delimiter_name'];
             $xmlImportSession->element_delimiter = isset($delimitersList[$elementDelimiterName])
                 ? $delimitersList[$elementDelimiterName]
@@ -224,12 +230,14 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $args['file_list'] = unserialize($uploadedData['file_list']);
         $args['csv_filename'] = $uploadedData['csv_filename'];
         $args['format'] = $uploadedData['format'];
+        $args['action'] = $uploadedData['action'];
+        $args['identifier_field'] = $uploadedData['identifier_field'];
         $args['item_type_id'] = $uploadedData['item_type_id'];
         $args['collection_id'] = $uploadedData['collection_id'];
-        $args['create_collections'] = $uploadedData['create_collections'];
-        $args['public'] = $uploadedData['items_are_public'];
-        $args['featured'] = $uploadedData['items_are_featured'];
+        $args['public'] = $uploadedData['records_are_public'];
+        $args['featured'] = $uploadedData['records_are_featured'];
         $args['html_elements'] = $uploadedData['elements_are_html'];
+        $args['create_collections'] = $uploadedData['create_collections'];
         $args['extra_data'] = $uploadedData['contains_extra_data'];
         $args['tag_name'] = $uploadedData['tag_name'];
         $args['column_delimiter'] = $uploadedData['column_delimiter'];
@@ -263,12 +271,14 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         }
         $csvFilename = $args['csv_filename'];
         $format = $args['format'];
+        $action = $args['action'];
+        $identifierField = $args['identifierField'];
         $itemTypeId = $args['item_type_id'];
         $collectionId = $args['collection_id'];
-        $createCollections = $args['create_collections'];
-        $itemsArePublic = $args['public'];
-        $itemsAreFeatured = $args['featured'];
+        $recordsArePublic = $args['public'];
+        $recordsAreFeatured = $args['featured'];
         $elementsAreHtml = $args['html_elements'];
+        $createCollections = $args['create_collections'];
         $containsExtraData = $args['extra_data'];
         $tagName = $args['tag_name'];
         $columnDelimiter = $args['column_delimiter'];
@@ -378,19 +388,21 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $csvImportSession->filePath = $csvFilePath;
             // Option used with full Csv Import only.
             $csvImportSession->format = $format;
+            $csvImportSession->action = $action;
+            $csvImportSession->identifierField = $identifierField;
             $csvImportSession->itemTypeId = $itemTypeId;
             $csvImportSession->collectionId = $collectionId;
-            // Option used with full Csv Import only.
-            $csvImportSession->createCollections = $createCollections;
-            $csvImportSession->itemsArePublic = $itemsArePublic;
-            $csvImportSession->itemsAreFeatured = $itemsAreFeatured;
+            $csvImportSession->recordsArePublic = $recordsArePublic;
+            $csvImportSession->recordsAreFeatured = $recordsAreFeatured;
             // Options used with full Csv Import only.
             $csvImportSession->elementsAreHtml = $elementsAreHtml;
-            $csvImportSession->containsExtraData = $containsExtraData;
+            $csvImportSession->createCollections = $createCollections;
             $csvImportSession->automapColumns = $automapColumns;
+            $csvImportSession->containsExtraData = $containsExtraData;
             // Options used with Csv Import standard only.
             $csvImportSession->automapColumnNamesToElements = $automapColumns;
             $csvImportSession->columnDelimiter = $columnDelimiter;
+            $csvImportSession->enclosure = $enclosure;
             $csvImportSession->columnNames = $file->getColumnNames();
             $csvImportSession->columnExamples = $file->getColumnExamples();
             // A bug appears in CsvImport when examples contain UTF-8 characters
@@ -398,7 +410,6 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             foreach ($csvImportSession->columnExamples as &$value) {
                 $value = iconv('ISO-8859-15', 'UTF-8', @iconv('UTF-8', 'ISO-8859-15' . '//IGNORE', $value));
             }
-            $csvImportSession->enclosure = $enclosure;
             $csvImportSession->elementDelimiter = $elementDelimiter;
             $csvImportSession->tagDelimiter = $tagDelimiter;
             $csvImportSession->fileDelimiter = $fileDelimiter;
@@ -406,12 +417,10 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
 
             // All is valid, so we save settings.
             set_option('xml_import_format', $args['format']);
-            set_option('csv_import_create_collections', $args['create_collections']);
-            set_option('csv_import_html_elements', $args['html_elements']);
-            set_option('csv_import_extra_data', $args['extra_data']);
             set_option('xml_import_stylesheet', $args['stylesheet']);
             set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
             set_option('xml_import_format_filename', $args['format_filename']);
+            set_option(CsvImport_ColumnMap_IdentifierField::IDENTIFIER_FIELD_OPTION_NAME, $args['identifier_field']);
             set_option(CsvImport_RowIterator::COLUMN_DELIMITER_OPTION_NAME, $args['column_delimiter']);
             if (XmlImportPlugin::isFullCsvImport()) {
                 set_option(CsvImport_RowIterator::ENCLOSURE_OPTION_NAME, $args['enclosure']);
@@ -419,8 +428,17 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             set_option(CsvImport_ColumnMap_Element::ELEMENT_DELIMITER_OPTION_NAME, $args['element_delimiter']);
             set_option(CsvImport_ColumnMap_Tag::TAG_DELIMITER_OPTION_NAME, $args['tag_delimiter']);
             set_option(CsvImport_ColumnMap_File::FILE_DELIMITER_OPTION_NAME, $args['file_delimiter']);
+            set_option('csv_import_html_elements', $args['html_elements']);
+            set_option('csv_import_create_collections', $args['create_collections']);
+            set_option('csv_import_extra_data', $args['extra_data']);
+
+            if ($csvImportSession->containsExtraData == 'manual' && $this->session->format != 'Report') {
+                $this->_helper->redirector->goto('map-columns', 'index', 'csv-import');
+            }
 
             switch ($format) {
+                case 'Manage':
+                    $this->_helper->redirector->goto('check-manage-csv', 'index', 'csv-import');
                 case 'Report':
                     $this->_helper->redirector->goto('check-omeka-csv', 'index', 'csv-import');
                 case 'Mix':
@@ -479,28 +497,11 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      */
     private function _elementForm($xmlImportSession)
     {
-        $fileImport = $xmlImportSession->file_import;
-        $xmlFolder = $xmlImportSession->xml_folder;
-        $formatFilename = $xmlImportSession->format_filename;
-        $fileList = $xmlImportSession->file_list;
-        $csvFilename = $xmlImportSession->csv_filename;
-        $format = $xmlImportSession->format;
-        $itemTypeId = $xmlImportSession->item_type_id;
-        $collectionId = $xmlImportSession->collection_id;
-        $createCollections = $xmlImportSession->create_collections;
-        $public = $xmlImportSession->public;
-        $featured = $xmlImportSession->featured;
-        $htmlElements = $xmlImportSession->html_elements;
-        $extraData = $xmlImportSession->contains_extra_data;
-        $columnDelimiter = $xmlImportSession->column_delimiter;
-        $enclosure = $xmlImportSession->enclosure;
-        $elementDelimiter = $xmlImportSession->element_delimiter;
-        $tagDelimiter = $xmlImportSession->tag_delimiter;
-        $fileDelimiter = $xmlImportSession->file_delimiter;
-        $stylesheet = $xmlImportSession->stylesheet;
-        $stylesheetParameters = $xmlImportSession->stylesheet_parameters;
-
         // Get first level nodes of first file in order to choose document name.
+        $fileList = $xmlImportSession->file_list;
+        $format = $xmlImportSession->format;
+        $stylesheet = $xmlImportSession->stylesheet;
+
         // TODO Add the root element name, because some formats use it.
         reset($fileList);
         $filepath = key($fileList);
@@ -555,81 +556,33 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $fileListElement->setValue(serialize($fileList));
         $form->addElement($fileListElement);
 
-        $csvFilenameElement = new Zend_Form_Element_Hidden('csv_filename');
-        $csvFilenameElement->setValue($csvFilename);
-        $form->addElement($csvFilenameElement);
-
-        $fileImportElement = new Zend_Form_Element_Hidden('file_import');
-        $fileImportElement->setValue($fileImport);
-        $form->addElement($fileImportElement);
-
-        $xmlFolderElement = new Zend_Form_Element_Hidden('xml_folder');
-        $xmlFolderElement->setValue($xmlFolder);
-        $form->addElement($xmlFolderElement);
-
-        $formatFilenameElement = new Zend_Form_Element_Hidden('format_filename');
-        $formatFilenameElement->setValue($formatFilename);
-        $form->addElement($formatFilenameElement);
-
-        $formatElement = new Zend_Form_Element_Hidden('format');
-        $formatElement->setValue($format);
-        $form->addElement($formatElement);
-
-        $itemTypeElement = new Zend_Form_Element_Hidden('item_type_id');
-        $itemTypeElement->setValue($itemTypeId);
-        $form->addElement($itemTypeElement);
-
-        $collectionIdElement = new Zend_Form_Element_Hidden('collection_id');
-        $collectionIdElement->setValue($collectionId);
-        $form->addElement($collectionIdElement);
-
-        $createCollectionsElement = new Zend_Form_Element_Hidden('create_collections');
-        $createCollectionsElement->setValue($createCollections);
-        $form->addElement($createCollectionsElement);
-
-        $publicElement = new Zend_Form_Element_Hidden('items_are_public');
-        $publicElement->setValue($public);
-        $form->addElement($publicElement);
-
-        $featuredElement = new Zend_Form_Element_Hidden('items_are_featured');
-        $featuredElement->setValue($featured);
-        $form->addElement($featuredElement);
-
-        $htmlElementsElement = new Zend_Form_Element_Hidden('elements_are_html');
-        $htmlElementsElement->setValue($htmlElements);
-        $form->addElement($htmlElementsElement);
-
-        $extraDataElement = new Zend_Form_Element_Hidden('contains_extra_data');
-        $extraDataElement->setValue($extraData);
-        $form->addElement($extraDataElement);
-
-        $columnDelimiterElement = new Zend_Form_Element_Hidden('column_delimiter');
-        $columnDelimiterElement->setValue($columnDelimiter);
-        $form->addElement($columnDelimiterElement);
-
-        $enclosureElement = new Zend_Form_Element_Hidden('enclosure');
-        $enclosureElement->setValue($enclosure);
-        $form->addElement($enclosureElement);
-
-        $elementDelimiterElement = new Zend_Form_Element_Hidden('element_delimiter');
-        $elementDelimiterElement->setValue($elementDelimiter);
-        $form->addElement($elementDelimiterElement);
-
-        $tagDelimiterElement = new Zend_Form_Element_Hidden('tag_delimiter');
-        $tagDelimiterElement->setValue($tagDelimiter);
-        $form->addElement($tagDelimiterElement);
-
-        $fileDelimiterElement = new Zend_Form_Element_Hidden('file_delimiter');
-        $fileDelimiterElement->setValue($fileDelimiter);
-        $form->addElement($fileDelimiterElement);
-
-        $stylesheetElement = new Zend_Form_Element_Hidden('stylesheet');
-        $stylesheetElement->setValue($stylesheet);
-        $form->addElement($stylesheetElement);
-
-        $stylesheetParametersElement = new Zend_Form_Element_Hidden('stylesheet_parameters');
-        $stylesheetParametersElement->setValue($stylesheetParameters);
-        $form->addElement($stylesheetParametersElement);
+        foreach (array(
+                'csv_filename' => $xmlImportSession->csv_filename,
+                'file_import' => $xmlImportSession->file_import,
+                'xml_folder' => $xmlImportSession->xml_folder,
+                'format_filename' => $xmlImportSession->format_filename,
+                'format' => $format,
+                'action' => $xmlImportSession->action,
+                'identifier_field' => $xmlImportSession->identifier_field,
+                'item_type_id' => $xmlImportSession->item_type_id,
+                'collection_id' => $xmlImportSession->collection_id,
+                'records_are_public' => $xmlImportSession->public,
+                'records_are_featured' => $xmlImportSession->featured,
+                'elements_are_html' => $xmlImportSession->html_elements,
+                'create_collections' => $xmlImportSession->create_collections,
+                'contains_extra_data' => $xmlImportSession->contains_extra_data,
+                'column_delimiter' => $xmlImportSession->column_delimiter,
+                'enclosure' => $xmlImportSession->enclosure,
+                'element_delimiter' => $xmlImportSession->element_delimiter,
+                'tag_delimiter' => $xmlImportSession->tag_delimiter,
+                'file_delimiter' => $xmlImportSession->file_delimiter,
+                'stylesheet' => $stylesheet,
+                'stylesheet_parameters' => $xmlImportSession->stylesheet_parameters,
+            ) as $name => $value) {
+            $element = new Zend_Form_Element_Hidden($name);
+            $element->setValue($value);
+            $form->addElement($element);
+        }
 
         // Submit button.
         $form->addElement('submit', 'submit');
@@ -970,6 +923,27 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
     }
 
     /**
+     * Convert Identifier field to name.
+     *
+     * It's simpler to manage identifiers by name, as they are in csv files.
+     *
+     * @param integer|string $postIdentifier
+     * @return string
+     */
+    protected function _elementNameFromPost($postIdentifier)
+    {
+        $postIdentifier = trim($postIdentifier);
+        if (empty($postIdentifier) || !is_numeric($postIdentifier)) {
+            return $postIdentifier;
+        }
+        $element = get_record_by_id('Element', $postIdentifier);
+        if (!$element) {
+            return $postIdentifier;
+        }
+        return $element->set_name . ':' . $element->name;
+    }
+
+    /**
      * Return the list of standard delimiters.
      *
      * @return array The list of standard delimiters.
@@ -984,6 +958,20 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             'carriage return' => "\r",
             'space' => ' ',
             'double space' => '  ',
+            'empty' => '',
+        );
+    }
+
+    /**
+     * Return the list of standard enclosures.
+     *
+     * @return array The list of standard enclosures.
+     */
+    public static function getEnclosuresList()
+    {
+        return array(
+            'double-quote' => '"',
+            'quote' => "'",
             'empty' => '',
         );
     }

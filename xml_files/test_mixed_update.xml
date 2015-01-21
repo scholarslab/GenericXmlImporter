@@ -9,10 +9,10 @@
     the geolocation data of the first item are copied from the import file.
 -->
 <documents>
-    <record updateIdentifier="Dublin Core:Title" recordType="Collection" recordIdentifier="Architectural Heritage">
+    <record updateMode="Add" updateIdentifier="Dublin Core:Title" recordType="Collection" recordIdentifier="Architectural Heritage">
         <data set="Dublin Core" element="Description">Some well known buildings.</data>
     </record>
-    <record updateIdentifier="Dublin Core:Title" recordIdentifier="Cattedrale di Santa Maria del Fiore">
+    <record updateMode="Add" updateIdentifier="Dublin Core:Title" recordIdentifier="Cattedrale di Santa Maria del Fiore">
         <data set="Dublin Core" element="Creator">Filippo Brunelleschi</data>
         <data set="geolocation" element="latitude">43.773145</data>
         <data set="geolocation" element="longitude">11.2559602</data>
@@ -20,7 +20,7 @@
         <data set="geolocation" element="map_type" />
         <data set="geolocation" element="address" />
     </record>
-    <record updateIdentifier="original_filename" recordIdentifier="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/The_Cathedral_panoramic_view_from_Vecchio_Palace_Florence_Italy.jpg/1280px-The_Cathedral_panoramic_view_from_Vecchio_Palace_Florence_Italy.jpg">
+    <record updateMode="Add" updateIdentifier="original_filename" recordIdentifier="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/The_Cathedral_panoramic_view_from_Vecchio_Palace_Florence_Italy.jpg/1280px-The_Cathedral_panoramic_view_from_Vecchio_Palace_Florence_Italy.jpg">
         <data set="Dublin Core" element="Date">ca. 1890 and ca. 1900</data>
         <data set="Dublin Core" element="Rights">Public Domain</data>
     </record>
@@ -28,7 +28,7 @@
         <data set="Dublin Core" element="Creator">Bishop Richard Poore</data>
         <data set="Dublin Core" element="Creator">Elias of Dereham</data>
     </record>
-    <record updateIdentifier="Dublin Core:Title" recordIdentifier="Salisbury Cathedral">
+    <record updateMode="Add" updateIdentifier="Dublin Core:Title" recordIdentifier="Salisbury Cathedral">
         <data set="Dublin Core" element="Title">Cathedral Church of the Blessed Virgin Mary</data>
         <data set="Dublin Core" element="Date">1220-1320</data>
         <data set="Dublin Core" element="Description"><![CDATA[From Wikipedia, the free encyclopedia
@@ -45,7 +45,7 @@ The cathedral is the mother church of the Diocese of Salisbury and seat of the B
         <data set="tags">Church</data>
         <data set="tags">Middle Age</data>
     </record>
-    <record updateIdentifier="original_filename" recordIdentifier="https://upload.wikimedia.org/wikipedia/commons/4/46/Salisbury_Cathedral_from_the_Bishop_Grounds_c.1825.jpg">
+    <record updateMode="Add" updateIdentifier="original_filename" recordIdentifier="https://upload.wikimedia.org/wikipedia/commons/4/46/Salisbury_Cathedral_from_the_Bishop_Grounds_c.1825.jpg">
         <data set="Dublin Core" element="Title">Salisbury Cathedral from the Bishop Grounds</data>
         <data set="Dublin Core" element="Creator">John Constable</data>
         <data set="Dublin Core" element="Date">c. 1825</data>

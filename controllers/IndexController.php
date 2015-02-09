@@ -302,7 +302,10 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         // No paramater for this option: fields are always automapped.
         $automapColumns = 1;
 
-        $csvFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'omeka_xml_import_' . date('Ymd-His') . '_' . $this->_sanitizeString($csvFilename) . '.csv';
+        $csvFilePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR
+            . 'omeka_xml_import_'
+            . date('Ymd-His') . '_'
+            . $this->_sanitizeString($csvFilename) . '.csv';
         $csvFilename = 'Via Xml Import: ' . $csvFilename;
 
         // Prepare parameters for the stylesheet.
@@ -778,10 +781,14 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $output = tempnam(sys_get_temp_dir(), 'xmlimport_');
         }
 
-        switch (basename(get_option('xml_import_xslt_processor'))) {
+        $processor = basename(get_option('xml_import_xslt_processor'));
+        switch ($processor) {
+            // Saxon-B on Debian/Ubuntu/Mint.
             case 'saxonb-xslt':
+            // Saxon on RedHat/Fedora/Centos/Mandriva.
+            case 'saxon':
                 $command = array(
-                    'saxonb-xslt',
+                    $processor,
                     '-ext:on',
                     '-versionmsg:off',
                     '-s:' . escapeshellarg($xml_file),
@@ -798,6 +805,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                 // In Shell, 0 is a correct result.
                 return ($result == 1) ? NULL : $output;
 
+            // Php default.
             default:
                 try {
                     $DomXml = $this->_domXmlLoad($xml_file);

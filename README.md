@@ -75,13 +75,15 @@ have some examples.
 
 6. `test_manage_from_mixed.xml`
 
-7. `test_mixed_update.xml`
+7. `test_manage_from_mixed_update.xml`
 
     These files contain the same data than the two previous ones, but they are
     adapted for the format "Manage". Formats "Mixed" and "Update" are deprecated
     in [Csv Import Full], so this one is recommended. It's simpler and allows
     import, update and remove with the same file and the same sheet. To import
     them, remove previous data and use the sheet `advanced_manage.xsl`.
+    Note that in these examples, the identifier field is "Dublin Core:Title"
+    (the same examples in CsvImport use "Dublin Core:Identifier").
 
 If your xsl sheet builds a csv file with "Csv Report", "Mixed records" or
 "Manage" format, they can be  imported directly without mapping. "Mixed" and
@@ -145,6 +147,7 @@ Copyright
 * Copyright Scholars' Lab, 2010 (GenericXmlImporter v1.0)
 
 
+[XmlImport]: https://github.com/Daniel-KM/XmlImport
 [Omeka]: https://omeka.org
 [Csv Import]: https://github.com/omeka/plugin-CsvImport
 [Csv Import Full]: https://github.com/Daniel-KM/CsvImport

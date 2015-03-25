@@ -398,8 +398,14 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $csvImportSession->identifierField = $identifierField;
             $csvImportSession->itemTypeId = $itemTypeId;
             $csvImportSession->collectionId = $collectionId;
-            $csvImportSession->recordsArePublic = $recordsArePublic;
-            $csvImportSession->recordsAreFeatured = $recordsAreFeatured;
+            if (XmlImportPlugin::isFullCsvImport()) {
+                $csvImportSession->recordsArePublic = $recordsArePublic;
+                $csvImportSession->recordsAreFeatured = $recordsAreFeatured;
+            }
+            else {
+                $csvImportSession->itemsArePublic = $recordsArePublic;
+                $csvImportSession->itemsAreFeatured = $recordsAreFeatured;
+            }
             // Options used with full Csv Import only.
             $csvImportSession->elementsAreHtml = $elementsAreHtml;
             $csvImportSession->createCollections = $createCollections;
@@ -426,7 +432,9 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             set_option('xml_import_stylesheet', $args['stylesheet']);
             set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
             set_option('xml_import_format_filename', $args['format_filename']);
-            set_option(CsvImport_ColumnMap_IdentifierField::IDENTIFIER_FIELD_OPTION_NAME, $args['identifier_field']);
+            if (XmlImportPlugin::isFullCsvImport()) {
+                set_option(CsvImport_ColumnMap_IdentifierField::IDENTIFIER_FIELD_OPTION_NAME, $args['identifier_field']);
+            }
             set_option(CsvImport_RowIterator::COLUMN_DELIMITER_OPTION_NAME, $args['column_delimiter']);
             if (XmlImportPlugin::isFullCsvImport()) {
                 set_option(CsvImport_RowIterator::ENCLOSURE_OPTION_NAME, $args['enclosure']);

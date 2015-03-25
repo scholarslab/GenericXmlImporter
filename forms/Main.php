@@ -130,25 +130,32 @@ class XmlImport_Form_Main extends Omeka_Form
             'value' => $identifierField,
         ));
 
-        $this->addElement('select', 'action', array(
-            'label' => __('Action'),
-            'multiOptions' => label_table_options(array(
-                CsvImport_ColumnMap_Action::ACTION_UPDATE_ELSE_CREATE
-                    => __('Update the record if it exists, else create one'),
-                CsvImport_ColumnMap_Action::ACTION_CREATE
-                    => __('Create a new record'),
-                CsvImport_ColumnMap_Action::ACTION_UPDATE
-                    => __('Update values of specific fields'),
-                CsvImport_ColumnMap_Action::ACTION_ADD
-                    => __('Add values to specific fields'),
-                CsvImport_ColumnMap_Action::ACTION_REPLACE
-                    => __('Replace values of all fields'),
-                CsvImport_ColumnMap_Action::ACTION_DELETE
-                    => __('Delete the record'),
-                CsvImport_ColumnMap_Action::ACTION_SKIP
-                    => __('Skip process of the record'),
-            ), __('No default action')),
-        ));
+        if (XmlImportPlugin::isFullCsvImport()) {
+            $this->addElement('select', 'action', array(
+                'label' => __('Action'),
+                'multiOptions' => label_table_options(array(
+                    CsvImport_ColumnMap_Action::ACTION_UPDATE_ELSE_CREATE
+                        => __('Update the record if it exists, else create one'),
+                    CsvImport_ColumnMap_Action::ACTION_CREATE
+                        => __('Create a new record'),
+                    CsvImport_ColumnMap_Action::ACTION_UPDATE
+                        => __('Update values of specific fields'),
+                    CsvImport_ColumnMap_Action::ACTION_ADD
+                        => __('Add values to specific fields'),
+                    CsvImport_ColumnMap_Action::ACTION_REPLACE
+                        => __('Replace values of all fields'),
+                    CsvImport_ColumnMap_Action::ACTION_DELETE
+                        => __('Delete the record'),
+                    CsvImport_ColumnMap_Action::ACTION_SKIP
+                        => __('Skip process of the record'),
+                ), __('No default action')),
+            ));
+        }
+        else {
+            $actionElement = new Zend_Form_Element_Hidden('action');
+            $actionElement->setValue(false);
+            $this->addElement($actionElement);
+        }
 
         $values = get_table_options('ItemType', __('No default item type'));
         $this->addElement('select', 'item_type_id', array(

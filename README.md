@@ -22,6 +22,10 @@ Then uncompress files and rename plugin folder "XmlImport".
 
 Then install it like any other Omeka plugin and follow the config instructions.
 
+Note:
+Php uses the obsolete xslt 1.0 processor. So, installation of an external xslt
+processor is recommended, in particular Saxon (Linux).
+
 
 Examples
 --------
@@ -33,11 +37,14 @@ them.
 Some files may be updated with a second file to get full data. This is just to
 have some examples.
 
+Some provided stylesheets need an xslt 2 processor.
+
 1. `test_generic_item.xml`
 
     A basic list of three books with images of Wikipedia, with non Dublin Core
     tags. To try it, choose options "One xml file", "Item metadata", and the xsl
-    sheet `generic_item.xsl`.
+    sheet `generic_item.xsl` (or `generic_item_xslt1.xsl` if an external
+    processor is not set).
 
 2. `test_generic_item_automap.xml`
 
@@ -45,7 +52,13 @@ have some examples.
     tags with the Omeka fields. Parameters are the same than the previous file,
     but you may delete previous import before this one.
 
-3. `test_omeka_xml_output_v5.xml`
+3. `test_item.xml`
+
+    This is another example of a flat format, with an unknown node. To use it,
+    use the same parameters, plus a specific parameter in the last field:
+    <node = my_record>.
+
+4. `test_omeka_xml_output_v5.xml`
 
     An export of two different items with files and files metadata. To try it,
     use one of the three other sheets: `omeka_xml_output_v4_report.xsl`,
@@ -61,9 +74,9 @@ have some examples.
     before import (none in the xml test files). Note that Omeka 1.5 outputs only
     urls of fullsize files, so you may change them before import.
 
-4. `test_mixed.xml`
+5. `test_mixed.xml`
 
-5. `test_mixed_update.xml`
+6. `test_mixed_update.xml`
 
     A full example of all features of [Csv Import Full] via Xml, and file to
     update the previous one.
@@ -73,9 +86,9 @@ have some examples.
     sheet `advanced_mixed.xsl`. If [Geolocation] is installed, it will be used
     to set the location of items.
 
-6. `test_manage_from_mixed.xml`
+7. `test_manage_from_mixed.xml`
 
-7. `test_manage_from_mixed_update.xml`
+8. `test_manage_from_mixed_update.xml`
 
     These files contain the same data than the two previous ones, but they are
     adapted for the format "Manage". Formats "Mixed" and "Update" are deprecated

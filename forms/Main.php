@@ -232,7 +232,10 @@ class XmlImport_Form_Main extends Omeka_Form
 
         $this->addElement('text', 'stylesheet_parameters', array(
             'label' => __('Add specific parameters to use with this xsl sheet'),
-            'description' => __('Format: "< parameter_1_name = parameter 1 value >< parameter_2_name = parameter 2 value >"...'),
+            'description' => __('Format: "< parameter_1_name = parameter 1 value >< parameter_2_name = parameter 2 value >"...')
+                . ' ' . __('For generic imports, one important parameter is the name of the node that represents a record.')
+                . ' ' . __('It automatically uses the first level node, but it may be a sub level one.')
+                . ' ' . __('In that case, set it like that: "< node = record_name >".'),
             'value' => get_option('xml_import_stylesheet_parameters'),
         ));
 

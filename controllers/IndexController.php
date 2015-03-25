@@ -539,6 +539,20 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
 
         // Check available record elements inside xml file. This is used only
         // with generic sheets. The tag will not be used in other cases.
+
+        // Check if the node is defined in the list of parameters.
+        $parametersAdded = (trim($stylesheetParameters) == '')
+            ? array()
+            : array_values(array_map('trim', explode('><', trim($stylesheetParameters, ' <>'))));
+        foreach ($parametersAdded as $value) {
+            if (strpos($value, '=') !== FALSE) {
+                list($paramName, $paramValue) = explode('=', $value);
+                if ($paramName != '') {
+                    $parameters[trim($paramName)] = trim($paramValue);
+                }
+            }
+        }
+
         // Automatic import via Omeka CSV Report.
         if ($format == 'Report') {
             $tagNameElement = new Zend_Form_Element_Hidden('tag_name');
@@ -557,7 +571,14 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $tagNameElement = new Zend_Form_Element_Hidden('tag_name');
             $tagNameElement->setValue(key($elementSet));
         }
-        // Multiple possibilities, so the generic xsl can't choose.
+        // A generic sheet, so check if the node is defined as a specific param.
+        elseif (isset($parameters['node'])) {
+            reset($elementSet);
+            $tagNameElement = new Zend_Form_Element_Hidden('tag_name');
+            $tagNameElement->setValue($parameters['node']);
+        }
+        // Multiple possibilities, so the generic xsl can't choose, so use the
+        // second step.
         else {
             $tagNameElement = new Zend_Form_Element_Select('tag_name');
             $tagNameElement
@@ -830,7 +851,6 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                 }
                 $proc->importStyleSheet($DomXsl);
                 $proc->setParameter('', $parameters);
-
                 $result = $proc->transformToURI($DomXml, $output);
                 @chmod(escapeshellarg($output), 0644);
 

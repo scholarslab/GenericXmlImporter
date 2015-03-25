@@ -20,7 +20,7 @@
     coded in Xml Import and in the Mixed records format.
 -->
 
-<xsl:stylesheet version="1.1"
+<xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:omeka="http://omeka.org/schemas/omeka-xml/v5">
     <xsl:output method="text" encoding="UTF-8"/>

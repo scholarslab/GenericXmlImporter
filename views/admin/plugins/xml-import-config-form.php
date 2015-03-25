@@ -25,6 +25,7 @@
         <?php echo get_view()->formText('xml_import_xslt_processor', get_option('xml_import_xslt_processor'), null); ?>
         <p class="explanation">
             <?php echo __('Path to the SaxonB xslt processor, quicker than the php one. Usually, this is "/usr/bin/saxonb-xslt". Let empty to use the php internal xslt processor.'); ?>
+            <?php echo __('Note that the use of an external xslt processor is recommended if the php one returns empty results with the sample xml files.'); ?>
         </p>
     </div>
 </div>

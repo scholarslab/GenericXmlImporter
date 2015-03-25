@@ -16,8 +16,9 @@
 <xsl:stylesheet
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    exclude-result-prefixes="xs"
-    version="2.0">
+    xmlns:exsl="http://exslt.org/common"
+    exclude-result-prefixes="xs exsl"
+    version="1.0">
     <xsl:output method="text" encoding="UTF-8"/>
 
     <!-- Parameters -->
@@ -72,7 +73,7 @@
         </xsl:for-each>
     </xsl:variable>
     <xsl:variable name="elements">
-        <xsl:for-each select="$all_elements/element[not(. = preceding-sibling::*)]">
+        <xsl:for-each select="exsl:node-set($all_elements)/element[not(. = preceding-sibling::*)]">
             <xsl:element name="element">
                 <xsl:value-of select="." />
             </xsl:element>
@@ -90,7 +91,7 @@
     </xsl:template>
 
     <xsl:template name="headers">
-        <xsl:for-each select="$elements/element">
+        <xsl:for-each select="exsl:node-set($elements)/element">
             <xsl:value-of select="$enclosure" />
             <xsl:value-of select="."/>
             <xsl:value-of select="$enclosure" />
@@ -104,7 +105,7 @@
     <xsl:template match="node()">
         <xsl:variable name="record" select="." />
 
-        <xsl:for-each select="$elements/element">
+        <xsl:for-each select="exsl:node-set($elements)/element">
             <xsl:value-of select="$enclosure" />
 
             <xsl:variable name="element" select="." />

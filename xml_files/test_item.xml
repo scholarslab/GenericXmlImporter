@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListRecords xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
+    <unknown>
+        <my_record>
+            <dc:title>Title of the first record</dc:title>
+            <dc:subject>Subject 1</dc:subject>
+            <dc:description>The description for the first record</dc:description>
+            <dc:date>2011</dc:date>
+            <dc:type>text</dc:type>
+            <tags>Europe</tags>
+            <tags>France</tags>
+            <file>http://omeka.org/ui/i/logo-horizontal-288px.gif</file>
+        </my_record>
+    </unknown>
+    <another>
+        <my_record>
+            <dc:title>Title of the second record</dc:title>
+            <dc:subject>Subject 2</dc:subject>
+            <dcterms:abstract>The abstract (Qualified Dublin Core)</dcterms:abstract>
+            <tags>England</tags>
+            <file>http://omeka.org/ui/i/rrchnm-logo-regular.gif</file>
+        </my_record>
+    </another>
+    <one>
+        <my_record>
+            <dc:title>Title of the first record</dc:title>
+            <dc:subject>Subject 2</dc:subject>
+            <dc:subject>Subject 3</dc:subject>
+            <dc:description>The description for the third record</dc:description>
+            <dcterms:tableOfContents>The table of contents (Qualified Dublin Core)</dcterms:tableOfContents>
+            <dc:date>2013</dc:date>
+            <dc:type>text</dc:type>
+            <tags>
+                <tag>Europe</tag>
+                <tag>Switzerland</tag>
+            </tags>
+        </my_record>
+    </one>
+</ListRecords>

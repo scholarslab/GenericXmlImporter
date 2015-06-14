@@ -138,12 +138,31 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookDefineAcl($args)
     {
         $acl = $args['acl'];
+        $resource = 'XmlImport_Index';
 
-        $acl->addResource('XmlImport_Index');
-
+        // TODO This is currently needed for tests for an undetermined reason.
+        if (!$acl->has($resource)) {
+            $acl->addResource($resource);
+        }
         // Hack to disable CRUD actions.
-        $acl->deny(null, 'XmlImport_Index', array('show', 'add', 'edit', 'delete'));
-        $acl->deny('admin', 'XmlImport_Index');
+        $acl->deny(null, $resource, array('show', 'add', 'edit', 'delete'));
+        $acl->deny(null, $resource);
+
+        $roles = $acl->getRoles();
+
+        // Check that all the roles exist, in case a plugin-added role has
+        // been removed (e.g. GuestUser).
+        $allowRoles = unserialize(get_option('csv_import_allow_roles')) ?: array();
+        $allowRoles = array_intersect($roles, $allowRoles);
+
+        if ($allowRoles) {
+            $acl->allow($allowRoles, $resource);
+        }
+
+        $denyRoles = array_diff($roles, $allowRoles);
+        if ($denyRoles) {
+            $acl->deny($denyRoles, $resource);
+        }
     }
 
    /**

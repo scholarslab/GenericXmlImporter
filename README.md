@@ -160,12 +160,12 @@ Copyright
 * Copyright Scholars' Lab, 2010 (GenericXmlImporter v1.0)
 
 
-[XmlImport]: https://github.com/Daniel-KM/XmlImport
+[Xml Import]: https://github.com/Daniel-KM/XmlImport
 [Omeka]: https://omeka.org
 [Csv Import]: https://github.com/omeka/plugin-CsvImport
 [Csv Import Full]: https://github.com/Daniel-KM/CsvImport
-[Geolocation]: http://omeka.org/add-ons/plugins/geolocation
-[plugin issues]: https://github.com/Daniel-KM/XmlImport/Issues
+[Geolocation]: https://omeka.org/add-ons/plugins/geolocation
+[plugin issues]: https://github.com/Daniel-KM/XmlImport/issues
 [Apache licence v2]: https://www.apache.org/licenses/LICENSE-2.0.html
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
 [Ethan Gruber]: mailto:ewg4x@virginia.edu

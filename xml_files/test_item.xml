@@ -9,7 +9,7 @@
             <dc:type>text</dc:type>
             <tags>Europe</tags>
             <tags>France</tags>
-            <file>http://omeka.org/ui/i/logo-horizontal-288px.gif</file>
+            <file>https://omeka.org/ui/i/logo-horizontal-288px.gif</file>
         </my_record>
     </unknown>
     <another>
@@ -18,7 +18,7 @@
             <dc:subject>Subject 2</dc:subject>
             <dcterms:abstract>The abstract (Qualified Dublin Core)</dcterms:abstract>
             <tags>England</tags>
-            <file>http://omeka.org/ui/i/rrchnm-logo-regular.gif</file>
+            <file>https://omeka.org/ui/i/rrchnm-logo-regular.gif</file>
         </my_record>
     </another>
     <one>

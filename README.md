@@ -16,15 +16,33 @@ to update any records, the [Csv Import Full] fork should be used.
 Installation
 ------------
 
-Install first the plugin [Csv Import] or [Csv Import Full].
+Install first the plugin [Csv Import] or [Csv Import Full]. The latter is
+required with some formats.
 
 Then uncompress files and rename plugin folder "XmlImport".
 
 Then install it like any other Omeka plugin and follow the config instructions.
 
-Note:
-Php uses the obsolete xslt 1.0 processor. So, installation of an external xslt
-processor is recommended, in particular Saxon (Linux).
+* XSLT processor
+
+The xslt processor of php is a slow xslt 1 one. So it's recommended to use an
+external xslt 2 processor, ten times faster. It's required with stylesheets
+designed for xslt 2.0. The command can be configured in the configuration page
+of the plugin. Use "%1$s", "%2$s", "%3$s", without escape, for the file input,
+the stylesheet, and the output.
+
+Examples for Debian / Ubuntu / Mint:
+```
+saxonb-xslt -ext:on -versionmsg:off -s:%1$s -xsl:%2$s -o:%3$s
+CLASSPATH=/usr/share/java/Saxon-HE.jar java net.sf.saxon.Transform -ext:on -versionmsg:off -s:%1$s -xsl:%2$s -o:%3$s
+```
+
+Example for Fedora / RedHat / Centos / Mandriva:
+```
+saxon -ext:on -versionmsg:off -s:%1$s -xsl:%2$s -o:%3$s
+```
+
+Note: Only saxon is currently supported.
 
 
 Examples

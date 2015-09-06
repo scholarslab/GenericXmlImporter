@@ -112,22 +112,11 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookConfig($args)
     {
         $post = $args['post'];
-
-        $xsl_directory = realpath(trim($post['xml_import_xsl_directory']));
-        if ($xsl_directory == '' || $xsl_directory == '/') {
-            $xsl_directory = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries';
+        foreach ($this->_options as $optionKey => $optionValue) {
+            if (isset($post[$optionKey])) {
+                set_option($optionKey, $post[$optionKey]);
+            }
         }
-        set_option('xml_import_xsl_directory', $xsl_directory);
-
-        // Don't install if the xslt processor command doesn't exist.
-        $xslt_processor = trim($post['xml_import_xslt_processor']);
-        if ($xslt_processor == ''
-                || (int) shell_exec('ls ' . $xslt_processor .  ' 2>&- || echo 1') == 1
-            ) {
-            $xslt_processor = '';
-        }
-
-        set_option('xml_import_xslt_processor', $xslt_processor);
     }
 
     /**

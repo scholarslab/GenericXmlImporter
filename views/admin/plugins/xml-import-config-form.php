@@ -24,7 +24,9 @@
     <div class="inputs five columns omega">
         <?php echo get_view()->formText('xml_import_xslt_processor', get_option('xml_import_xslt_processor'), null); ?>
         <p class="explanation">
-            <?php echo __('Path to the SaxonB xslt processor, quicker than the php one. Usually, this is "/usr/bin/saxonb-xslt". Let empty to use the php internal xslt processor.'); ?>
+            <?php echo __('Command of the processor. Let empty to use the internal xslt processor of php.'); ?>
+            <?php echo __('This is required by some formats that need to parse a xslt 2 stylesheet.'); ?>
+            <?php echo __('See format of the command and examples in the readme.'); ?>
             <?php echo __('Note that the use of an external xslt processor is recommended if the php one returns empty results with the sample xml files.'); ?>
         </p>
     </div>

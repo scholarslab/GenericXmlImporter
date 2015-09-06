@@ -717,8 +717,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      */
     private function _scandirOverHttp($directory, $extension = '')
     {
-        $page = file_get_contents($directory);
-
+        $page = @file_get_contents($directory);
         if (empty($page)) {
             return false;
         }
@@ -739,7 +738,9 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
 
         // Get the domain if needed.
         $domain = parse_url($directory);
-        $user = ($domain['user'] . ':' . $domain['pass'] != ':') ? $domain['user'] . ':' . $domain['pass'] . '@' : '';
+        $user = isset($domain['user']) ? $domain['user'] : '';
+        $pass = isset($domain['pass']) ? $domain['pass'] : '';
+        $user = ($user . $pass != '') ? $user . ':' . $pass . '@' : '';
         $port = !empty($domain['port']) ? ':' . $domain['port'] : '';
         $domain = $domain['scheme'] . '://' . $user . $domain['host'] . $port;
 

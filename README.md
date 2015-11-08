@@ -23,6 +23,12 @@ Then uncompress files and rename plugin folder "XmlImport".
 
 Then install it like any other Omeka plugin and follow the config instructions.
 
+* Directory of xsl sheets
+
+The process uses xsl sheets to convert your xml files into csv ones. So the path
+to the directory where are your sheets should be set. By default, this is the
+path to the default sheets.
+
 * XSLT processor
 
 The xslt processor of php is a slow xslt 1 one. So it's recommended to use an
@@ -31,7 +37,8 @@ designed for xslt 2.0. The command can be configured in the configuration page
 of the plugin. Use "%1$s", "%2$s", "%3$s", without escape, for the file input,
 the stylesheet, and the output.
 
-Examples for Debian / Ubuntu / Mint:
+Examples for Debian / Ubuntu / Mint (Debian 6 for the first command, Debian 8
+for the second one), with the package "SaxonB" or "libsaxonhe-java":
 ```
 saxonb-xslt -ext:on -versionmsg:off -s:%1$s -xsl:%2$s -o:%3$s
 CLASSPATH=/usr/share/java/Saxon-HE.jar java net.sf.saxon.Transform -ext:on -versionmsg:off -s:%1$s -xsl:%2$s -o:%3$s
@@ -42,7 +49,17 @@ Example for Fedora / RedHat / Centos / Mandriva:
 saxon -ext:on -versionmsg:off -s:%1$s -xsl:%2$s -o:%3$s
 ```
 
+To test your installation, you need to be able to process such a command line
+(Debian 8 here):
+```
+cd /path/to/Omeka/plugins/XmlImport
+CLASSPATH=/usr/share/java/Saxon-HE.jar java net.sf.saxon.Transform -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'
+```
+
 Note: Only saxon is currently supported.
+
+Anyway, if there is no xslt2 processor installed, the command should be cleaned
+and the plugin will use the default xslt 1 processor of php.
 
 
 Examples
@@ -57,12 +74,16 @@ have some examples.
 
 Some provided stylesheets need an xslt 2 processor.
 
+Because xslt is only a converter into csv, you need to set the options for csv
+in the form: delimiter: tabulation, enclosure: empty, element, tag and file
+delimiters: pipe.
+
 1. `test_generic_item.xml`
 
     A basic list of three books with images of Wikipedia, with non Dublin Core
-    tags. To try it, choose options "One xml file", "Item metadata", and the xsl
-    sheet `generic_item.xsl` (or `generic_item_xslt1.xsl` if an external
-    processor is not set).
+    tags. To try it, choose options "One xml file", "Items", and the xsl sheet
+    `generic_item.xsl` (or `generic_item_xslt1.xsl` if an external processor is
+    not set).
 
 2. `test_generic_item_automap.xml`
 

@@ -113,6 +113,11 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $post = $args['post'];
         foreach ($this->_options as $optionKey => $optionValue) {
+            if ($optionKey == 'xml_import_xsl_directory') {
+                $post[$optionKey] = empty($post[$optionKey])
+                    ? dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries'
+                    : realpath($post[$optionKey]);
+            }
             if (isset($post[$optionKey])) {
                 set_option($optionKey, $post[$optionKey]);
             }

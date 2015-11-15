@@ -32,6 +32,11 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      */
     public function indexAction()
     {
+        if (!XmlImportPlugin::isXsltSupported()) {
+            $this->_helper->flashMessenger(__('No xslt processor installed.') . ' ' . __('Check your config.'), 'error');
+            return;
+        }
+
         $form = $this->_getMainForm();
         $this->view->form = $form;
 

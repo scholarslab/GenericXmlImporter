@@ -58,13 +58,6 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
         $this->_options['xml_import_xsl_directory'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries';
         $this->_options['xml_import_stylesheet'] = XmlImportPlugin::isFullCsvImport() ? 'generic_mixed.xsl' :  'generic_item.xsl';
 
-        // Checks the ability to use XSLT.
-        try {
-            $xslt = new XSLTProcessor;
-        } catch (Exception $e) {
-            throw new Zend_Exception(__('This plugin requires XSLT support.'));
-        }
-
         $this->_installOptions();
     }
 
@@ -99,12 +92,26 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookConfigForm($args)
     {
+        $flash = Zend_Controller_Action_HelperBroker::getStaticHelper('FlashMessenger');
+
+        // Full Csv Import.
+        if ($this->isFullCsvImport()) {
+            $flash->addMessage(__('You are using full Csv Import, so all import formats will be available.'), 'success');
+        }
+        // Limited CsvImport.
+        else {
+            $flash->addMessage(__('You are using standard Csv Import, so you will be able to import metadata of items only, not metadata of files.'), 'error');
+        }
+
+        // Require external processor.
+        if (!$this->isXsltSupported()) {
+            $flash->addMessage(__('No xslt processor is installed, neither the php internal one, nor an external one.')
+                . ' ' . __('You must install one and set its path below.'), 'error');
+        }
+
         $view = get_view();
         echo $view->partial(
-            'plugins/xml-import-config-form.php',
-            array(
-                'full_csv_import' => $this->isFullCsvImport(),
-            )
+            'plugins/xml-import-config-form.php'
         );
     }
 
@@ -204,5 +211,18 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
     static public function isFullCsvImport()
     {
         return (substr(get_plugin_ini('CsvImport', 'version'), -5) == '-full');
+    }
+
+    /**
+     * Determine if the xslt processor is installed with php.
+     *
+     * Some import options are unailable if CsvImport Full is not installed.
+     *
+     * @return boolean
+     */
+    static public function isXsltSupported()
+    {
+        $processor = get_option('xml_import_xslt_processor');
+        return class_exists('XSLTProcessor') || !empty($processor);
     }
 }

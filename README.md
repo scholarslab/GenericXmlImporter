@@ -31,11 +31,11 @@ path to the default sheets.
 
 * XSLT processor
 
-The xslt processor of php is a slow xslt 1 one. So it's recommended to use an
-external xslt 2 processor, ten times faster. It's required with stylesheets
-designed for xslt 2.0. The command can be configured in the configuration page
-of the plugin. Use "%1$s", "%2$s", "%3$s", without escape, for the file input,
-the stylesheet, and the output.
+If installed, the xslt processor of php is a slow xslt 1 one. So it is
+recommended to use an external xslt 2 processor, until ten times faster. It's
+required with stylesheets designed for xslt 2.0. The command can be configured
+in the configuration page of the plugin. Use "%1$s", "%2$s", "%3$s", without
+escape, for the file input, the stylesheet, and the output.
 
 Examples for Debian / Ubuntu / Mint (Debian 6 for the first command, Debian 8
 for the second one), with the package "SaxonB" or "libsaxonhe-java":
@@ -59,7 +59,9 @@ CLASSPATH=/usr/share/java/Saxon-HE.jar java net.sf.saxon.Transform -ext:on -vers
 Note: Only saxon is currently supported.
 
 Anyway, if there is no xslt2 processor installed, the command should be cleaned
-and the plugin will use the default xslt 1 processor of php.
+and the plugin will use the default xslt 1 processor of php. Of course, it
+should be installed: this is the package "php5-xsl" for Debian. This processor
+can process only the xslt 1 sheets.
 
 
 Examples

@@ -18,7 +18,10 @@
 
 <xsl:stylesheet version="2.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:omeka="http://omeka.org/schemas/omeka-xml/v5">
+    xmlns:omeka="http://omeka.org/schemas/omeka-xml/v5"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    >
     <xsl:output method="text" encoding="UTF-8"/>
 
     <!-- Parameters -->
@@ -52,7 +55,10 @@
     <!-- Identifier field to get the Identifier. -->
     <xsl:param name="identifier_field"><xsl:text>Dublin Core:Identifier</xsl:text></xsl:param>
 
-    <!-- Constantes -->
+    <!-- List of Dublin Core terms to simplify the process. -->
+    <xsl:param name="dcterms_file">dcterms.xml</xsl:param>
+
+    <!-- Constants -->
     <xsl:variable name="line_start">
         <xsl:value-of select="$enclosure"/>
     </xsl:variable>
@@ -72,22 +78,34 @@
         <xsl:value-of select="$enclosure"/>
         <xsl:value-of select="$end_of_line"/>
     </xsl:variable>
-    <!-- Permet la mise en minuscule du type de fichier (xslt 1.0) -->
-    <xsl:variable name="majuscule" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÄËÏÖÜŸÇ'" />
-    <xsl:variable name="minuscule" select="'abcdefghijklmnopqrstuvwxyzáéíóúàèìòùâêîôûäëïöüÿç'" />
 
-    <!-- Build the identifier field and subfield, if any. -->
+    <!-- List of Dublin Core terms to simplify the process. -->
+    <xsl:variable name="dcterms" select="document($dcterms_file)"/>
+
+    <!-- Allow to lowercase or uppercase a string (European strings, for xslt 1.0). -->
+    <xsl:variable name="uppercase" select="'ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚÀÈÌÒÙÂÊÎÔÛÄËÏÖÜŸÇ'" />
+    <xsl:variable name="lowercase" select="'abcdefghijklmnopqrstuvwxyzáéíóúàèìòùâêîôûäëïöüÿç'" />
+
+    <!-- Build the node-set of headers from the xml file. -->
+    <!-- This is the list of distinct attribute names of data nodes. -->
+    <xsl:variable name="columns">
+        <xsl:call-template name="headers" />
+    </xsl:variable>
+
+    <!-- Build the identifier field, subfield, and Dublin Core term, if any, to
+    simplify next process. -->
     <xsl:variable name="identifierField">
         <xsl:value-of select="normalize-space(substring-before($identifier_field, ':'))" />
     </xsl:variable>
     <xsl:variable name="identifierSubField">
         <xsl:value-of select="normalize-space(substring-after($identifier_field, ':'))" />
     </xsl:variable>
-
-    <!-- Build the node-set of headers from the xml file. -->
-    <!-- This is the list of distinct attribute names of data nodes. -->
-    <xsl:variable name="columns">
-        <xsl:call-template name="headers" />
+    <xsl:variable name="identifierSubFieldTerm">
+        <xsl:if test="$identifierField = 'Dublin Core' and $identifierSubField != ''">
+            <xsl:value-of select="$columns/column
+                    [@set = $identifierField and @element = $identifierSubField]
+                    /@term" />
+        </xsl:if>
     </xsl:variable>
 
     <!-- Template to get a list of headers. -->
@@ -118,9 +136,11 @@
                 <xsl:attribute name="name">Item</xsl:attribute>
             </xsl:element>
             <!-- In the case where there is no identifier. -->
+            <!--
             <xsl:element name="column">
-                <xsl:attribute name="name">Item</xsl:attribute>
+                <xsl:attribute name="name">IdentifierField</xsl:attribute>
             </xsl:element>
+            -->
         </xsl:if>
         <!-- Set as column all normal attributes of records. -->
         <xsl:for-each select="//record/@*[
@@ -139,7 +159,9 @@
             <xsl:element name="column">
                 <xsl:attribute name="name">
                     <!-- First character as uppercase -->
-                    <xsl:value-of select="concat(translate(substring(name(), 1, 1), $minuscule, $majuscule), substring(name(), 2))"/>
+                    <xsl:call-template name="capitalizeFirst">
+                        <xsl:with-param name="string" select="name()" />
+                    </xsl:call-template>
                 </xsl:attribute>
                 <!-- For simpler checks, copy original name as another attribute too. -->
                 <xsl:attribute name="attrib">
@@ -157,7 +179,61 @@
             </xsl:element>
         </xsl:if>
 
-        <!-- Elements metadata used in the file itself. -->
+        <!-- Standard Dublin Core metadata used in the file itself, at any level. -->
+        <xsl:for-each select="//record/dc:*">
+            <xsl:variable name="dcLabel">
+                <xsl:call-template name="capitalizeFirst">
+                    <xsl:with-param name="string" select="local-name()" />
+                </xsl:call-template>
+            </xsl:variable>
+            <xsl:element name="column">
+                <!-- Set the column name. -->
+                <xsl:attribute name="name">
+                    <xsl:text>Dublin Core</xsl:text>
+                    <xsl:text>:</xsl:text>
+                    <xsl:value-of select="$dcLabel" />
+                </xsl:attribute>
+                <!-- For simpler checks, copy term name too. -->
+                <xsl:attribute name="set">
+                    <xsl:text>Dublin Core</xsl:text>
+                </xsl:attribute>
+                <xsl:attribute name="element">
+                    <xsl:value-of select="$dcLabel" />
+                </xsl:attribute>
+                <xsl:attribute name="term">
+                    <xsl:value-of select="local-name()" />
+                </xsl:attribute>
+            </xsl:element>
+        </xsl:for-each>
+
+        <!-- Qualified Dublin Core metadata used in the file itself, at any level. -->
+        <xsl:for-each select="//record/dcterms:*">
+            <xsl:variable name="dcLabel">
+                <xsl:value-of select="$dcterms/terms
+                    /term[@name = local-name(current())]
+                    /@label" />
+            </xsl:variable>
+            <xsl:element name="column">
+                <!-- Set the column name. -->
+                <xsl:attribute name="name">
+                    <xsl:text>Dublin Core</xsl:text>
+                    <xsl:text>:</xsl:text>
+                    <xsl:value-of select="$dcLabel" />
+                </xsl:attribute>
+                <!-- For simpler checks, copy term name too. -->
+                <xsl:attribute name="set">
+                    <xsl:text>Dublin Core</xsl:text>
+                </xsl:attribute>
+                <xsl:attribute name="element">
+                    <xsl:value-of select="$dcLabel" />
+                </xsl:attribute>
+                <xsl:attribute name="term">
+                    <xsl:value-of select="local-name()" />
+                </xsl:attribute>
+            </xsl:element>
+        </xsl:for-each>
+
+        <!-- Elements metadata used in the file itself, at any level. -->
         <xsl:for-each select="//record/elementSet/element">
             <xsl:element name="column">
                 <!-- Set the column name. -->
@@ -167,17 +243,23 @@
                     <xsl:value-of select="@name" />
                 </xsl:attribute>
                 <!-- For simpler checks, copy original attributes too. -->
-                <!-- TODO Use a copy all attributes? -->
                 <xsl:attribute name="set">
                     <xsl:value-of select="../@name" />
                 </xsl:attribute>
                 <xsl:attribute name="element">
                     <xsl:value-of select="@name" />
                 </xsl:attribute>
+                <xsl:if test="../@name = 'Dublin Core'">
+                    <xsl:attribute name="term">
+                        <xsl:value-of select="$dcterms/terms
+                            /term[@label = current()/@name]
+                            /@name" />
+                    </xsl:attribute>
+                </xsl:if>
             </xsl:element>
         </xsl:for-each>
 
-        <!-- Elements metadata used in the file itself. -->
+        <!-- Elements extra metadata used in the file itself, at any level. -->
         <!-- TODO Manage multivalues and add a ":" at the end of the name. -->
         <xsl:for-each select="//record/extra/data">
             <xsl:element name="column">
@@ -267,6 +349,18 @@
                     <xsl:value-of select="$record
                             /@*[local-name() = $column/@attrib]" />
                 </xsl:when>
+                <!-- Dublin Core elements or Dublin Core tags. -->
+                <xsl:when test="@set = 'Dublin Core' and @element">
+                    <xsl:apply-templates select="$record
+                            /elementSet[@name = $column/@set]
+                            /element[@name = $column/@element]
+                            /data
+                            | $record
+                            /dc:*[local-name() = $column/@term]
+                            | $record
+                            /dcterms:*[local-name() = $column/@term]
+                            " />
+                </xsl:when>
                 <!-- Normal elements. -->
                 <xsl:when test="@set and @element">
                     <xsl:apply-templates select="$record
@@ -296,9 +390,10 @@
         <!-- These checks don't manage all cases, only existing ones. -->
         <xsl:choose>
             <xsl:when test="$record/@recordType">
-                <xsl:value-of select="concat(
-                        translate(substring($record/@recordType, 1, 1), $minuscule, $majuscule),
-                        substring($record/@recordType, 2))" />
+                <!-- First character as uppercase -->
+                <xsl:call-template name="capitalizeFirst">
+                    <xsl:with-param name="string" select="$record/@recordType" />
+                </xsl:call-template>
             </xsl:when>
             <xsl:when test="$record/record/record">
                 <xsl:text>Collection</xsl:text>
@@ -334,13 +429,31 @@
                 <xsl:when test="$recordNode/@identifier">
                     <xsl:value-of select="normalize-space($recordNode/@identifier)" />
                 </xsl:when>
+                <xsl:when test="$identifierField = 'Dublin Core'
+                            and $identifierSubField != ''">
+                    <xsl:value-of select="
+                        normalize-space(
+                            (
+                                $recordNode
+                                /elementSet[@name = $identifierField]
+                                /element[@name = $identifierSubField]
+                                /data[1]
+                                | $recordNode
+                                /dc:*[local-name() = $identifierSubFieldTerm][1]
+                                | $recordNode
+                                /dcterms:*[local-name() = $identifierSubFieldTerm][1]
+                            )[1]
+                        )" />
+                </xsl:when>
                 <xsl:when test="$identifierField != ''
-                            and $identifierSubField != '' ">
-                    <xsl:value-of select="normalize-space($recordNode
+                            and $identifierSubField != ''">
+                    <xsl:value-of select="
+                        normalize-space(
+                            $recordNode
                             /elementSet[@name = $identifierField]
                             /element[@name = $identifierSubField]
                             /data[1]
-                            )" />
+                        )" />
                 </xsl:when>
             </xsl:choose>
         </xsl:variable>
@@ -362,7 +475,7 @@
         </xsl:if>
     </xsl:template>
 
-    <xsl:template match="data">
+    <xsl:template match="data | dc:* | dcterms:*">
         <xsl:value-of select="normalize-space(.)" />
         <xsl:if test="not(position() = last())">
             <xsl:value-of select="$delimiter_element" />
@@ -374,6 +487,11 @@
         <xsl:if test="not(position() = last())">
             <xsl:value-of select="$delimiter_tag" />
         </xsl:if>
+    </xsl:template>
+
+    <xsl:template name="capitalizeFirst">
+        <xsl:param name="string" select="." />
+        <xsl:value-of select="concat(translate(substring($string, 1, 1), $lowercase, $uppercase), substring($string, 2))" />
     </xsl:template>
 
     <!-- Don't write anything else. -->

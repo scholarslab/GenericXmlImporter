@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     For xslt: "advanced_manage.xsl".
-    A param may be set to import this file: IdentifierField is "Dublin Core:Title". 
+    A param may be set to import this file: IdentifierField is "Dublin Core:Title".
     If not set, the import will fail and update can't be done.
-    
+
     This somewhat flat Xml file is used to test Xml Import features.
     It contains:
     - creation of a collection when it doesn't exists
     - automap
     - extra data (with plugin Geolocation)
     - multivalued content
+    - standard dc and qualified dc terms (the namespaces are added)
     - content with multiple lines (they will be put on one row during import;
     use html content to import multiple lines)
     Some missing data of records (collection, item, files) will be updated via
     the update file.
 -->
-<documents>
-    <record 
+<documents
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    >
+    <record
         collection="Architectural Heritage"
         itemType="Still Image"
         featured="1"
@@ -48,6 +52,9 @@ The cathedral is the mother church of the Roman Catholic Archdiocese of Florence
                 <data>Height: 114.5 m</data>
             </element>
         </elementSet>
+        <dc:description>This is a standard description in xml Dublin Core for testing purpose.</dc:description>
+        <dcterms:description>This is another standard description in xml Dublin Core Terms for testing purpose.</dcterms:description>
+        <dcterms:coverage>Italia</dcterms:coverage>
         <extra>
             <data name="geolocation:latitude">43.773145</data>
             <data name="geolocation:longitude">11.2559602</data>
@@ -55,7 +62,7 @@ The cathedral is the mother church of the Roman Catholic Archdiocese of Florence
             <data name="geolocation:map_type" />
             <data name="geolocation:address" />
         </extra>
-        <record 
+        <record
             file="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/The_Cathedral_panoramic_view_from_Vecchio_Palace_Florence_Italy.jpg/1280px-The_Cathedral_panoramic_view_from_Vecchio_Palace_Florence_Italy.jpg"
             >
             <elementSet name="Dublin Core">
@@ -65,8 +72,8 @@ The cathedral is the mother church of the Roman Catholic Archdiocese of Florence
             </elementSet>
         </record>
     </record>
-    <record 
-        collection="Architectural Heritage" 
+    <record
+        collection="Architectural Heritage"
         itemType="Still Image"
         >
         <elementSet name="Dublin Core">

@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Description : List of term names and labels of Dublin Core terms.
+
+    This mapping is required, because it can't be done by a capitalization: some
+    terms names and labels are different, like "issued".
+
+    @copyright Daniel Berthereau, 2012-2015
+    @license http://www.apache.org/licenses/LICENSE-2.0.html
+    @package XmlImport
+-->
+
+<terms>
+    <term name="title" label="Title" />
+    <term name="alternative" label="Alternative Title" />
+    <term name="creator" label="Creator" />
+    <term name="subject" label="Subject" />
+    <term name="description" label="Description" />
+    <term name="tableOfContents" label="Table Of Contents" />
+    <term name="abstract" label="Abstract" />
+    <term name="publisher" label="Publisher" />
+    <term name="contributor" label="Contributor" />
+    <term name="date" label="Date" />
+    <term name="created" label="Date Created" />
+    <term name="valid" label="Date Valid" />
+    <term name="available" label="Date Available" />
+    <term name="issued" label="Date Issued" />
+    <term name="modified" label="Date Modified" />
+    <term name="dateAccepted" label="Date Accepted" />
+    <term name="dateCopyrighted" label="Date Copyrighted" />
+    <term name="dateSubmitted" label="Date Submitted" />
+    <term name="type" label="Type" />
+    <term name="format" label="Format" />
+    <term name="extent" label="Extent" />
+    <term name="medium" label="Medium" />
+    <term name="identifier" label="Identifier" />
+    <term name="bibliographicCitation" label="Bibliographic Citation" />
+    <term name="source" label="Source" />
+    <term name="language" label="Language" />
+    <term name="relation" label="Relation" />
+    <term name="isVersionOf" label="Is Version Of" />
+    <term name="hasVersion" label="Has Version" />
+    <term name="replaces" label="Replaces" />
+    <term name="isReplacedBy" label="Is Replaced By" />
+    <term name="isRequiredBy" label="Is Required By" />
+    <term name="requires" label="Requires" />
+    <term name="isPartOf" label="Is Part Of" />
+    <term name="hasPart" label="Has Part" />
+    <term name="isReferencedBy" label="Is Referenced By" />
+    <term name="references" label="References" />
+    <term name="isFormatOf" label="Is Format Of" />
+    <term name="hasFormat" label="Has Format" />
+    <term name="conformsTo" label="Conforms To" />
+    <term name="coverage" label="Coverage" />
+    <term name="spatial" label="Spatial Coverage" />
+    <term name="temporal" label="Temporal Coverage" />
+    <term name="rights" label="Rights" />
+    <term name="accessRights" label="Access Rights" />
+    <term name="license" label="License" />
+    <term name="audience" label="Audience" />
+    <term name="mediator" label="Mediator" />
+    <term name="educationLevel" label="Audience Education Level" />
+    <term name="accrualMethod" label="Accrual Method" />
+    <term name="accrualPeriodicity" label="Accrual Periodicity" />
+    <term name="accrualPolicy" label="Accrual Policy" />
+    <term name="instructionalMethod" label="Instructional Method" />
+    <term name="provenance" label="Provenance" />
+    <term name="rightsHolder" label="Rights Holder" />
+</terms>

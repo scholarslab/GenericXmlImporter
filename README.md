@@ -145,6 +145,21 @@ delimiters: pipe.
     Note that in these examples, the identifier field is "Dublin Core:Title"
     (the same examples in CsvImport use "Dublin Core:Identifier").
 
+10. `test_mag.xml`
+
+    "Metadati Amministrativi e Gestionali" ([Mag]) is an xml format similar to
+    [Mets]. It is used in Italy to manage administrative data about digitalized
+    documents.
+
+    To try it, select the format "Manage", the identifier field "Dublin Core:Identifier",
+    the sheet "mag2document.xsl", check the option "Intermediate stylesheet" and
+    add these parameters: `< base_url = http://localhost/path/to/omeka ><document_path =  >`.
+    If local paths are allowed in Csv Import (fork only), they may be: `< base_url = /path/to/omeka ><document_path =  >`.
+    The parameter "document_path" depends on the structure of the folders where
+    are saved files and the way they are set in xml files. For this test, it
+    should be empty. Other parameters of the xsl sheet can be set similarly.
+    These parameters should be removed for other test files.
+
 If your xsl sheet builds a csv file with "Csv Report", "Mixed records" or
 "Manage" format, they can be  imported directly without mapping. "Mixed" and
 "Manage" formats can be used only with the [Csv Import Full] fork. These formats
@@ -212,6 +227,8 @@ Copyright
 [Csv Import]: https://github.com/omeka/plugin-CsvImport
 [Csv Import Full]: https://github.com/Daniel-KM/CsvImport
 [Geolocation]: https://omeka.org/add-ons/plugins/geolocation
+[Mag]: http://www.iccu.sbn.it/opencms/opencms/it/main/standard/metadati/pagina_267.html
+[Mets]: https://www.loc.gov/standards/mets
 [plugin issues]: https://github.com/Daniel-KM/XmlImport/issues
 [Apache licence v2]: https://www.apache.org/licenses/LICENSE-2.0.html
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"

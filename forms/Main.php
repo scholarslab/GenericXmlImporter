@@ -236,6 +236,12 @@ class XmlImport_Form_Main extends Omeka_Form
             'value' => get_option('xml_import_stylesheet'),
         ));
 
+        $this->addElement('checkbox', 'stylesheet_intermediate', array(
+            'label' => __('Intermediate stylesheet'),
+            'description' => __('Check if this stylesheet is an intermediate one that converts the xml into the format used for simple documents, that are automatically imported via the stylesheet "advanced_manage" (requires the fork of CsvImport).'),
+            'value' => get_option('xml_import_stylesheet_intermediate'),
+        ));
+
         $this->addElement('text', 'stylesheet_parameters', array(
             'label' => __('Add specific parameters to use with this xsl sheet'),
             'description' => __('Format: "< parameter_1_name = parameter 1 value >< parameter_2_name = parameter 2 value >"...')
@@ -305,6 +311,7 @@ class XmlImport_Form_Main extends Omeka_Form
         $this->addDisplayGroup(
             array(
                 'stylesheet',
+                'stylesheet_intermediate',
                 'stylesheet_parameters',
             ),
             'xsl_params',

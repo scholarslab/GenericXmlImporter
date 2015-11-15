@@ -28,6 +28,8 @@ class XmlImport_generateCsv extends Process
         $elementDelimiter = $args['element_delimiter'];
         $tagDelimiter = $args['tag_delimiter'];
         $fileDelimiter = $args['file_delimiter'];
+        // TODO Intermediate stylesheets are not managed currently.
+        // $stylesheetIntermediate = $args['stylesheet_intermediate'];
         $stylesheetParameters = $args['stylesheet_parameters'];
 
         $stylesheet = !empty($args['stylesheet'])

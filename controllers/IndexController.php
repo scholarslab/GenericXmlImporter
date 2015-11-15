@@ -141,6 +141,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $xmlImportSession->create_collections = $uploadedData['create_collections'];
             $xmlImportSession->contains_extra_data = $uploadedData['contains_extra_data'];
             $xmlImportSession->stylesheet = $uploadedData['stylesheet'];
+            $xmlImportSession->stylesheet_intermediate = $uploadedData['stylesheet_intermediate'];
             $xmlImportSession->stylesheet_parameters = $uploadedData['stylesheet_parameters'];
 
             $delimitersList = self::getDelimitersList();
@@ -246,6 +247,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $args['tag_delimiter'] = $uploadedData['tag_delimiter'];
         $args['file_delimiter'] = $uploadedData['file_delimiter'];
         $args['stylesheet'] = $uploadedData['stylesheet'];
+        $args['stylesheet_intermediate'] = $uploadedData['stylesheet_intermediate'];
         $args['stylesheet_parameters'] = $uploadedData['stylesheet_parameters'];
 
         $this->_generateCsv($args);
@@ -287,6 +289,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $tagDelimiter = $args['tag_delimiter'];
         $fileDelimiter = $args['file_delimiter'];
         $stylesheet = get_option('xml_import_xsl_directory') . DIRECTORY_SEPARATOR . $args['stylesheet'];
+        $stylesheetIntermediate = $args['stylesheet_intermediate'];
         $stylesheetParameters = $args['stylesheet_parameters'];
 
         // Delimiters for Csv Report are fixed.
@@ -307,6 +310,16 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             . date('Ymd-His') . '_'
             . $this->_sanitizeString($csvFilename) . '.csv';
         $csvFilename = 'Via Xml Import: ' . $csvFilename;
+
+        // If the xslt is an intermediate, prepare the second stylesheet.
+        $stylesheetManage = '';
+        if ($stylesheetIntermediate) {
+            $command = get_option('archive_folder_processor');
+            $stylesheetManage = empty($command)
+                ? 'advanced_manage_xslt1.xsl'
+                : 'advanced_manage.xsl';
+            $stylesheetManage = get_option('xml_import_xsl_directory') . DIRECTORY_SEPARATOR . $stylesheetManage;
+        }
 
         // Prepare parameters for the stylesheet.
         $parameters = array(
@@ -355,6 +368,16 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                     $this->_helper->flashMessenger(__('Error when transforming xml file "%s" with the xsl sheet "%s".', $filepath, $stylesheet), 'error');
                     $this->_helper->redirector->goto('index');
                 }
+
+                // If the xslt is an intermediate, process the second conversion.
+                if ($stylesheetIntermediate) {
+                    $result = $this->_processXslt($result, $stylesheetManage, '', $parameters);
+                    if ($result === NULL) {
+                        $this->_helper->flashMessenger(__('Error when transforming xml file "%s" with the xsl sheet "%s".', $filepath, $stylesheet), 'error');
+                        $this->_helper->redirector->goto('index');
+                    }
+                }
+
                 $output = $result;
 
                 // @todo Use Zend/Omeka api.
@@ -430,6 +453,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             // All is valid, so we save settings.
             set_option('xml_import_format', $args['format']);
             set_option('xml_import_stylesheet', $args['stylesheet']);
+            set_option('xml_import_stylesheet_intermediate', $args['stylesheet_intermediate']);
             set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
             set_option('xml_import_format_filename', $args['format_filename']);
             if (XmlImportPlugin::isFullCsvImport()) {
@@ -515,6 +539,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $fileList = $xmlImportSession->file_list;
         $format = $xmlImportSession->format;
         $stylesheet = $xmlImportSession->stylesheet;
+        $stylesheetIntermediate = $xmlImportSession->stylesheet_intermediate;
         $stylesheetParameters = $xmlImportSession->stylesheet_parameters;
 
         // TODO Add the root element name, because some formats use it.
@@ -613,6 +638,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                 'tag_delimiter' => $xmlImportSession->tag_delimiter,
                 'file_delimiter' => $xmlImportSession->file_delimiter,
                 'stylesheet' => $stylesheet,
+                'stylesheet_intermediate' => $xmlImportSession->stylesheet_intermediate,
                 'stylesheet_parameters' => $xmlImportSession->stylesheet_parameters,
             ) as $name => $value) {
             $element = new Zend_Form_Element_Hidden($name);

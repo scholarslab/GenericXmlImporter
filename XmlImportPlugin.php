@@ -44,6 +44,7 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
         'xml_import_xslt_processor' => '',
         'xml_import_format' => 'Item',
         'xml_import_stylesheet' => 'generic_item.xsl',
+        'xml_import_stylesheet_intermediate' => false,
         'xml_import_stylesheet_parameters' => '',
         'xml_import_format_filename' => '.xml',
     );

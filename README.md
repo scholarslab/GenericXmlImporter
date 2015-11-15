@@ -1,7 +1,6 @@
 Xml Import (plugin for Omeka)
 =============================
 
-
 [Xml Import] is a plugin for [Omeka] that allows to import data and files and to
 update records from one or multiple XML files via a generic or a custom XSLT
 sheet. It's usefull to import documents and records from other places or from an
@@ -12,12 +11,17 @@ Process uses [Csv Import], so all imports can be managed in one place.
 Currently, to import metadata of extra data of collections, items or files and
 to update any records, the [Csv Import Full] fork should be used.
 
+You should create xsl sheets that convert your original xml files into csv ones.
+It's possible too to convert your xml files into an intermediate simple format
+with only items, files and elements (Dublin Core or other formats), that will be
+automatically imported. See examples.
+
 
 Installation
 ------------
 
 Install first the plugin [Csv Import] or [Csv Import Full]. The latter is
-required with some formats.
+required with some formats, in particular to use the intermediate process.
 
 Then uncompress files and rename plugin folder "XmlImport".
 
@@ -31,11 +35,15 @@ path to the default sheets.
 
 * XSLT processor
 
-If installed, the xslt processor of php is a slow xslt 1 one. So it is
-recommended to use an external xslt 2 processor, until ten times faster. It's
-required with stylesheets designed for xslt 2.0. The command can be configured
-in the configuration page of the plugin. Use "%1$s", "%2$s", "%3$s", without
-escape, for the file input, the stylesheet, and the output.
+Xslt has two main versions:  xslt 1.0 and xslt 2.0. The first is often installed
+with php via the extension "php-xsl" or the package "php5-xsl", depending on
+your system. It is until ten times slower than xslt 2.0 and sheets are more
+complex to write.
+
+So it's recommended to install an xslt 2 processor, that can process xslt 1.0
+and xslt 2.0 sheets. The command can be configured in the configuration page of
+the plugin. Use "%1$s", "%2$s", "%3$s", without escape, for the file input, the
+stylesheet, and the output.
 
 Examples for Debian 6 / Ubuntu / Mint (with the package "SaxonB"):
 ```
@@ -72,35 +80,33 @@ cd /path/to/Omeka/plugins/XmlImport
 saxon -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'
 ```
 
-Note: Only saxon is currently supported.
+Note: Only saxon is currently supported as xslt 2 processor.
 
 Anyway, if there is no xslt2 processor installed, the command should be cleaned
-and the plugin will use the default xslt 1 processor of php. Of course, it
-should be installed: this is the package "php5-xsl" for Debian. This processor
-can process only the xslt 1 sheets.
+and the plugin will use the default xslt 1 processor of php, if installed.
 
 
 Examples
 --------
 
-Seven examples of xml files are available in the xml_files folder. They are
+A lot of examples of xml files are available in the xml_files folder. They are
 many because a new one is built for each new feature. The last ones uses all of
-them.
+them. Furthermore, some files may be updated with a second file to get full
+data. This is just to have some examples of update or records.
 
-Some files may be updated with a second file to get full data. This is just to
-have some examples.
+Some provided stylesheets need an xslt 2 processor, but there is an equivalent
+sheet for xslt 1 processor. All xslt 1 sheets can be processed by an xslt 2
+processor.
 
-Some provided stylesheets need an xslt 2 processor.
-
-Because xslt is only a converter into csv, you need to set the options for csv
-in the form: delimiter: tabulation, enclosure: empty, element, tag and file
-delimiters: pipe.
+Because Xml Import is currently only a converter into csv, you need to set the
+options for csv in the form: delimiter: tabulation, enclosure: empty, element,
+tag and file delimiters: pipe.
 
 1. `test_generic_item.xml`
 
     A basic list of three books with images of Wikipedia, with non Dublin Core
     tags. To try it, choose options "One xml file", "Items", and the xsl sheet
-    `generic_item.xsl` (or `generic_item_xslt1.xsl` if an external processor is
+    `generic_item.xsl` (or `generic_item.xslt1.xsl` if an external processor is
     not set).
 
 2. `test_generic_item_automap.xml`
@@ -119,8 +125,8 @@ delimiters: pipe.
 
     An export of two different items with files and files metadata. To try it,
     use one of the three other sheets: `omeka_xml_output_v4_report.xsl`,
-    `omeka_xml_output_v4_item.xsl`, `omeka_xml_output_v5_mixed.xsl` and the
-    format "Mixed".
+    `omeka_xml_output_v4_item.xsl`, `omeka_xml_output_v5_mixed.xsl` or
+    `omeka_xml_output_v5_manage.xsl` and check the respective format.
 
     They allow to import Omeka Xml output files (version 4.0 and 4.1, included
     in Omeka 1.5, and version 5.0, included in Omeka 2.0), that you can get
@@ -171,8 +177,8 @@ delimiters: pipe.
 
     To try it, select the format "Manage", the identifier field "Dublin Core:Identifier",
     the sheet "mag2document.xsl", check the option "Intermediate stylesheet" and
-    add these parameters: `< base_url = http://localhost/path/to/omeka ><document_path =  >`.
-    If local paths are allowed in Csv Import (fork only), they may be: `< base_url = /path/to/omeka ><document_path =  >`.
+    add these parameters: `< base_url = http://localhost/path/to/omeka >< document_path = >`.
+    If local paths are allowed in Csv Import (fork only), they may be: `< base_url = /path/to/omeka >< document_path = >`.
     The parameter "document_path" depends on the structure of the folders where
     are saved files and the way they are set in xml files. For this test, it
     should be empty. Other parameters of the xsl sheet can be set similarly.

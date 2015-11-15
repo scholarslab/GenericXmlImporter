@@ -3,6 +3,9 @@
     Description : Convert a generic Xml file to "Manage records" format in order
     to import it automatically into Omeka via Csv Import
 
+    This is the xslt 1.1 downgrade from "advanced_manage.xsl". It requires the
+    processor xslt 1 Saxon 6.5.5 or higher. The processor Xalan doesn't work.
+
     Notes:
     - By default, this sheet uses "Dublin Core:Identifier" as main Identifier.
     If no identifier is found, records should use the attribute "identifierField"
@@ -16,11 +19,13 @@
     @package Omeka/Plugins/XmlImport
 -->
 
-<xsl:stylesheet version="2.0"
+<xsl:stylesheet version="1.1"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+
     xmlns:omeka="http://omeka.org/schemas/omeka-xml/v5"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:dcterms="http://purl.org/dc/terms/"
+
     >
     <xsl:output method="text" encoding="UTF-8" />
 
@@ -316,6 +321,7 @@
 
         <!-- Copy each value of column from each record, if value exists. -->
         <xsl:for-each select="$columns/column">
+
             <xsl:variable name="column" select="." />
 
             <!-- Process vary according to columns. -->

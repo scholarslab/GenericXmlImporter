@@ -54,9 +54,8 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookInstall()
     {
-        // Default stylesheet.
+        // Default location of stylesheets.
         $this->_options['xml_import_xsl_directory'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries';
-        $this->_options['xml_import_stylesheet'] = XmlImportPlugin::isFullCsvImport() ? 'generic_mixed.xsl' :  'generic_item.xsl';
 
         $this->_installOptions();
     }

@@ -13,16 +13,16 @@
     - Warning: enclosure, delimiter (column, element, tag and file) and end of line are hard
     coded in Xml Import.
 -->
-<xsl:stylesheet
+<xsl:stylesheet version="2.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     exclude-result-prefixes="xs"
-    version="2.0">
-    <xsl:output method="text" encoding="UTF-8"/>
+    >
+    <xsl:output method="text" encoding="UTF-8" />
 
     <!-- Parameters -->
     <!-- The node used as a record. -->
-    <xsl:param name="node" select="''"/>
+    <xsl:param name="node" select="''" />
 
     <!-- Headers are added by default. -->
     <xsl:param name="headers">true</xsl:param>
@@ -86,13 +86,13 @@
             <xsl:call-template name="headers" />
         </xsl:if>
 
-        <xsl:apply-templates select="descendant::node()[name() = $nodename]"/>
+        <xsl:apply-templates select="descendant::node()[name() = $nodename]" />
     </xsl:template>
 
     <xsl:template name="headers">
         <xsl:for-each select="$elements/element">
             <xsl:value-of select="$enclosure" />
-            <xsl:value-of select="."/>
+            <xsl:value-of select="." />
             <xsl:value-of select="$enclosure" />
             <xsl:if test="not(position() = last())">
                 <xsl:value-of select="$delimiter" />
@@ -113,7 +113,7 @@
                     <!-- There are sub-values (<tags><tag>alpha</tag><tag>beta</tag></tags>. -->
                     <xsl:when test="*">
                         <xsl:for-each select="*">
-                            <xsl:value-of select="normalize-space(.)"/>
+                            <xsl:value-of select="normalize-space(.)" />
                             <xsl:if test="not(position() = last())">
                                 <xsl:call-template name="internal_separator" />
                             </xsl:if>
@@ -121,7 +121,7 @@
                     </xsl:when>
                     <!-- Simple values (but they can be multiple: <tag>gamma</tag><tag>delta</tag>). -->
                     <xsl:otherwise>
-                        <xsl:value-of select="normalize-space(.)"/>
+                        <xsl:value-of select="normalize-space(.)" />
                         <xsl:if test="not(position() = last())">
                             <xsl:call-template name="internal_separator" />
                         </xsl:if>

@@ -3,6 +3,9 @@
     Description : Convert a generic Xml file to "Manage records" format in order
     to import it automatically into Omeka via Csv Import
 
+    This is the xslt 1.0 downgrade from "advanced_manage.xsl". It uses the
+    exslt extension, that can be used with the default php xslt processor.
+
     Notes:
     - By default, this sheet uses "Dublin Core:Identifier" as main Identifier.
     If no identifier is found, records should use the attribute "identifierField"
@@ -16,11 +19,15 @@
     @package Omeka/Plugins/XmlImport
 -->
 
-<xsl:stylesheet version="2.0"
+<xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:exsl="http://exslt.org/common"
+
     xmlns:omeka="http://omeka.org/schemas/omeka-xml/v5"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:dcterms="http://purl.org/dc/terms/"
+
+    extension-element-prefixes="exsl"
     >
     <xsl:output method="text" encoding="UTF-8" />
 
@@ -115,7 +122,7 @@
     </xsl:variable>
     <xsl:variable name="identifierSubFieldTerm">
         <xsl:if test="$identifierField = 'Dublin Core' and $identifierSubField != ''">
-            <xsl:value-of select="$columns/column
+            <xsl:value-of select="exsl:node-set($columns)/column
                     [@set = $identifierField and @element = $identifierSubField]
                     /@term" />
         </xsl:if>
@@ -129,7 +136,7 @@
             <xsl:call-template name="list_all_attributes" />
         </xsl:variable>
         <!-- Get distinct columns names. -->
-        <xsl:for-each select="$attributes/column[not(@name = preceding-sibling::column/@name)]">
+        <xsl:for-each select="exsl:node-set($attributes)/column[not(@name = preceding-sibling::column/@name)]">
             <xsl:copy-of select="." />
         </xsl:for-each>
     </xsl:template>
@@ -292,7 +299,7 @@
     <xsl:template match="/">
         <xsl:if test="$headers = 'true'">
             <xsl:value-of select="$line_start" />
-            <xsl:for-each select="$columns/column">
+            <xsl:for-each select="exsl:node-set($columns)/column">
                 <xsl:value-of select="@name" />
                 <xsl:if test="not(position() = last())">
                     <xsl:value-of select="$separator" />
@@ -315,7 +322,8 @@
         </xsl:variable>
 
         <!-- Copy each value of column from each record, if value exists. -->
-        <xsl:for-each select="$columns/column">
+        <xsl:for-each select="exsl:node-set($columns)/column">
+
             <xsl:variable name="column" select="." />
 
             <!-- Process vary according to columns. -->

@@ -13,9 +13,10 @@
 -->
 
 <xsl:stylesheet version="2.0"
-        xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-        xmlns:omeka="http://omeka.org/schemas/omeka-xml/v5">
-    <xsl:output method="text" encoding="UTF-8"/>
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:omeka="http://omeka.org/schemas/omeka-xml/v5"
+    >
+    <xsl:output method="text" encoding="UTF-8" />
 
     <!-- Parameters -->
     <!-- All headers are added by default. -->
@@ -47,23 +48,23 @@
 
     <!-- Constantes -->
     <xsl:variable name="line_start">
-        <xsl:value-of select="$enclosure"/>
+        <xsl:value-of select="$enclosure" />
     </xsl:variable>
     <xsl:variable name="separator">
-        <xsl:value-of select="$enclosure"/>
+        <xsl:value-of select="$enclosure" />
         <xsl:choose>
             <xsl:when test="$delimiter != ''">
-                <xsl:value-of select="$delimiter"/>
+                <xsl:value-of select="$delimiter" />
             </xsl:when>
             <xsl:otherwise>
-                <xsl:value-of select="$delimiter_column"/>
+                <xsl:value-of select="$delimiter_column" />
             </xsl:otherwise>
         </xsl:choose>
-        <xsl:value-of select="$enclosure"/>
+        <xsl:value-of select="$enclosure" />
     </xsl:variable>
     <xsl:variable name="line_end">
-        <xsl:value-of select="$enclosure"/>
-        <xsl:value-of select="$end_of_line"/>
+        <xsl:value-of select="$enclosure" />
+        <xsl:value-of select="$end_of_line" />
     </xsl:variable>
 
     <!-- Build the node-set of headers from the xml file. -->
@@ -87,7 +88,7 @@
             <xsl:call-template name="list_all_attributes" />
         </xsl:variable>
         <!-- Get distinct columns names. -->
-        <xsl:for-each select="$attributes/column[not(@name = (preceding::*/@name))]">
+        <xsl:for-each select="$attributes/column[not(@name = preceding-sibling::column/@name)]">
             <xsl:copy-of select="." />
         </xsl:for-each>
     </xsl:template>
@@ -152,22 +153,22 @@
     <!-- Main template for output. -->
     <xsl:template match="/">
         <xsl:if test="$headers = 'true'">
-            <xsl:value-of select="$line_start"/>
+            <xsl:value-of select="$line_start" />
             <xsl:for-each select="$columns/column">
                 <xsl:value-of select="@name" />
                 <xsl:if test="not(position() = last())">
                     <xsl:value-of select="$separator" />
                 </xsl:if>
             </xsl:for-each>
-            <xsl:value-of select="$line_end"/>
+            <xsl:value-of select="$line_end" />
         </xsl:if>
 
-        <!-- <xsl:apply-templates select="descendant::node()[name() = $node]" mode="record"/> -->
+        <!-- <xsl:apply-templates select="descendant::node()[name() = $node]" mode="record" /> -->
         <xsl:apply-templates select="//record" />
     </xsl:template>
 
     <xsl:template match="record">
-        <xsl:value-of select="$line_start"/>
+        <xsl:value-of select="$line_start" />
 
         <xsl:variable name="record" select="." />
 
@@ -215,7 +216,7 @@
             </xsl:if>
         </xsl:for-each>
 
-        <xsl:value-of select="$line_end"/>
+        <xsl:value-of select="$line_end" />
     </xsl:template>
 
     <xsl:template match="data">

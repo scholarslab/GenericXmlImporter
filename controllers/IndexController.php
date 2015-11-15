@@ -321,7 +321,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         if ($stylesheetIntermediate) {
             $command = get_option('xml_import_xslt_processor');
             $stylesheetManage = empty($command)
-                ? 'advanced_manage_xslt1.xsl'
+                ? 'advanced_manage.xslt1.xsl'
                 : 'advanced_manage.xsl';
             $stylesheetManage = get_option('xml_import_xsl_directory') . DIRECTORY_SEPARATOR . $stylesheetManage;
         }

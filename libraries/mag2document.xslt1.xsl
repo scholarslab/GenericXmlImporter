@@ -20,7 +20,7 @@
     @see https://www.loc.gov/standards/mets
 -->
 
-<xsl:stylesheet version="2.0"
+<xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 
     xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -37,7 +37,7 @@
 
     <xsl:output method="xml" indent="yes" encoding="UTF-8" />
 
-    <xsl:strip-space elements="*"/>
+    <xsl:strip-space elements="*" />
 
     <!-- The mag standard doesn't describe all possibilities, so these options
     allows to set some details for the mapping. -->
@@ -120,7 +120,14 @@
 
                 <!-- TODO Use Dublin Core:Rights? -->
                 <xsl:attribute name="public">
-                    <xsl:value-of select="if (mag:gen/mag:access_rights = 1) then '1' else '0'" />
+                    <xsl:choose>
+                        <xsl:when test="mag:gen/mag:access_rights = 1">
+                            <xsl:text>1</xsl:text>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:text>0</xsl:text>
+                        </xsl:otherwise>
+                    </xsl:choose>
                 </xsl:attribute>
 
                 <!-- TODO Keep other values from the gen? Convert to Dublin Core extended? -->
@@ -487,7 +494,7 @@
     <xsl:template name="capitalizeFirst">
         <xsl:param name="string" select="." />
 
-        <xsl:value-of select="concat(translate(substring($string, 1, 1), $lowercase, $uppercase), substring($string, 2))"/>
+        <xsl:value-of select="concat(translate(substring($string, 1, 1), $lowercase, $uppercase), substring($string, 2))" />
     </xsl:template>
 
     <!-- Remove the useless "./" at the start of the file path. -->

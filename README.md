@@ -37,23 +37,39 @@ required with stylesheets designed for xslt 2.0. The command can be configured
 in the configuration page of the plugin. Use "%1$s", "%2$s", "%3$s", without
 escape, for the file input, the stylesheet, and the output.
 
-Examples for Debian / Ubuntu / Mint (Debian 6 for the first command, Debian 8
-for the second one), with the package "SaxonB" or "libsaxonhe-java":
+Examples for Debian 6 / Ubuntu / Mint (with the package "SaxonB"):
 ```
 saxonb-xslt -ext:on -versionmsg:off -s:%1$s -xsl:%2$s -o:%3$s
+```
+
+Examples for Debian 8 / Ubuntu / Mint (with the package "libsaxonhe-java"):
+```
 CLASSPATH=/usr/share/java/Saxon-HE.jar java net.sf.saxon.Transform -ext:on -versionmsg:off -s:%1$s -xsl:%2$s -o:%3$s
 ```
 
-Example for Fedora / RedHat / Centos / Mandriva:
+Example for Fedora / RedHat / Centos / Mandriva / Mageia:
 ```
 saxon -ext:on -versionmsg:off -s:%1$s -xsl:%2$s -o:%3$s
 ```
 
-To test your installation, you need to be able to process such a command line
-(Debian 8 here):
+To test your installation, you need to be able to process such a command line:
+
+For Debian 6...:
+```
+cd /path/to/Omeka/plugins/XmlImport
+saxonb-xslt -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'
+```
+
+For Debian 8...:
 ```
 cd /path/to/Omeka/plugins/XmlImport
 CLASSPATH=/usr/share/java/Saxon-HE.jar java net.sf.saxon.Transform -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'
+```
+
+For Fedora...:
+```
+cd /path/to/Omeka/plugins/XmlImport
+saxon -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'
 ```
 
 Note: Only saxon is currently supported.

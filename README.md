@@ -125,9 +125,17 @@ delimiters: pipe.
     sheet `advanced_mixed.xsl`. If [Geolocation] is installed, it will be used
     to set the location of items.
 
-7. `test_manage_from_mixed.xml`
+7. `test_manage_local.xml`
 
-8. `test_manage_from_mixed_update.xml`
+    This format load test files from the plugin. Use the sheet `advanced_manage.xsl`.
+    The identifier field is "Dublin Core:Identifier". The parameters are:
+    `< base_url = http://localhost/path/to/omeka ><document_path =  >`. If local
+    paths are allowed in Csv Import (fork only), they may be: `< base_url = /path/to/omeka ><document_path =  >`.
+    These parameters should be removed for other test files.
+
+8. `test_manage_from_mixed.xml`
+
+9. `test_manage_from_mixed_update.xml`
 
     These files contain the same data than the two previous ones, but they are
     adapted for the format "Manage". Formats "Mixed" and "Update" are deprecated

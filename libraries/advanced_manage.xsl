@@ -28,6 +28,10 @@
     <!-- All headers are added by default. -->
     <xsl:param name="headers">true</xsl:param>
 
+    <!-- The base path for the file, if needed. It will be added to all partial
+    url or path of files (without a protocol like "https:".). -->
+    <xsl:param name="base_file"></xsl:param>
+
     <!-- Default enclosure. -->
     <!-- No enclosure is needed when tabulation is used. -->
     <xsl:param name="enclosure"></xsl:param>
@@ -59,6 +63,15 @@
     <xsl:param name="dcterms_file">dcterms.xml</xsl:param>
 
     <!-- Constants -->
+    <xsl:variable name="base_url">
+        <xsl:value-of select="$base_file" />
+        <xsl:if test="$base_file != ''">
+            <xsl:if test="substring($base_file, string-length($base_file), 1) != '/'
+                and substring($base_file, string-length($base_file), 1) != '\'">
+                <xsl:text>/</xsl:text>
+            </xsl:if>
+        </xsl:if>
+    </xsl:variable>
     <xsl:variable name="line_start">
         <xsl:value-of select="$enclosure"/>
     </xsl:variable>
@@ -469,6 +482,15 @@
     </xsl:template>
 
     <xsl:template match="@file">
+        <xsl:variable name="file" select="normalize-space(.)" />
+        <xsl:if test="$base_url != ''
+            and substring($file, 1, 7) != 'http://'
+            and substring($file, 1, 8) != 'https://'
+            and substring($file, 1, 7) != 'file://'
+            and substring($file, 1, 1) != '/'
+            ">
+            <xsl:value-of select="$base_url" />
+        </xsl:if>
         <xsl:value-of select="normalize-space(.)" />
         <xsl:if test="not(position() = last())">
             <xsl:value-of select="$delimiter_file" />

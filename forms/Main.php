@@ -222,6 +222,12 @@ class XmlImport_Form_Main extends Omeka_Form
         if ($values === false) {
             $values = array();
         }
+        // Remove the main directory (it will be added later).
+        $stylesheets = array();
+        foreach ($values as $key => $value) {
+            $stylesheets[substr($key, 1 + strlen(get_option('xml_import_xsl_directory')))] = $value;
+        }
+        $values = $stylesheets;
         $this->addElement('select', 'stylesheet', array(
             'label' => __('Xsl sheet'),
             'description' => __('The generic xsl sheet is "xml_import_generic_item.xsl". It transforms a flat xml file with multiple records into a csv file with multiple rows to import via "Item" format.'),

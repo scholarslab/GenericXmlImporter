@@ -55,8 +55,7 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
     {
         // Default stylesheet.
         $this->_options['xml_import_xsl_directory'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries';
-        $this->_options['xml_import_stylesheet'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries'
-            . DIRECTORY_SEPARATOR . (XmlImportPlugin::isFullCsvImport() ? 'generic_mixed.xsl' :  'generic_item.xsl');
+        $this->_options['xml_import_stylesheet'] = XmlImportPlugin::isFullCsvImport() ? 'generic_mixed.xsl' :  'generic_item.xsl';
 
         // Checks the ability to use XSLT.
         try {
@@ -79,6 +78,10 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
         if (version_compare($oldVersion, '2.8', '<')) {
             delete_option('xml_import_delimiter');
             set_option('xml_import_format', $this->_options['xml_import_format']);
+        }
+
+        if (version_compare($oldVersion, '2.13', '<')) {
+            set_option('xml_import_stylesheet', substr(get_option('xml_import_stylesheet'), 1 + strlen(get_option('xml_import_xsl_directory'))));
         }
     }
 

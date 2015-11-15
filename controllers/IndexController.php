@@ -286,7 +286,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $elementDelimiter = $args['element_delimiter'];
         $tagDelimiter = $args['tag_delimiter'];
         $fileDelimiter = $args['file_delimiter'];
-        $stylesheet = $args['stylesheet'];
+        $stylesheet = get_option('xml_import_xsl_directory') . DIRECTORY_SEPARATOR . $args['stylesheet'];
         $stylesheetParameters = $args['stylesheet_parameters'];
 
         // Delimiters for Csv Report are fixed.

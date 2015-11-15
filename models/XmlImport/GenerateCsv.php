@@ -32,7 +32,7 @@ class XmlImport_generateCsv extends Process
 
         $stylesheet = !empty($args['stylesheet'])
             ? $args['stylesheet']
-            : get_option('xml_import_stylesheet');
+            : get_option('xml_import_xsl_directory') . DIRECTORY_SEPARATOR . get_option('xml_import_stylesheet');
         $csvfilesdir = !empty($args['destination_dir'])
             ? $args['destination_dir']
             : sys_get_temp_dir();

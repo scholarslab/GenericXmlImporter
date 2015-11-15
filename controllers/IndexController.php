@@ -319,7 +319,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         // If the xslt is an intermediate, prepare the second stylesheet.
         $stylesheetManage = '';
         if ($stylesheetIntermediate) {
-            $command = get_option('archive_folder_processor');
+            $command = get_option('xml_import_xslt_processor');
             $stylesheetManage = empty($command)
                 ? 'advanced_manage_xslt1.xsl'
                 : 'advanced_manage.xsl';
@@ -839,7 +839,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      */
     protected function _processXslt($input, $stylesheet, $output = '', $parameters = array())
     {
-        $command = get_option('archive_folder_processor');
+        $command = get_option('xml_import_xslt_processor');
 
         // Default is the internal xslt processor of php.
         return empty($command)
@@ -865,7 +865,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $output = tempnam(sys_get_temp_dir(), 'omk_');
         }
 
-        $command = get_option('archive_folder_processor');
+        $command = get_option('xml_import_xslt_processor');
 
         $command = sprintf($command, escapeshellarg($input), escapeshellarg($stylesheet), escapeshellarg($output));
         foreach ($parameters as $name => $parameter) {

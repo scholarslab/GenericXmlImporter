@@ -16,6 +16,10 @@ It's possible too to convert your xml files into an intermediate simple format
 with only items, files and elements (Dublin Core or other formats), that will be
 automatically imported. See examples.
 
+Some default sheets are provided, in particular for Omeka export (v4 and v5),
+and [Mets], a common format used for digital papers (only for profiles with
+Dublin Core).
+
 
 Installation
 ------------

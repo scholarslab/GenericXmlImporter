@@ -72,6 +72,10 @@
     <xsl:variable name="all_elements">
         <xsl:for-each select="//*[name() = $nodename]/*">
             <xsl:element name="element">
+                <xsl:if test="@set != ''">
+                    <xsl:value-of select="@set" />
+                    <xsl:text>:</xsl:text>
+                </xsl:if>
                 <xsl:value-of select="name()" />
             </xsl:element>
         </xsl:for-each>
@@ -113,7 +117,11 @@
             <xsl:value-of select="$enclosure" />
 
             <xsl:variable name="element" select="." />
-            <xsl:for-each select="$record/*[name() = $element]">
+            <xsl:for-each select="
+                $record/*[(not(contains($element, ':')) and name() = $element)]
+                |
+                $record/*[(contains($element, ':') and name() = substring-after($element, ':'))]
+            ">
                 <xsl:choose>
                     <!-- There are sub-values (<tags><tag>alpha</tag><tag>beta</tag></tags>. -->
                     <xsl:when test="*">
@@ -130,7 +138,7 @@
                         <xsl:if test="not(position() = last())">
                             <xsl:call-template name="internal_separator" />
                         </xsl:if>
-                </xsl:otherwise>
+                    </xsl:otherwise>
                 </xsl:choose>
             </xsl:for-each>
 

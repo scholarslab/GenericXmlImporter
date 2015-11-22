@@ -45,7 +45,7 @@ and xslt 2.0 sheets. The command can be configured in the configuration page of
 the plugin. Use "%1$s", "%2$s", "%3$s", without escape, for the file input, the
 stylesheet, and the output.
 
-Examples for Debian 6 / Ubuntu / Mint (with the package "SaxonB"):
+Examples for Debian 6, 7, 8 / Ubuntu / Mint (with the package "libsaxonb-java"):
 ```
 saxonb-xslt -ext:on -versionmsg:off -s:%1$s -xsl:%2$s -o:%3$s
 ```
@@ -62,19 +62,19 @@ saxon -ext:on -versionmsg:off -s:%1$s -xsl:%2$s -o:%3$s
 
 To test your installation, you need to be able to process such a command line:
 
-For Debian 6...:
+For Saxon-B on Debian 6...:
 ```
 cd /path/to/Omeka/plugins/XmlImport
 saxonb-xslt -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'
 ```
 
-For Debian 8...:
+For Saxon-HE on Debian 8...:
 ```
 cd /path/to/Omeka/plugins/XmlImport
 CLASSPATH=/usr/share/java/Saxon-HE.jar java net.sf.saxon.Transform -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'
 ```
 
-For Fedora...:
+For Saxon on Fedora...:
 ```
 cd /path/to/Omeka/plugins/XmlImport
 saxon -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'

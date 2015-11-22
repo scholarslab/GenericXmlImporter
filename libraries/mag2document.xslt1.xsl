@@ -168,6 +168,26 @@
                 clear (no standard separator). -->
                 <xsl:apply-templates select="mag:bib/dc:* | mag:bib/dcterms:*" />
 
+                <!-- Add holdings as identifiers. -->
+                <xsl:if test="mag:bib/mag:holdings/mag:library != ''">
+                    <dc:identifier>
+                        <xsl:text>Library: </xsl:text>
+                        <xsl:value-of select="mag:bib/mag:holdings/mag:library" />
+                    </dc:identifier>
+                </xsl:if>
+                <xsl:if test="mag:bib/mag:holdings/mag:inventory_number != ''">
+                    <dc:identifier>
+                        <xsl:text>Inventory number: </xsl:text>
+                        <xsl:value-of select="mag:bib/mag:holdings/mag:inventory_number" />
+                    </dc:identifier>
+                </xsl:if>
+                <xsl:if test="mag:bib/mag:holdings/mag:shelfmark != ''">
+                    <dc:identifier>
+                        <xsl:text>Shelf mark: </xsl:text>
+                        <xsl:value-of select="mag:bib/mag:holdings/mag:shelfmark" />
+                    </dc:identifier>
+                </xsl:if>
+
                 <!-- TODO Add extra data (only if there is a specific element set in Omeka)? -->
 
                 <!-- Attach each image to the record. -->

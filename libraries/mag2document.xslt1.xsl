@@ -194,9 +194,11 @@
     <xsl:template match="mag:img">
         <xsl:element name="record">
             <xsl:attribute name="file">
-                <xsl:value-of select="$base_url" />
-                <xsl:if test="substring($base_url, string-length($base_url), 1) != '/'">
-                    <xsl:text>/</xsl:text>
+                <xsl:if test="$base_url != ''">
+                    <xsl:value-of select="$base_url" />
+                    <xsl:if test="substring($base_url, string-length($base_url), 1) != '/'">
+                        <xsl:text>/</xsl:text>
+                    </xsl:if>
                 </xsl:if>
                 <xsl:choose>
                     <xsl:when test="$document_path = 'mag:bib/dc:identifier'">

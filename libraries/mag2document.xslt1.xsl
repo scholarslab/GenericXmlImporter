@@ -51,9 +51,13 @@
     -->
     <xsl:param name="base_url"></xsl:param>
     <!-- The path of the document to add to the base url, if any. The code below
-    may need to be updated (only the three paths below are ready). -->
+    may need to be updated (only the formats below are ready). A common prefix
+    and suffix can be added too. -->
+    <xsl:param name="document_path_prefix"></xsl:param>
     <xsl:param name="document_path"></xsl:param>
+    <xsl:param name="document_path_suffix"></xsl:param>
     <!-- <xsl:param name="document_path">mag:bib/dc:identifier</xsl:param> -->
+    <!-- <xsl:param name="document_path">library_number</xsl:param> -->
     <!-- <xsl:param name="document_path">mag:bib/mag:holdings/mag:inventory_number</xsl:param> -->
     <!-- <xsl:param name="document_path">mag:bib/mag:holdings/mag:shelfmark</xsl:param> -->
 
@@ -69,8 +73,11 @@
     <xsl:param name="format_file_title">auto</xsl:param>
 
     <!-- The size of an image can be set in "cm", "inch", "auto", or none. -->
+    <!-- In mag, "auto" means "inch". -->
     <xsl:param name="format_file_image_size">cm</xsl:param>
-    <xsl:param name="format_file_image_precision">100</xsl:param>
+    <!-- The precision is an integer from 1 (not float) to 9.
+    It is not used with "auto". -->
+    <xsl:param name="format_file_image_precision">4</xsl:param>
 
     <!-- To simplify future updates, a unique identifier is recommended for each
     file. It can be: "documentId_order", "inventory_order", shelfmark_order",
@@ -220,9 +227,19 @@
                         <xsl:text>/</xsl:text>
                     </xsl:if>
                 </xsl:if>
+
+                <xsl:value-of select="$document_path_prefix" />
+
                 <xsl:choose>
                     <xsl:when test="$document_path = 'mag:bib/dc:identifier'">
                         <xsl:value-of select="../mag:bib/dc:identifier" />
+                        <xsl:text>/</xsl:text>
+                    </xsl:when>
+                    <xsl:when test="$document_path = 'library_number'">
+                        <xsl:call-template name="lastPart">
+                            <xsl:with-param name="string" select="../mag:bib/mag:holdings/mag:library" />
+                            <xsl:with-param name="delimiter" select="' '" />
+                        </xsl:call-template>
                         <xsl:text>/</xsl:text>
                     </xsl:when>
                     <xsl:when test="$document_path = 'mag:bib/mag:holdings/mag:inventory_number'">
@@ -234,6 +251,9 @@
                         <xsl:text>/</xsl:text>
                     </xsl:when>
                 </xsl:choose>
+
+                <xsl:value-of select="$document_path_suffix" />
+
                 <xsl:call-template name="cleanFilepathStart">
                     <xsl:with-param name="filepath" select="mag:file/@xlink:href" />
                 </xsl:call-template>
@@ -390,79 +410,77 @@
 
     <!-- Specific templates. -->
 
-    <!-- Set the Dublin Core : format of the file according to param and source. -->
+    <!-- Set the Dublin Core: format of the file according to param and source. -->
     <xsl:template name="formatFileFormat">
-        <xsl:param name="image" select="." />
-
         <xsl:if test="$format_file_image_size != 'none'">
             <xsl:choose>
                 <!-- Check if the source size is set. -->
-                <xsl:when test="$image/mag:image_dimensions/niso:source_xdimension != ''
-                        and $image/mag:image_dimensions/niso:source_xdimension != '0'
-                        and $image/mag:image_dimensions/niso:source_ydimension != ''
-                        and $image/mag:image_dimensions/niso:source_ydimension != '0'">
+                <xsl:when test="mag:image_dimensions/niso:source_xdimension != ''
+                        and mag:image_dimensions/niso:source_xdimension != '0'
+                        and mag:image_dimensions/niso:source_ydimension != ''
+                        and mag:image_dimensions/niso:source_ydimension != '0'">
                         <xsl:choose>
                             <xsl:when test="$format_file_image_size = 'cm'">
                                 <dc:format>
                                     <xsl:call-template name="round">
-                                        <xsl:with-param name="value" select="number($image/mag:image_dimensions/niso:source_xdimension) * 2.54" />
+                                        <xsl:with-param name="value" select="number(mag:image_dimensions/niso:source_xdimension) * 2.54" />
                                     </xsl:call-template>
                                     <xsl:text> x </xsl:text>
                                     <xsl:call-template name="round">
-                                        <xsl:with-param name="value" select="number($image/mag:image_dimensions/niso:source_ydimension) * 2.54" />
+                                        <xsl:with-param name="value" select="number(mag:image_dimensions/niso:source_ydimension) * 2.54" />
                                     </xsl:call-template>
                                     <xsl:text> cm</xsl:text>
                                 </dc:format>
                             </xsl:when>
                             <xsl:otherwise>
                                 <dc:format>
-                                    <xsl:value-of select="number($image/mag:image_dimensions/niso:source_xdimension)" />
+                                    <xsl:value-of select="number(mag:image_dimensions/niso:source_xdimension)" />
                                     <xsl:text> x </xsl:text>
-                                    <xsl:value-of select="number($image/mag:image_dimensions/niso:source_ydimension)" />
+                                    <xsl:value-of select="number(mag:image_dimensions/niso:source_ydimension)" />
                                     <xsl:text> inches</xsl:text>
                                 </dc:format>
                             </xsl:otherwise>
                         </xsl:choose>
                 </xsl:when>
                 <!-- Check if the size of the image is set. -->
-                <xsl:when test="$image/mag:image_dimensions/niso:imagewidth != ''
-                        and $image/mag:image_dimensions/niso:imagewidth != '0'
-                        and $image/mag:image_dimensions/niso:imagelength != ''
-                        and $image/mag:image_dimensions/niso:imagelength != '0'
-                        and $image/mag:image_metrics/niso:xsamplingfrequency != ''
-                        and $image/mag:image_metrics/niso:xsamplingfrequency != '0'
-                        and $image/mag:image_metrics/niso:ysamplingfrequency != ''
-                        and $image/mag:image_metrics/niso:ysamplingfrequency != '0'" >
+                <xsl:when test="mag:image_dimensions/niso:imagewidth != ''
+                        and mag:image_dimensions/niso:imagewidth != '0'
+                        and mag:image_dimensions/niso:imagelength != ''
+                        and mag:image_dimensions/niso:imagelength != '0'
+                        and mag:image_metrics/niso:xsamplingfrequency != ''
+                        and mag:image_metrics/niso:xsamplingfrequency != '0'
+                        and mag:image_metrics/niso:ysamplingfrequency != ''
+                        and mag:image_metrics/niso:ysamplingfrequency != '0'" >
                     <dc:format>
                         <xsl:choose>
-                            <xsl:when test="$image/mag:image_metrics/niso:samplingfrequencyunit = 3">
+                            <xsl:when test="mag:image_metrics/niso:samplingfrequencyunit = 3">
                                 <xsl:choose>
                                     <xsl:when test="$format_file_image_size = 'cm'">
                                         <xsl:call-template name="round">
                                             <xsl:with-param name="value" select="
-                                                number($image/mag:image_dimensions/niso:imagewidth)
-                                                div number($image/mag:image_metrics/niso:xsamplingfrequency)" />
+                                                number(mag:image_dimensions/niso:imagewidth)
+                                                div number(mag:image_metrics/niso:xsamplingfrequency)" />
                                         </xsl:call-template>
                                         <xsl:text> x </xsl:text>
                                         <xsl:call-template name="round">
                                             <xsl:with-param name="value" select="
-                                                number($image/mag:image_dimensions/niso:imagelength)
-                                                div number($image/mag:image_metrics/niso:ysamplingfrequency)" />
+                                                number(mag:image_dimensions/niso:imagelength)
+                                                div number(mag:image_metrics/niso:ysamplingfrequency)" />
                                         </xsl:call-template>
                                         <xsl:text> cm</xsl:text>
                                     </xsl:when>
                                     <xsl:otherwise>
                                         <xsl:call-template name="round">
                                             <xsl:with-param name="value" select="
-                                                number($image/mag:image_dimensions/niso:imagewidth)
-                                                div number($image/mag:image_metrics/niso:xsamplingfrequency)
+                                                number(mag:image_dimensions/niso:imagewidth)
+                                                div number(mag:image_metrics/niso:xsamplingfrequency)
                                                 div 2.54" />
                                         </xsl:call-template>
                                         <xsl:text> x </xsl:text>
                                         <xsl:call-template name="round">
                                             <xsl:with-param name="value" select="
-                                                number($image/mag:image_dimensions/niso:imagelength)
-                                                div number($image/mag:image_metrics/niso:ysamplingfrequency)
+                                                number(mag:image_dimensions/niso:imagelength)
+                                                div number(mag:image_metrics/niso:ysamplingfrequency)
                                                 div 2.54" />
                                         </xsl:call-template>
                                         <xsl:text> inches</xsl:text>
@@ -474,15 +492,15 @@
                                     <xsl:when test="$format_file_image_size = 'cm'">
                                         <xsl:call-template name="round">
                                             <xsl:with-param name="value" select="
-                                                number($image/mag:image_dimensions/niso:imagewidth)
-                                                div number($image/mag:image_metrics/niso:xsamplingfrequency)
+                                                number(mag:image_dimensions/niso:imagewidth)
+                                                div number(mag:image_metrics/niso:xsamplingfrequency)
                                                 * 2.54" />
                                         </xsl:call-template>
                                         <xsl:text> x </xsl:text>
                                         <xsl:call-template name="round">
                                             <xsl:with-param name="value" select="
-                                                number($image/mag:image_dimensions/niso:imagelength)
-                                                div number($image/mag:image_metrics/niso:ysamplingfrequency)
+                                                number(mag:image_dimensions/niso:imagelength)
+                                                div number(mag:image_metrics/niso:ysamplingfrequency)
                                                 * 2.54" />
                                         </xsl:call-template>
                                         <xsl:text> cm</xsl:text>
@@ -490,14 +508,14 @@
                                     <xsl:otherwise>
                                         <xsl:call-template name="round">
                                             <xsl:with-param name="value" select="
-                                                number($image/mag:image_dimensions/niso:imagewidth)
-                                                div number($image/mag:image_metrics/niso:xsamplingfrequency)" />
+                                                number(mag:image_dimensions/niso:imagewidth)
+                                                div number(mag:image_metrics/niso:xsamplingfrequency)" />
                                         </xsl:call-template>
                                         <xsl:text> x </xsl:text>
                                         <xsl:call-template name="round">
                                             <xsl:with-param name="value" select="
-                                                number($image/mag:image_dimensions/niso:imagelength)
-                                                div number($image/mag:image_metrics/niso:ysamplingfrequency)" />
+                                                number(mag:image_dimensions/niso:imagelength)
+                                                div number(mag:image_metrics/niso:ysamplingfrequency)" />
                                         </xsl:call-template>
                                         <xsl:text> inches</xsl:text>
                                     </xsl:otherwise>
@@ -517,6 +535,26 @@
         <xsl:param name="string" select="." />
 
         <xsl:value-of select="concat(translate(substring($string, 1, 1), $lowercase, $uppercase), substring($string, 2))" />
+    </xsl:template>
+
+    <!-- Get the last partof a string. -->
+    <xsl:template name="lastPart">
+        <xsl:param name="string" />
+        <xsl:param name="delimiter" />
+
+        <xsl:if test="$delimiter != ''">
+            <xsl:choose>
+                <xsl:when test="not(contains($string, $delimiter))">
+                    <xsl:value-of select="$string" />
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:call-template name="lastPart">
+                        <xsl:with-param name="string" select="substring-after($string, $delimiter)" />
+                        <xsl:with-param name="delimiter" select="$delimiter" />
+                    </xsl:call-template>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:if>
     </xsl:template>
 
     <!-- Remove the useless "./" at the start of the file path. -->
@@ -551,7 +589,16 @@
         <xsl:param name="value" select="0" />
         <xsl:param name="precision" select="$precision" />
 
-        <xsl:value-of select="round(number($value) * $precision) div $precision" />
+        <xsl:variable name="intPrecision" select="number($precision)" />
+
+        <xsl:choose>
+            <xsl:when test="$intPrecision &gt; 0">
+                <xsl:value-of select="round(number($value) * $intPrecision) div $intPrecision" />
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$value" />
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <!-- Format a number with leading zero according to a number. -->

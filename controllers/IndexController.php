@@ -403,12 +403,13 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $view = $this->view;
 
             // Set up CsvImport validation and column mapping if needed.
-            $file = XmlImportPlugin::isFullCsvImport()
+            $csvImportFile = XmlImportPlugin::isFullCsvImport()
                 ? new CsvImport_File($csvFilePath, $columnDelimiter, $enclosure)
                 : new CsvImport_File($csvFilePath, $columnDelimiter);
-            if (!$file->parse()) {
+            $result = $csvImportFile->parse();
+            if (!$result) {
                 $msg = __('Your CSV file is incorrectly formatted.')
-                    . ' ' . $file->getErrorString();
+                    . ' ' . $csvImportFile->getErrorString();
                 $this->_helper->flashMessenger($msg, 'error');
                 $this->_helper->redirector->goto('index');
             }
@@ -443,8 +444,8 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $csvImportSession->automapColumnNamesToElements = $automapColumns;
             $csvImportSession->columnDelimiter = $columnDelimiter;
             $csvImportSession->enclosure = $enclosure;
-            $csvImportSession->columnNames = $file->getColumnNames();
-            $csvImportSession->columnExamples = $file->getColumnExamples();
+            $csvImportSession->columnNames = $csvImportFile->getColumnNames();
+            $csvImportSession->columnExamples = $csvImportFile->getColumnExamples();
             // A bug appears in CsvImport when examples contain UTF-8 characters
             // like 'ГЧ„чŁ'.
             foreach ($csvImportSession->columnExamples as &$value) {

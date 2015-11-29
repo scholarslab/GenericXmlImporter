@@ -378,7 +378,7 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                 if ($stylesheetIntermediate) {
                     $result = $this->_processXslt($result, $stylesheetManage, '', $parameters);
                     if ($result === NULL) {
-                        $this->_helper->flashMessenger(__('Error when transforming xml file "%s" with the xsl sheet "%s".', $filepath, $stylesheet), 'error');
+                        $this->_helper->flashMessenger(__('Error when transforming xml file "%s" with the xsl sheet "%s" (error while processing with the intermediate sheet).', $filepath, $stylesheet), 'error');
                         $this->_helper->redirector->goto('index');
                     }
                 }

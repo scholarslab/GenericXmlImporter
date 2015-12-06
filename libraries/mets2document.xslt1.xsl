@@ -27,7 +27,6 @@
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:dcterms="http://purl.org/dc/terms/"
 
-    xmlns="http://www.loc.gov/METS/"
     xmlns:mets="http://www.loc.gov/METS/"
     xmlns:premis="info:lc/xmlns/premis-v2"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -113,7 +112,6 @@
     <!-- Main template. -->
     <xsl:template match="/mets:mets">
         <documents
-            xmlns="http://localhost/documents/"
             xmlns:dc="http://purl.org/dc/elements/1.1/"
             xmlns:dcterms="http://purl.org/dc/terms/"
             >
@@ -186,7 +184,7 @@
         </xsl:variable>
         <xsl:variable name="fileDiv" select="//mets:div[@ID = $fileDivId]" />
 
-        <xsl:element name="record" namespace="http://localhost/documents/">
+        <xsl:element name="record">
             <xsl:attribute name="file">
                 <xsl:if test="$base_url != ''">
                     <xsl:value-of select="$base_url" />
@@ -395,11 +393,11 @@
             <!-- The orientation needs a specific element set, but this is an
             important data. -->
             <xsl:if test="niso:orientation != ''">
-                <xsl:element name="elementSet" namespace="http://localhost/documents/">
+                <xsl:element name="elementSet">
                     <xsl:attribute name="name">Image</xsl:attribute>
-                    <xsl:element name="element" namespace="http://localhost/documents/">
+                    <xsl:element name="element">
                         <xsl:attribute name="name">Orientation</xsl:attribute>
-                        <xsl:element name="data" namespace="http://localhost/documents/">
+                        <xsl:element name="data">
                             <xsl:choose>
                                 <xsl:when test="niso:orientation = 1">
                                     <xsl:text>0</xsl:text>
@@ -434,9 +432,9 @@
                             </xsl:choose>
                         </xsl:element>
                     </xsl:element>
-                    <xsl:element name="element" namespace="http://localhost/documents/">
+                    <xsl:element name="element">
                         <xsl:attribute name="name">Flip</xsl:attribute>
-                        <xsl:element name="data" namespace="http://localhost/documents/">
+                        <xsl:element name="data">
                             <xsl:choose>
                                 <xsl:when test="niso:orientation = 1
                                     or niso:orientation = 3

@@ -123,7 +123,7 @@ tag and file delimiters: pipe.
 
     This is another example of a flat format, with an unknown node. To use it,
     use the same parameters, plus a specific parameter in the last field:
-    <node = my_record>.
+    `node = my_record`.
 
 4. `test_omeka_xml_output_v5.xml`
 
@@ -157,8 +157,15 @@ tag and file delimiters: pipe.
 
     This format load test files from the plugin. Use the sheet `advanced_manage.xsl`.
     The identifier field is "Dublin Core:Identifier". The parameters are:
-    `< base_url = http://localhost/path/to/omeka ><document_path =  >`. If local
-    paths are allowed in Csv Import (fork only), they may be: `< base_url = /path/to/omeka ><document_path =  >`.
+    ```
+    base_url = http://localhost/path/to/omeka
+    document_path =
+    ```
+    If local paths are allowed in Csv Import (fork only), they may be:
+    ```
+    base_url = /path/to/omeka
+    document_path =
+    ```
     These parameters should be removed for other test files.
 
 8. `test_manage_from_mixed.xml`
@@ -181,8 +188,16 @@ tag and file delimiters: pipe.
 
     To try it, select the format "Manage", the identifier field "Dublin Core:Identifier",
     the sheet "mag2document.xsl", check the option "Intermediate stylesheet" and
-    add these parameters: `< base_url = http://localhost/path/to/omeka >< document_path = >`.
-    If local paths are allowed in Csv Import (fork only), they may be: `< base_url = /path/to/omeka >< document_path = >`.
+    add these parameters:
+    ```
+    base_url = http://localhost/path/to/omeka
+    document_path =
+    ```
+    If local paths are allowed in Csv Import (fork only), they may be:
+    ```
+    base_url = /path/to/omeka
+    document_path =
+    ```
     The parameter "document_path" depends on the structure of the folders where
     are saved files and the way they are set in xml files. For this test, it
     should be empty. Other parameters of the xsl sheet can be set similarly.

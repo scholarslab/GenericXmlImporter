@@ -62,12 +62,6 @@
     <!-- List of Dublin Core terms to simplify the process. -->
     <xsl:param name="dcterms_file">dcterms.xml</xsl:param>
 
-    <!-- In certain circumstances, the extension of files to import should be
-    changed, for example when another tool is used to convert tiff image to png
-    in order to import only png images. Let empty in most cases. -->
-    <xsl:param name="replace_extension_from">tiff</xsl:param>
-    <xsl:param name="replace_extension_to">png</xsl:param>
-
     <!-- Constants -->
     <xsl:variable name="base_url">
         <xsl:value-of select="$base_file" />
@@ -520,23 +514,6 @@
         <xsl:param name="string" select="." />
         <xsl:value-of select="concat(translate(substring($string, 1, 1), $lowercase, $uppercase), substring($string, 2))" />
     </xsl:template>
-
-    <!-- Specific templates. -->
-
-    <!-- Replace the extension of a file if wished. -->
-    <xsl:template name="replaceExtension">
-        <xsl:param name="filepath" select="''" />
-
-        <xsl:value-of select="substring-before($filepath, '.')" />
-        <xsl:if test="contains(substring-after($filepath, '.'), '.')">
-            <xsl:text>.</xsl:text>
-            <xsl:call-template name="removeExtension">
-                <xsl:with-param name="filepath" select="substring-after($filepath, '.')" />
-            </xsl:call-template>
-        </xsl:if>
-    </xsl:template>
-
-
 
     <!-- Don't write anything else. -->
     <xsl:template match="text()" />

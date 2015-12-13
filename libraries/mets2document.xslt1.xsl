@@ -43,7 +43,11 @@
 
     <xsl:strip-space elements="*" />
 
-    <!-- Profiles of Mets may be very different, so some options allows to set
+    <!-- Options -->
+
+    <!-- Other options can be used in the file "advanced_manage". -->
+
+    <!-- Profiles of Mets may be very different, so these options allows to set
     some details for the mapping. -->
 
     <!-- If a collection is set, it will be used. Else, the gen/collection will be used. -->
@@ -368,6 +372,26 @@
     <xsl:template match="mets:mdWrap[@MDTYPE = 'NISOIMG']/mets:xmlData">
         <!-- The original size of image can be "cm", "inch", "auto", or none. -->
         <xsl:call-template name="formatFileFormat" />
+
+        <!-- There may be some general capture information. -->
+        <xsl:if test="descendant::niso:imageProducer">
+            <dc:publisher>
+                <xsl:value-of select="descendant::niso:imageProducer" />
+            </dc:publisher>
+        </xsl:if>
+
+        <xsl:if test="descendant::niso:processingAgency">
+            <dc:contributor>
+                <xsl:text>Processing Agency: </xsl:text>
+                <xsl:value-of select="descendant::niso:processingAgency" />
+            </dc:contributor>
+        </xsl:if>
+
+        <xsl:if test="descendant::niso:dateTimeCreated">
+            <dcterms:created>
+                <xsl:value-of select="descendant::niso:dateTimeCreated" />
+            </dcterms:created>
+        </xsl:if>
 
         <!-- The size in pixels. -->
         <xsl:if test="niso:imageWidth != ''

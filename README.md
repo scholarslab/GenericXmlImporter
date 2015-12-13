@@ -84,7 +84,8 @@ cd /path/to/Omeka/plugins/XmlImport
 saxon -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'
 ```
 
-Note: Only saxon is currently supported as xslt 2 processor.
+Note: Only saxon is currently supported as xslt 2 processor. Because Saxon is a
+Java tool, a JRE should be installed, for example "openjdk-8-jre-headless".
 
 Anyway, if there is no xslt2 processor installed, the command should be cleaned
 and the plugin will use the default xslt 1 processor of php, if installed.

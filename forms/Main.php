@@ -708,7 +708,8 @@ class XmlImport_Form_Main extends Omeka_Form
         // max size.
         $pluginMaxSizeRaw = trim(get_option(CsvImportPlugin::MEMORY_LIMIT_OPTION_NAME));
         if ($pluginMaxSizeRaw != '') {
-            if ($pluginMaxSize = $this->_getBinarySize($pluginMaxSizeRaw)) {
+            $pluginMaxSize = $this->_getBinarySize($pluginMaxSizeRaw);
+            if ($pluginMaxSize) {
                 $strictMaxSize = $strictMaxSize->compare($pluginMaxSize) > 0
                     ? $pluginMaxSize
                     : $strictMaxSize;
@@ -836,18 +837,16 @@ class XmlImport_Form_Main extends Omeka_Form
     private function _getElementFromIdentifierField($identifierField)
     {
         if (strlen($identifierField) > 0) {
-            if ($parts = explode(
+            $parts = explode(
                     CsvImport_ColumnMap_MixElement::DEFAULT_COLUMN_NAME_DELIMITER,
-                    $identifierField)
-                ) {
-                if (count($parts) == 2) {
-                    $elementSetName = trim($parts[0]);
-                    $elementName = trim($parts[1]);
-                    $element = get_db()->getTable('Element')
-                        ->findByElementSetNameAndElementName($elementSetName, $elementName);
-                    if ($element) {
-                        return $element;
-                    }
+                    $identifierField);
+            if (count($parts) == 2) {
+                $elementSetName = trim($parts[0]);
+                $elementName = trim($parts[1]);
+                $element = get_db()->getTable('Element')
+                    ->findByElementSetNameAndElementName($elementSetName, $elementName);
+                if ($element) {
+                    return $element;
                 }
             }
         }

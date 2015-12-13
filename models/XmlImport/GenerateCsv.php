@@ -54,7 +54,8 @@ class XmlImport_generateCsv extends Process
 
         // Write transformed xml file to the temp csv file.
         try {
-            if ($doc = $xp->transformToXML($xml_doc)) {
+            $doc = $xp->transformToXML($xml_doc);
+            if ($doc) {
                 $csvFilename = $csvfilesdir . DIRECTORY_SEPARATOR . pathinfo($filename, PATHINFO_FILENAME) . '.csv';
                 $documentFile = fopen($csvFilename, 'w');
                 fwrite($documentFile, $doc);

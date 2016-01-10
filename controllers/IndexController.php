@@ -342,14 +342,41 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         // Add custom parameters. Allowed types are already checked.
         $parametersAdded = (trim($stylesheetParameters) == '')
             ? array()
-            : array_values(array_map('trim', explode(PHP_EOL, $stylesheetParameters)));
+            : array_values(array_filter(array_map('trim', explode(PHP_EOL, $stylesheetParameters))));
+        $parameterNameErrors = array();
+        $parameterValueErrors = array();
         foreach ($parametersAdded as $value) {
             if (strpos($value, '=') !== FALSE) {
                 list($paramName, $paramValue) = explode('=', $value);
                 if ($paramName != '') {
                     $parameters[trim($paramName)] = trim($paramValue);
                 }
+                // Log the error.
+                else {
+                    $parameterNameErrors[] = $value;
+                }
             }
+            // Log the error.
+            else {
+                $parameterValueErrors[] = $value;
+            }
+        }
+
+        if ($parameterNameErrors || $parameterValueErrors) {
+            if ($parameterNameErrors) {
+                $msg = __('An error occurs when parsing xsl specific parameters.');
+                $msg .= ' ' . __('Some parameters are badly formatted (no name): [%s].',
+                    implode('], [', $parameterNameErrors));
+                $this->_helper->flashMessenger($msg, 'error');
+            }
+
+            if ($parameterValueErrors) {
+                $msg = __('An error occurs when parsing xsl specific parameters.');
+                $msg .= ' ' . __('Some parameters are badly formatted (no "=" between name and value): [%s].',
+                    implode('], [', $parameterValueErrors));
+                $this->_helper->flashMessenger($msg, 'error');
+            }
+            $this->_helper->redirector->goto('index');
         }
 
         try {

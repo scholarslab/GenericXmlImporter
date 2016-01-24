@@ -54,6 +54,7 @@ class XmlImport_generateCsv extends Process
 
         // Write transformed xml file to the temp csv file.
         try {
+            $flash = Zend_Controller_Action_HelperBroker::getStaticHelper('FlashMessenger');
             $doc = $xp->transformToXML($xml_doc);
             if ($doc) {
                 $csvFilename = $csvfilesdir . DIRECTORY_SEPARATOR . pathinfo($filename, PATHINFO_FILENAME) . '.csv';
@@ -62,9 +63,9 @@ class XmlImport_generateCsv extends Process
                 fclose($documentFile);
 
                 //$this->_initializeCsvImport($basename, $recordsArePublic, $recordsAreFeatured, $collectionId);
-                $this->_helper->flashMessenger(__('Successfully generated CSV File'));
+                $flash->addMessage(__('Successfully generated CSV File'), 'success');
             } else {
-                $this->_helper->flashMessenger(__('Could not transform XML file.  Be sure your XML document is valid.'), 'error');
+                $flash->addMessage(__('Could not transform XML file.  Be sure your XML document is valid.'), 'error');
             }
         } catch (Exception $e){
             $this->view->error = $e->getMessage();

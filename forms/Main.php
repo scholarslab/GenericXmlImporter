@@ -351,7 +351,7 @@ class XmlImport_Form_Main extends Omeka_Form
 
         $fileValidators = array(
             new Zend_Validate_File_Size(array('max' => $byteSize->getValue())),
-            new Zend_Validate_File_Count(0, 1),
+            new Zend_Validate_File_Count(array('min' => 0, 'max' => 1)),
         );
         if ($this->_requiredExtensions) {
             $fileValidators[] =

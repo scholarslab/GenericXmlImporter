@@ -31,6 +31,8 @@ class XmlImport_Form_Main extends Omeka_Form
         $this->_tagDelimiter = CsvImport_ColumnMap_Tag::getDefaultTagDelimiter();
         $this->_fileDelimiter = CsvImport_ColumnMap_File::getDefaultFileDelimiter();
 
+        $allowLocalPaths = Zend_Registry::get('csv_import')->local_folders->allow == '1';
+
         $this->setName('xmlimport');
         $this->setAttrib('id', 'xmlimport');
         $this->setMethod('post');
@@ -53,7 +55,24 @@ class XmlImport_Form_Main extends Omeka_Form
 
         // Multiple files.
         $this->addElement('text', 'xml_folder', array(
-            'description' => __('The server should be able to access to this uri.'),
+            'description' => __('The server should be able to access to this uri.')
+                . ($allowLocalPaths ? '' : ' ' . __('Local paths are forbidden by the administrator.')),
+            'required' => false,
+            'filters' => array(
+                'StringTrim',
+            ),
+            'validators' => array(
+                array(
+                    'Callback',
+                    true,
+                    array(
+                        'callback' => array('XmlImport_Form_Validator', 'validateUri'),
+                    ),
+                    'messages' => array(
+                        Zend_Validate_Callback::INVALID_VALUE => __('A url or a path is required to import xml files.'),
+                    ),
+                ),
+            ),
         ));
         // Helper to manage multiple files.
         $this->addElement('text', 'format_filename', array(
@@ -183,13 +202,26 @@ class XmlImport_Form_Main extends Omeka_Form
         $this->addElement('textarea', 'stylesheet_parameters', array(
             'label' => __('Add specific parameters to use with this xsl sheet'),
             'description' => __('Some parameters can be set in the xsl sheets for specific purposes.')
-                . ' ' . __('You can specify them here, one by line.')
-                . ' ' . __('For generic imports, one important parameter is the name of the node that represents a record.')
-                . ' ' . __('It automatically uses the first level node, but it may be a sub level one.')
-                . ' ' . __('In that case, set it like that: "node = record_name".'),
+                . ' ' . __('You can specify them here, one by line.'),
             'value' => get_option('xml_import_stylesheet_parameters'),
+            'required' => false,
             'rows' => 5,
             'placeholder' => __('parameter_1_name = parameter 1 value'),
+            'filters' => array(
+                'StringTrim',
+            ),
+            'validators' => array(
+                array(
+                    'callback',
+                    false,
+                    array(
+                        'callback' => array('XmlImport_Form_Validator', 'validateExtraParameters'),
+                    ),
+                    'messages' => array(
+                        Zend_Validate_Callback::INVALID_VALUE => __('Each extra parameter, one by line, should have a name separated from the value with a "=".'),
+                    ),
+                ),
+            ),
         ));
 
         $this->addDisplayGroup(

@@ -3,9 +3,6 @@
     Description : Convert a flat xml file to CSV format in order to import it automatically into
     Omeka via CsvImport.
 
-    This is the xslt 1.0 downgrade from "generic_item.xsl". It uses the
-    exslt extension, that can be used with the default php xslt processor.
-
     @copyright Daniel Berthereau, 2012-2015
     @copyright Scholars' Lab, 2010 [GenericXmlImporter v.1.0]
     @license http://www.apache.org/licenses/LICENSE-2.0.html

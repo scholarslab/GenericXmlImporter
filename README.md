@@ -6,10 +6,8 @@ update records from one or multiple XML files via a generic or a custom XSLT
 sheet. It's usefull to import documents and records from other places or from an
 older installation of Omeka.
 
-Process uses [Csv Import], so all imports can be managed in one place.
-
-Currently, to import metadata of extra data of collections, items or files and
-to update any records, the [Csv Import Full] fork should be used.
+Process uses the plugin [Csv Import Full], an improved fork of [Csv Import], so
+all imports can be managed in one place.
 
 You should create xsl sheets that convert your original xml files into csv ones.
 It's possible too to convert your xml files into an intermediate simple format
@@ -24,8 +22,9 @@ Dublin Core).
 Installation
 ------------
 
-Install first the plugin [Csv Import] or [Csv Import Full]. The latter is
-required with some formats, in particular to use the intermediate process.
+Install first the plugin [Csv Import Full], with a version greater or equal to
+2.2-full, required since release 2.15. The official [Csv Import] can be used
+only with older releases and with some old formats.
 
 Then uncompress files and rename plugin folder "XmlImport".
 
@@ -94,6 +93,9 @@ and the plugin will use the default xslt 1 processor of php, if installed.
 Examples
 --------
 
+Since [Csv Import Full] release 2.2-full, only the "Manage" format is available.
+See older releases to manage old formats incompatible with this one.
+
 A lot of examples of xml files are available in the xml_files folder. They are
 many because a new one is built for each new feature. The last ones uses all of
 them. Furthermore, some files may be updated with a second file to get full
@@ -104,8 +106,8 @@ sheet for xslt 1 processor. All xslt 1 sheets can be processed by an xslt 2
 processor.
 
 Because Xml Import is currently only a converter into csv, you need to set the
-options for csv in the form: delimiter: tabulation, enclosure: empty, element,
-tag and file delimiters: pipe.
+options for csv in the form. Recommended values are delimiter: tabulation,
+enclosure: empty, element, tag and file delimiters: pipe.
 
 1. `test_generic_item.xml`
 
@@ -114,17 +116,25 @@ tag and file delimiters: pipe.
     `generic_item.xsl` (or `generic_item.xslt1.xsl` if an external processor is
     not set).
 
+    With release 2.15, choose the identifier field "Dublin Core : Title" and
+    extra data "Perhaps", so a manual mapping will be done, where the special
+    value "Identifier" will be set to the title.
+
 2. `test_generic_item_automap.xml`
 
     The same list with some Dublin Core attributes in order to automap the xml
     tags with the Omeka fields. Parameters are the same than the previous file,
     but you may delete previous import before this one.
 
+    With release 2.15, cf. #1, but the extra data can be "No".
+
 3. `test_item.xml`
 
     This is another example of a flat format, with an unknown node. To use it,
     use the same parameters, plus a specific parameter in the last field:
     `node = my_record`.
+
+    With release 2.15, cf. #1.
 
 4. `test_omeka_xml_output_v5.xml`
 
@@ -142,6 +152,9 @@ tag and file delimiters: pipe.
     before import (none in the xml test files). Note that Omeka 1.5 outputs only
     urls of fullsize files, so you may change them before import.
 
+    With release 2.15, choose the identifier field "Table Identifier", extra
+    data "No" and stylesheet `omeka_xml_output_v5.xsl`.
+
 5. `test_mixed.xml`
 
 6. `test_mixed_update.xml`
@@ -154,18 +167,18 @@ tag and file delimiters: pipe.
     sheet `advanced_mixed.xsl`. If [Geolocation] is installed, it will be used
     to set the location of items.
 
+    These two files are not importable with release 2.15.
+
 7. `test_manage_local.xml`
 
     This format load test files from the plugin. Use the sheet `advanced_manage.xsl`.
     The identifier field is "Dublin Core:Identifier". The parameters are:
     ```
-    base_url = http://localhost/path/to/omeka
-    document_path =
+    base_file = http://localhost/path/to/omeka
     ```
-    If local paths are allowed in Csv Import (fork only), they may be:
+    If local paths are allowed in Csv Import, they may be:
     ```
-    base_url = /path/to/omeka
-    document_path =
+    base_file = /path/to/omeka
     ```
     These parameters should be removed for other test files.
 
@@ -194,7 +207,7 @@ tag and file delimiters: pipe.
     base_url = http://localhost/path/to/omeka
     document_path =
     ```
-    If local paths are allowed in Csv Import (fork only), they may be:
+    If local paths are allowed in Csv Import, they may be:
     ```
     base_url = /path/to/omeka
     document_path =
@@ -210,10 +223,11 @@ If your xsl sheet builds a csv file with "Csv Report", "Mixed records" or
 are useful to import multiple types of documents (text, image, video...) and
 their metadata in one time.
 
-Import of files metadata and update of records are possible only with the
-[Csv Import Full] fork.
-
 These xsl sheets can be chained or adapted to any needs and xml formats.
+
+Generic files with Dublin Core content can be imported with the name of the node
+that represents a record.The first level node is automatically used. To use
+another level, the stylesheet parameter "node = record_name".
 
 Note about delimiters:
 As Xml Import uses Csv Import, delimiters are used. Recommended delimiters are
@@ -262,8 +276,8 @@ and [Mines ParisTech].
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2012-2015
 * Copyright Scholars' Lab, 2010 (GenericXmlImporter v1.0)
+* Copyright Daniel Berthereau, 2012-2016
 
 
 [Xml Import]: https://github.com/Daniel-KM/XmlImport

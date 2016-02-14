@@ -14,10 +14,8 @@ class XmlImport_generateCsv extends Process
             ? $args['csv_filename']
             : pathinfo($filename, PATHINFO_BASENAME);
 
-        $format = $args['format'];
         $itemTypeId = $args['item_type_id'];
         $collectionId = $args['collection_id'];
-        $createCollections = $args['create_collections'];
         $recordsArePublic = $args['public'];
         $recordsAreFeatured = $args['featured'];
         $elementsAreHtml = $args['html_elements'];

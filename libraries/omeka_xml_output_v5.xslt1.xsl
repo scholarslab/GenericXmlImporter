@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Description : Convert an Omeka Xml output (version 5.0) to "Mixed records"
+    Description : Convert an Omeka Xml output (version 5.0) to "Manage records"
     format in order to import it automatically into Omeka via Csv Import.
 
     @copyright Daniel Berthereau, 2012-2015
@@ -98,19 +98,23 @@
         <xsl:value-of select="$line_start" />
 
         <!-- Specific columns of items. -->
-        <xsl:text>sourceItemId</xsl:text>
+        <xsl:text>Identifier</xsl:text>
         <xsl:value-of select="$separator" />
-        <xsl:text>itemType</xsl:text>
+        <xsl:text>Record Type</xsl:text>
         <xsl:value-of select="$separator" />
-        <xsl:text>fileUrl</xsl:text>
+        <xsl:text>Collection</xsl:text>
         <xsl:value-of select="$separator" />
-        <xsl:text>collection</xsl:text>
+        <xsl:text>Item</xsl:text>
         <xsl:value-of select="$separator" />
-        <xsl:text>public</xsl:text>
+        <xsl:text>File</xsl:text>
         <xsl:value-of select="$separator" />
-        <xsl:text>featured</xsl:text>
+        <xsl:text>Item Type</xsl:text>
         <xsl:value-of select="$separator" />
-        <xsl:text>tags</xsl:text>
+        <xsl:text>Public</xsl:text>
+        <xsl:value-of select="$separator" />
+        <xsl:text>Featured</xsl:text>
+        <xsl:value-of select="$separator" />
+        <xsl:text>Tags</xsl:text>
 
         <!-- Standard metadata headers. -->
         <xsl:for-each select="$omeka_sets/XMLlist/elementSet">
@@ -205,7 +209,15 @@
 
     <xsl:template name="base_item">
         <!-- No separator because this is the first column. -->
+        <xsl:text>XmlImport-</xsl:text>
         <xsl:value-of select="@itemId" />
+        <xsl:value-of select="$separator" />
+        <xsl:text>Item</xsl:text>
+        <xsl:value-of select="$separator" />
+        <xsl:value-of select="omeka:collection/omeka:name" />
+        <xsl:value-of select="$separator" />
+        <xsl:value-of select="$separator" />
+        <!-- No value for File, because it's an item. -->
         <xsl:value-of select="$separator" />
         <!-- Compatibility check to import a file from Omeka 1.5: "Document" is now "Text" in Omeka 2.0. -->
         <xsl:choose>
@@ -217,10 +229,6 @@
             </xsl:otherwise>
         </xsl:choose>
         <xsl:value-of select="$separator" />
-        <!-- No value for fileUrl, because it's an item. -->
-        <xsl:value-of select="$separator" />
-        <xsl:value-of select="omeka:collection/omeka:name" />
-        <xsl:value-of select="$separator" />
         <xsl:value-of select="@public" />
         <xsl:value-of select="$separator" />
         <xsl:value-of select="@featured" />
@@ -228,13 +236,21 @@
 
     <xsl:template name="base_file">
         <!-- No separator because this is the first column. -->
+        <xsl:text>XmlImport-</xsl:text>
         <xsl:value-of select="../../@itemId" />
+        <xsl:text>-</xsl:text>
+        <xsl:value-of select="position()" />
         <xsl:value-of select="$separator" />
-        <!-- No item type, because it's not an item. -->
+        <xsl:text>File</xsl:text>
+        <xsl:value-of select="$separator" />
+        <!-- No collection, because it's not an item. -->
+        <xsl:value-of select="$separator" />
+        <xsl:text>XmlImport-</xsl:text>
+        <xsl:value-of select="../../@itemId" />
         <xsl:value-of select="$separator" />
         <xsl:value-of select="omeka:src" />
         <xsl:value-of select="$separator" />
-        <!-- No collection, because it's not an item. -->
+        <!-- No item type, because it's not an item. -->
         <xsl:value-of select="$separator" />
         <!-- No public, because it's not an item. -->
         <xsl:value-of select="$separator" />

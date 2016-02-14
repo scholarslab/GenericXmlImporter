@@ -26,7 +26,7 @@ class XmlImport_Form_Main extends Omeka_Form
         parent::init();
 
         $this->_columnDelimiter = CsvImport_RowIterator::getDefaultColumnDelimiter();
-        $this->_enclosure = XmlImportPlugin::isFullCsvImport() ? CsvImport_RowIterator::getDefaultEnclosure() : '"';
+        $this->_enclosure = XmlImportPlugin::checkCsvImport() ? CsvImport_RowIterator::getDefaultEnclosure() : '"';
         $this->_elementDelimiter = CsvImport_ColumnMap_Element::getDefaultElementDelimiter();
         $this->_tagDelimiter = CsvImport_ColumnMap_Tag::getDefaultTagDelimiter();
         $this->_fileDelimiter = CsvImport_ColumnMap_File::getDefaultFileDelimiter();
@@ -58,104 +58,15 @@ class XmlImport_Form_Main extends Omeka_Form
         // Helper to manage multiple files.
         $this->addElement('text', 'format_filename', array(
             'description' => __('The format of the filenames to search (format: "suffix.extension", for example "refnum.xml"; default: ".xml").')
-                . ' ' . __('This is useful especially when folders contains multiple xml files.'),
+                . ' ' . __('This is useful especially when folders contains multiple formats of xml files.'),
             'value' => get_option('xml_import_format_filename'),
         ));
 
-        // Radio button for selecting record type.
-        if (XmlImportPlugin::isFullCsvImport()) {
-            $values = array(
-                'Manage' => __('Manage records (import, update, remove)'),
-                'Report' => __('Omeka CSV Report'),
-                'Item' => __('Items'),
-                'File' => __('Files metadata (update)'),
-                'Mix' => __('Mixed records'),
-                'Update' => __('Update records'),
-            );
-            $description = '';
-        }
-        else {
-            $values = array(
-                'Manage' => __('Manage records (import, update, remove) (only if CsvImport full is enabled)'),
-                'Report' => __('Omeka CSV Report'),
-                'Item' => __('Items'),
-                'File' => __('Files metadata (only if CsvImport full is enabled)'),
-                'Mix' => __('Mixed records (only if CsvImport full is enabled)'),
-                'Update' => __('Update records (only if CsvImport full is enabled)'),
-            );
-            $description = __('Metadata of files cannot be imported and nothing can be updated, because you are using standard Csv Import.');
-        }
-        $this->addElement('radio', 'format', array(
-            'label'=> __('Choose the type of record you want to import (according to the xsl sheet below):'),
-            'description'=> $description,
-            'multiOptions' => $values,
-            'value' => get_option('xml_import_format'),
-            'required' => TRUE,
-        ));
-
         $this->_addColumnDelimiterElement();
-        if (XmlImportPlugin::isFullCsvImport()) {
-            $this->_addEnclosureElement();
-        }
-        else {
-            $enclosureElement = new Zend_Form_Element_Hidden('enclosure');
-            $enclosureElement->setValue($this->_enclosure);
-            $this->addElement($enclosureElement);
-        }
+        $this->_addEnclosureElement();
         $this->_addElementDelimiterElement();
         $this->_addTagDelimiterElement();
         $this->_addFileDelimiterElement();
-
-        $identifierField = get_option('csv_import_identifier_field');
-        if (!empty($identifierField) && $identifierField != 'internal id') {
-            $currentIdentifierField = $this->_getElementFromIdentifierField($identifierField);
-            if ($currentIdentifierField) {
-                $identifierField = $currentIdentifierField->id;
-            }
-        }
-        $values = get_table_options('Element', null, array(
-            'record_types' => array('All'),
-            'sort' => 'alphaBySet',
-        ));
-        $values = array(
-            '' => __('No default identifier field'),
-            'internal id' => __('Internal id'),
-            // 'filename' => __('Imported filename (to import files only)'),
-            // 'original filename' => __('Original filename (to import files only)'),
-        ) + $values;
-        $this->addElement('select', 'identifier_field', array(
-            'label' => __('Identifier field (required)'),
-            'description' => __('The default identifier should be available for all record types that are currently imported in the file.'),
-            'multiOptions' => $values,
-            'value' => $identifierField,
-        ));
-
-        if (XmlImportPlugin::isFullCsvImport()) {
-            $this->addElement('select', 'action', array(
-                'label' => __('Action'),
-                'multiOptions' => label_table_options(array(
-                    CsvImport_ColumnMap_Action::ACTION_UPDATE_ELSE_CREATE
-                        => __('Update the record if it exists, else create one'),
-                    CsvImport_ColumnMap_Action::ACTION_CREATE
-                        => __('Create a new record'),
-                    CsvImport_ColumnMap_Action::ACTION_UPDATE
-                        => __('Update values of specific fields'),
-                    CsvImport_ColumnMap_Action::ACTION_ADD
-                        => __('Add values to specific fields'),
-                    CsvImport_ColumnMap_Action::ACTION_REPLACE
-                        => __('Replace values of all fields'),
-                    CsvImport_ColumnMap_Action::ACTION_DELETE
-                        => __('Delete the record'),
-                    CsvImport_ColumnMap_Action::ACTION_SKIP
-                        => __('Skip process of the record'),
-                ), __('No default action')),
-            ));
-        }
-        else {
-            $actionElement = new Zend_Form_Element_Hidden('action');
-            $actionElement->setValue(false);
-            $this->addElement($actionElement);
-        }
 
         $values = get_table_options('ItemType', __('No default item type'));
         $this->addElement('select', 'item_type_id', array(
@@ -185,35 +96,62 @@ class XmlImport_Form_Main extends Omeka_Form
             'value' => get_option('csv_import_html_elements'),
         ));
 
-        if (XmlImportPlugin::isFullCsvImport()) {
-            $this->addElement('checkbox', 'create_collections', array(
-                'label' => __('Create collections'),
-                'description' => __("If the collection of an item doesn't exist, it will be created.") . '<br />'
-                    .  __('Use "Update" to set metadata of a collection.'),
-                'value' => get_option('csv_import_create_collections'),
-            ));
-
-           $this->addElement('select', 'contains_extra_data', array(
-                'label' => __('Contains extra data'),
-                'description' => __('Other columns can be used as values for non standard data.'),
-                'multiOptions' =>array(
-                    'no' => __('No, so unrecognized column names will be noticed'),
-                    'manual' => __('Perhaps, so the mapping should be done manually'),
-                    'ignore' => __('Ignore unrecognized column names'),
-                    'yes' => __("Yes, so column names won't be checked"),
-                ),
-                'value' => get_option('csv_import_extra_data'),
-            ));
+        $identifierField = get_option('csv_import_identifier_field');
+        if (!empty($identifierField) && $identifierField != 'table id' && $identifierField != 'internal id') {
+            $currentIdentifierField = $this->_getElementFromIdentifierField($identifierField);
+            if ($currentIdentifierField) {
+                $identifierField = $currentIdentifierField->id;
+            }
         }
-        else {
-            $createCollectionsElement = new Zend_Form_Element_Hidden('create_collections');
-            $createCollectionsElement->setValue(false);
-            $this->addElement($createCollectionsElement);
+        $values = get_table_options('Element', null, array(
+            'record_types' => array('All'),
+            'sort' => 'alphaBySet',
+        ));
+        $values = array(
+            '' => __('No default identifier field'),
+            'table id' => __('Table identifier'),
+            'internal id' => __('Internal id'),
+            // 'filename' => __('Imported filename (to import files only)'),
+            // 'original filename' => __('Original filename (to import files only)'),
+        ) + $values;
+        $this->addElement('select', 'identifier_field', array(
+            'label' => __('Identifier field (required)'),
+            'description' => __('The default identifier should be available for all record types that are currently imported in the file.'),
+            'multiOptions' => $values,
+            'value' => $identifierField,
+        ));
 
-            $extraDataElement = new Zend_Form_Element_Hidden('contains_extra_data');
-            $extraDataElement->setValue('no');
-            $this->addElement($extraDataElement);
-        }
+        $this->addElement('select', 'action', array(
+            'label' => __('Action'),
+            'multiOptions' => label_table_options(array(
+                CsvImport_ColumnMap_Action::ACTION_UPDATE_ELSE_CREATE
+                    => __('Update the record if it exists, else create one'),
+                CsvImport_ColumnMap_Action::ACTION_CREATE
+                    => __('Create a new record'),
+                CsvImport_ColumnMap_Action::ACTION_UPDATE
+                    => __('Update values of specific fields'),
+                CsvImport_ColumnMap_Action::ACTION_ADD
+                    => __('Add values to specific fields'),
+                CsvImport_ColumnMap_Action::ACTION_REPLACE
+                    => __('Replace values of all fields'),
+                CsvImport_ColumnMap_Action::ACTION_DELETE
+                    => __('Delete the record'),
+                CsvImport_ColumnMap_Action::ACTION_SKIP
+                    => __('Skip process of the record'),
+            ), __('No default action')),
+        ));
+
+       $this->addElement('select', 'contains_extra_data', array(
+            'label' => __('Contains extra data'),
+            'description' => __('Other columns can be used as values for non standard data.'),
+            'multiOptions' =>array(
+                'no' => __('No, so unrecognized column names will be noticed'),
+                'manual' => __('Perhaps, so the mapping should be done manually'),
+                'ignore' => __('Ignore unrecognized column names'),
+                'yes' => __("Yes, so column names won't be checked"),
+            ),
+            'value' => get_option('csv_import_extra_data'),
+        ));
 
         // XSLT Stylesheet.
         $values = $this->_listDirectory(get_option('xml_import_xsl_directory'), 'xsl');
@@ -230,7 +168,7 @@ class XmlImport_Form_Main extends Omeka_Form
         $values = $stylesheets;
         $this->addElement('select', 'stylesheet', array(
             'label' => __('Xsl sheet'),
-            'description' => __('The generic xsl sheet is "xml_import_generic_item.xsl". It transforms a flat xml file with multiple records into a csv file with multiple rows to import via "Item" format.'),
+            'description' => __('The generic xsl sheet is "xml_import_generic_item.xsl". It transforms a flat xml file with multiple records into a csv file with multiple rows.'),
             'multiOptions' => $values,
             'required' => true,
             'value' => get_option('xml_import_stylesheet'),
@@ -238,7 +176,7 @@ class XmlImport_Form_Main extends Omeka_Form
 
         $this->addElement('checkbox', 'stylesheet_intermediate', array(
             'label' => __('Intermediate stylesheet'),
-            'description' => __('Check if this stylesheet is an intermediate one that converts the xml into the format used for simple documents, that are automatically imported via the stylesheet "advanced_manage" (requires the fork of CsvImport).'),
+            'description' => __('Check if this stylesheet is an intermediate one that converts the xml into the format used for simple documents, that are automatically imported via the stylesheet "advanced".'),
             'value' => get_option('xml_import_stylesheet_intermediate'),
         ));
 
@@ -260,7 +198,6 @@ class XmlImport_Form_Main extends Omeka_Form
                 'xml_file',
                 'xml_folder',
                 'format_filename',
-                'format',
             ),
             'file_type'
         );
@@ -286,8 +223,6 @@ class XmlImport_Form_Main extends Omeka_Form
 
         $this->addDisplayGroup(
             array(
-                'identifier_field',
-                'action',
                 'item_type_id',
                 'collection_id',
                 'records_are_public',
@@ -302,12 +237,13 @@ class XmlImport_Form_Main extends Omeka_Form
 
         $this->addDisplayGroup(
             array(
-                'create_collections',
+                'identifier_field',
+                'action',
                 'contains_extra_data',
             ),
-            'import_features',
+            'import_process',
             array(
-                'legend' => __('Features to use'),
+                'legend' => __('Process'),
                 'description' => __('Set features used to process the file.'),
         ));
 

@@ -42,7 +42,6 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_options = array(
         'xml_import_xsl_directory' => 'libraries',
         'xml_import_xslt_processor' => '',
-        'xml_import_format' => 'Item',
         'xml_import_stylesheet' => 'generic_item.xsl',
         'xml_import_stylesheet_intermediate' => false,
         'xml_import_stylesheet_parameters' => '',
@@ -54,6 +53,12 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookInstall()
     {
+        if (!$this->checkCsvImport()) {
+            $message = __('Since release 2.15, Xml Import requires a fork of CsvImport, that adds some features.')
+                . ' ' . __('See %sreadme%s.', '<a href="https://github.com/Daniel-KM/CsvImport">', '</a>');
+            throw new Omeka_Plugin_Exception($message);
+        }
+
         // Default location of stylesheets.
         $this->_options['xml_import_xsl_directory'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries';
 
@@ -76,6 +81,10 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
         if (version_compare($oldVersion, '2.13', '<')) {
             set_option('xml_import_stylesheet', substr(get_option('xml_import_stylesheet'), 1 + strlen(get_option('xml_import_xsl_directory'))));
         }
+
+        if (version_compare($oldVersion, '2.15', '<')) {
+            delete_option('xml_import_format');
+        }
     }
 
     /**
@@ -94,12 +103,10 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
         $flash = Zend_Controller_Action_HelperBroker::getStaticHelper('FlashMessenger');
 
         // Full Csv Import.
-        if ($this->isFullCsvImport()) {
-            $flash->addMessage(__('You are using full Csv Import, so all import formats will be available.'), 'success');
-        }
-        // Limited CsvImport.
-        else {
-            $flash->addMessage(__('You are using standard Csv Import, so you will be able to import metadata of items only, not metadata of files.'), 'error');
+        if (!$this->checkCsvImport()) {
+            $flash->addMessage(__('You are using standard Csv Import.')
+                . ' ' . __('Since release 2.15, Xml Import requires its fork, that adds some features.')
+                . ' ' . __('See %sreadme%s.', '<a href="https://github.com/Daniel-KM/CsvImport">', '</a>'), 'error');
         }
 
         // Require external processor.
@@ -207,9 +214,11 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
      *
      * @return boolean
      */
-    static public function isFullCsvImport()
+    static public function checkCsvImport()
     {
-        return (substr(get_plugin_ini('CsvImport', 'version'), -5) == '-full');
+        $version = get_plugin_ini('CsvImport', 'version');
+        return substr($version, -5) == '-full'
+            && version_compare($version, '2.2-full', '>=');
     }
 
     /**

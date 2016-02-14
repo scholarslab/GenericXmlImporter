@@ -9,4 +9,3 @@
 </div>
 <?php
     echo foot();
-?>

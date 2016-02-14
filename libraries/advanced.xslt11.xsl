@@ -3,8 +3,8 @@
     Description : Convert a generic Xml file to "Manage records" format in order
     to import it automatically into Omeka via Csv Import
 
-    This is the xslt 1.0 downgrade from "advanced_manage.xsl". It uses the
-    exslt extension, that can be used with the default php xslt processor.
+    This is the xslt 1.1 downgrade from "advanced.xsl". It requires the
+    processor xslt 1 Saxon 6.5.5 or higher. The processor Xalan doesn't work.
 
     Notes:
     - By default, this sheet uses "Dublin Core:Identifier" as main Identifier.
@@ -14,20 +14,18 @@
     - To import values with multiple lines, use html format in Csv Import.
     - This sheet doesn't clean errors in the source.
 
-    @copyright Daniel Berthereau, 2012-2015
+    @copyright Daniel Berthereau, 2012-2016
     @license http://www.apache.org/licenses/LICENSE-2.0.html
     @package Omeka/Plugins/XmlImport
 -->
 
-<xsl:stylesheet version="1.0"
+<xsl:stylesheet version="1.1"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:exsl="http://exslt.org/common"
 
     xmlns:omeka="http://omeka.org/schemas/omeka-xml/v5"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
     xmlns:dcterms="http://purl.org/dc/terms/"
 
-    extension-element-prefixes="exsl"
     >
     <xsl:output method="text" encoding="UTF-8" />
 
@@ -122,7 +120,7 @@
     </xsl:variable>
     <xsl:variable name="identifierSubFieldTerm">
         <xsl:if test="$identifierField = 'Dublin Core' and $identifierSubField != ''">
-            <xsl:value-of select="exsl:node-set($columns)/column
+            <xsl:value-of select="$columns/column
                     [@set = $identifierField and @element = $identifierSubField]
                     /@term" />
         </xsl:if>
@@ -136,7 +134,7 @@
             <xsl:call-template name="list_all_attributes" />
         </xsl:variable>
         <!-- Get distinct columns names. -->
-        <xsl:for-each select="exsl:node-set($attributes)/column[not(@name = preceding-sibling::column/@name)]">
+        <xsl:for-each select="$attributes/column[not(@name = preceding-sibling::column/@name)]">
             <xsl:copy-of select="." />
         </xsl:for-each>
     </xsl:template>
@@ -150,7 +148,7 @@
         <!-- If there are files. -->
         <xsl:if test="//record/record or //record/@file">
             <xsl:element name="column">
-                <xsl:attribute name="name">RecordType</xsl:attribute>
+                <xsl:attribute name="name">Record Type</xsl:attribute>
             </xsl:element>
             <xsl:element name="column">
                 <xsl:attribute name="name">Item</xsl:attribute>
@@ -179,9 +177,22 @@
             <xsl:element name="column">
                 <xsl:attribute name="name">
                     <!-- First character as uppercase -->
-                    <xsl:call-template name="capitalizeFirst">
-                        <xsl:with-param name="string" select="name()" />
-                    </xsl:call-template>
+                    <xsl:choose>
+                        <xsl:when test="name() = 'identifierField'">
+                            <xsl:text>Identifier Field</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="name() = 'recordType'">
+                            <xsl:text>Record Type</xsl:text>
+                        </xsl:when>
+                        <xsl:when test="name() = 'itemType'">
+                            <xsl:text>Item Type</xsl:text>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:call-template name="capitalizeFirst">
+                                <xsl:with-param name="string" select="name()" />
+                            </xsl:call-template>
+                        </xsl:otherwise>
+                    </xsl:choose>
                 </xsl:attribute>
                 <!-- For simpler checks, copy original name as another attribute too. -->
                 <xsl:attribute name="attrib">
@@ -299,7 +310,7 @@
     <xsl:template match="/">
         <xsl:if test="$headers = 'true'">
             <xsl:value-of select="$line_start" />
-            <xsl:for-each select="exsl:node-set($columns)/column">
+            <xsl:for-each select="$columns/column">
                 <xsl:value-of select="@name" />
                 <xsl:if test="not(position() = last())">
                     <xsl:value-of select="$separator" />
@@ -322,8 +333,7 @@
         </xsl:variable>
 
         <!-- Copy each value of column from each record, if value exists. -->
-        <xsl:for-each select="exsl:node-set($columns)/column">
-
+        <xsl:for-each select="$columns/column">
             <xsl:variable name="column" select="." />
 
             <!-- Process vary according to columns. -->
@@ -335,7 +345,7 @@
                     </xsl:call-template>
                 </xsl:when>
                 <!-- RecordType is an exception and should be determined. -->
-                <xsl:when test="@name = 'RecordType'">
+                <xsl:when test="@name = 'Record Type'">
                     <xsl:value-of select="$record_type" />
                 </xsl:when>
                 <!-- Action is an exception for files (use item action if any). -->
@@ -407,6 +417,13 @@
     <!-- Determine the record type. -->
     <xsl:template name="get_record_type">
         <xsl:param name="record" select="." />
+
+        <xsl:variable name="recordIdentifierField">
+            <xsl:call-template name="stringToLower">
+                <xsl:with-param name="string" select="$record/@identifierField" />
+            </xsl:call-template>
+        </xsl:variable>
+
         <!-- These checks don't manage all cases, only existing ones. -->
         <xsl:choose>
             <xsl:when test="$record/@recordType">
@@ -426,11 +443,10 @@
             </xsl:when>
             <xsl:when test="$record/@file
                     or $record/parent::record
-                    or $record/@identifierField = 'original filename'
-                    or $record/@identifierField = 'filename'
-                    or $record/@identifierField = 'authentication'
-                    or $record/@identifierField = 'md5'
-                    or $record/@identifierField = 'original_filename'
+                    or $recordIdentifierField = 'original filename'
+                    or $recordIdentifierField = 'filename'
+                    or $recordIdentifierField = 'authentication'
+                    or $recordIdentifierField = 'md5'
                     ">
                 <xsl:text>File</xsl:text>
             </xsl:when>
@@ -521,6 +537,11 @@
     <xsl:template name="capitalizeFirst">
         <xsl:param name="string" select="." />
         <xsl:value-of select="concat(translate(substring($string, 1, 1), $lowercase, $uppercase), substring($string, 2))" />
+    </xsl:template>
+
+    <xsl:template name="stringToLower">
+        <xsl:param name="string" select="." />
+        <xsl:value-of select="translate($string, $uppercase, $lowercase)" />
     </xsl:template>
 
     <!-- Don't write anything else. -->

@@ -60,7 +60,9 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
         }
 
         // Default location of stylesheets.
-        $this->_options['xml_import_xsl_directory'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries';
+        $this->_options['xml_import_xsl_directory'] = dirname(__FILE__)
+            . DIRECTORY_SEPARATOR . 'libraries'
+            . DIRECTORY_SEPARATOR . 'xsl';
 
         $this->_installOptions();
     }
@@ -84,6 +86,11 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
 
         if (version_compare($oldVersion, '2.15', '<')) {
             delete_option('xml_import_format');
+            if (get_option('xml_import_xsl_directory') == dirname(__FILE__) . DIRECTORY_SEPARATOR . 'libraries') {
+                set_option('xml_import_xsl_directory', dirname(__FILE__)
+                    . DIRECTORY_SEPARATOR . 'libraries'
+                    . DIRECTORY_SEPARATOR . 'xsl');
+            }
         }
     }
 

@@ -68,19 +68,19 @@ To test your installation, you need to be able to process such a command line:
 For Saxon-B on Debian 6...:
 ```
 cd /path/to/Omeka/plugins/XmlImport
-saxonb-xslt -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'
+saxonb-xslt -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/xsl/generic.xsl' -o:'/tmp/test.csv'
 ```
 
 For Saxon-HE on Debian 8...:
 ```
 cd /path/to/Omeka/plugins/XmlImport
-CLASSPATH=/usr/share/java/Saxon-HE.jar java net.sf.saxon.Transform -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'
+CLASSPATH=/usr/share/java/Saxon-HE.jar java net.sf.saxon.Transform -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/xsl/generic.xsl' -o:'/tmp/test.csv'
 ```
 
 For Saxon on Fedora...:
 ```
 cd /path/to/Omeka/plugins/XmlImport
-saxon -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/generic_item.xsl' -o:'/tmp/test.csv'
+saxon -ext:on -versionmsg:off -s:'xml_files/test_generic_item_automap.xml' -xsl:'libraries/xsl/generic.xsl' -o:'/tmp/test.csv'
 ```
 
 Note: Only saxon is currently supported as xslt 2 processor. Because Saxon is a

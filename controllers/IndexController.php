@@ -822,38 +822,6 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
     /**
      * Apply a process (xslt stylesheet) on an input (xml file) and save output.
      *
-     * @internal Only saxon is currently supported.
-     *
-     * @param string $input Path of input file.
-     * @param string $stylesheet Path of the stylesheet.
-     * @param string $output Path of the output file. If none, a temp file will
-     * be used.
-     * @param array $parameters Parameters array.
-     * @return string|null Path to the output file if ok, null else.
-     */
-    private function _processXsltViaExternal($input, $stylesheet, $output = '', $parameters = array())
-    {
-        if (empty($output)) {
-            $output = tempnam(sys_get_temp_dir(), 'omk_');
-        }
-
-        $command = get_option('xml_import_xslt_processor');
-
-        $command = sprintf($command, escapeshellarg($input), escapeshellarg($stylesheet), escapeshellarg($output));
-        foreach ($parameters as $name => $parameter) {
-            $command .= ' ' . escapeshellarg($name . '=' . $parameter);
-        }
-
-        $result = (int) shell_exec($command . ' 2>&- || echo 1');
-        @chmod($output, 0640);
-
-        // In Shell, 0 is a correct result.
-        return ($result == 1) ? null : $output;
-    }
-
-    /**
-     * Apply a process (xslt stylesheet) on an input (xml file) and save output.
-     *
      * @param string $input Path of input file.
      * @param string $stylesheet Path of the stylesheet.
      * @param string $output Path of the output file. If none, a temp file will
@@ -884,6 +852,8 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         $proc->setParameter('', $parameters);
         $result = $proc->transformToURI($domXml, $output);
         @chmod($output, 0640);
+
+        // There is no message for error with this processor.
 
         return ($result === false) ? null : $output;
     }
@@ -918,6 +888,45 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
         }
 
         return $domDocument;
+    }
+
+    /**
+     * Apply a process (xslt stylesheet) on an input (xml file) and save output.
+     *
+     * @internal Only saxon is currently supported.
+     *
+     * @param string $input Path of input file.
+     * @param string $stylesheet Path of the stylesheet.
+     * @param string $output Path of the output file. If none, a temp file will
+     * be used.
+     * @param array $parameters Parameters array.
+     * @return string|null Path to the output file if ok, null else.
+     */
+    private function _processXsltViaExternal($input, $stylesheet, $output = '', $parameters = array())
+    {
+        if (empty($output)) {
+            $output = tempnam(sys_get_temp_dir(), 'omk_');
+        }
+
+        $command = get_option('xml_import_xslt_processor');
+
+        $command = sprintf($command, escapeshellarg($input), escapeshellarg($stylesheet), escapeshellarg($output));
+        foreach ($parameters as $name => $parameter) {
+            $command .= ' ' . escapeshellarg($name . '=' . $parameter);
+        }
+
+        $result = shell_exec($command . ' 2>&1 1>&-');
+        @chmod($output, 0640);
+
+        // In Shell, empty is a correct result.
+        if (!empty($result)) {
+            $msg = __('An error occurs during the xsl transformation of the file "%s" with the sheet "%s" : %s',
+                $input, $stylesheet, $result);
+            $this->_helper->flashMessenger($msg, 'error');
+            return null;
+        }
+
+        return $output;
     }
 
     /**

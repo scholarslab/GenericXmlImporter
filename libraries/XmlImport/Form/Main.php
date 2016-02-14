@@ -26,7 +26,7 @@ class XmlImport_Form_Main extends Omeka_Form
         parent::init();
 
         $this->_columnDelimiter = CsvImport_RowIterator::getDefaultColumnDelimiter();
-        $this->_enclosure = XmlImportPlugin::checkCsvImport() ? CsvImport_RowIterator::getDefaultEnclosure() : '"';
+        $this->_enclosure = CsvImport_RowIterator::getDefaultEnclosure();
         $this->_elementDelimiter = CsvImport_ColumnMap_Element::getDefaultElementDelimiter();
         $this->_tagDelimiter = CsvImport_ColumnMap_Tag::getDefaultTagDelimiter();
         $this->_fileDelimiter = CsvImport_ColumnMap_File::getDefaultFileDelimiter();
@@ -528,7 +528,7 @@ class XmlImport_Form_Main extends Omeka_Form
     }
 
     /**
-     * Validate the form post
+     * Validate the form post.
      */
     public function isValid($post)
     {
@@ -658,9 +658,10 @@ class XmlImport_Form_Main extends Omeka_Form
             $maxSize = $this->_getBinarySize($size);
         }
 
-        if ($maxSize === false ||
-            $maxSize === null ||
-            $maxSize->compare($strictMaxSize) > 0) {
+        if ($maxSize === false
+                || $maxSize === null
+                || $maxSize->compare($strictMaxSize) > 0
+            ) {
             $maxSize = $strictMaxSize;
         }
 

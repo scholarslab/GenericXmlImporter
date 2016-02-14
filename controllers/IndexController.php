@@ -486,7 +486,6 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
      */
     protected function _getMainForm()
     {
-        require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'forms' . DIRECTORY_SEPARATOR . 'Main.php';
         $csvConfig = $this->_getPluginConfig();
         $form = new XmlImport_Form_Main($csvConfig);
         return $form;

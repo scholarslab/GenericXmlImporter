@@ -9,7 +9,7 @@ class XmlImport_Form_Validator extends Zend_Validate_Callback
      * @param string $value The value to check.
      * @return boolean
      */
-    public function validateUri($uri)
+    static public function validateUri($uri)
     {
         $scheme = parse_url($uri, PHP_URL_SCHEME);
         // The check is done via the server for external urls.

@@ -1,13 +1,13 @@
-Xml Import (plugin for Omeka)
+XML Import (plugin for Omeka)
 =============================
 
-[Xml Import] is a plugin for [Omeka] that allows to import data and files and to
+[XML Import] is a plugin for [Omeka] that allows to import data and files and to
 update records from one or multiple XML files via a generic or a custom XSLT
 sheet. It's usefull to import documents and records from other places or from an
 older installation of Omeka.
 
-Process uses the plugin [Csv Import Full], an improved fork of [Csv Import], so
-all imports can be managed in one place.
+Process uses the plugin [CSV Import+], an improved version [CSV Import], so all
+imports can be managed in one place.
 
 You should create xsl sheets that convert your original xml files into csv ones.
 It's possible too to convert your xml files into an intermediate simple format
@@ -18,13 +18,19 @@ Some default sheets are provided, in particular for Omeka export (v4 and v5),
 and [Mets], a common format used for digital papers (only for profiles with
 Dublin Core).
 
+In most cases now, it's recommended to use [Archive Folder], a simpler tool that
+doesn't use [CSV Import+], so there is no issue with delimiters, enclosures,
+white spaces, and multilines contents. [Archive Folder] uses the same sheets
+than the ones that uses the xml intermediate format. The pivot format is a very
+simple one, as the Dublin Core.
+
 
 Installation
 ------------
 
-Install first the plugin [Csv Import Full], with a version greater or equal to
-2.2-full, required since release 2.15. The official [Csv Import] can be used
-only with older releases and with some old formats.
+Install first the plugin [CSV Import+], with a version greater or equal to 2.3,
+required since release 2.16. The official [CSV Import] can be used only with
+older releases and with some old formats.
 
 Then uncompress files and rename plugin folder "XmlImport".
 
@@ -97,7 +103,7 @@ cleared. The plugin will use the default xslt 1 processor of php, if installed.
 Examples
 --------
 
-Since [Csv Import Full] release 2.2-full, only the "Manage" format is available.
+Since [CSV Import+] release 2.2-full, only the "Manage" format is available.
 See older releases to manage old formats incompatible with this one.
 
 A lot of examples of xml files are available in the xml_files folder. They are
@@ -109,7 +115,7 @@ Some provided stylesheets need an xslt 2 processor, but there is an equivalent
 sheet for xslt 1 processor. All xslt 1 sheets can be processed by an xslt 2
 processor.
 
-Because Xml Import is currently only a converter into csv, you need to set the
+Because XML Import is currently only a converter into csv, you need to set the
 options for csv in the form. Recommended values are delimiter: tabulation,
 enclosure: empty, element, tag and file delimiters: pipe.
 
@@ -163,7 +169,7 @@ enclosure: empty, element, tag and file delimiters: pipe.
 
 6. `test_mixed_update.xml`
 
-    A full example of all features of [Csv Import Full] via Xml, and file to
+    A full example of all features of [CSV Import+] via Xml, and file to
     update the previous one.
 
     To try them, use format "Mixed" for the first and "Update" for the second,
@@ -180,7 +186,7 @@ enclosure: empty, element, tag and file delimiters: pipe.
     ```
     base_file = http://localhost/path/to/omeka
     ```
-    If local paths are allowed in Csv Import, they may be:
+    If local paths are allowed in CSV Import, they may be:
     ```
     base_file = /path/to/omeka
     ```
@@ -192,7 +198,7 @@ enclosure: empty, element, tag and file delimiters: pipe.
 
     These files contain the same data than the two previous ones, but they are
     adapted for the format "Manage". Formats "Mixed" and "Update" are deprecated
-    in [Csv Import Full], so this one is recommended. It's simpler and allows
+    in [CSV Import+], so this one is recommended. It's simpler and allows
     import, update and remove with the same file and the same sheet. To import
     them, remove previous data and use the sheet `advanced_manage.xsl`.
     Note that in these examples, the identifier field is "Dublin Core:Title"
@@ -211,7 +217,7 @@ enclosure: empty, element, tag and file delimiters: pipe.
     base_url = http://localhost/path/to/omeka
     document_path =
     ```
-    If local paths are allowed in Csv Import, they may be:
+    If local paths are allowed in CSV Import, they may be:
     ```
     base_url = /path/to/omeka
     document_path =
@@ -223,7 +229,7 @@ enclosure: empty, element, tag and file delimiters: pipe.
 
 If your xsl sheet builds a csv file with "Csv Report", "Mixed records" or
 "Manage" format, they can be  imported directly without mapping. "Mixed" and
-"Manage" formats can be used only with the [Csv Import Full] fork. These formats
+"Manage" formats can be used only with the [CSV Import+] fork. These formats
 are useful to import multiple types of documents (text, image, video...) and
 their metadata in one time.
 
@@ -234,7 +240,7 @@ that represents a record.The first level node is automatically used. To use
 another level, the stylesheet parameter "node = record_name".
 
 Note about delimiters:
-As Xml Import uses Csv Import, delimiters are used. Recommended delimiters are
+As XML Import uses CSV Import, delimiters are used. Recommended delimiters are
 special characters allowed in xml 1.0: tabulation "\t" for column delimiter,
 carriage return "\r"  for element, tag and file delimiters, with the Unix end
 of line "\n" (line feed). They can be used with an empty enclosure.
@@ -284,10 +290,11 @@ Copyright
 * Copyright Daniel Berthereau, 2012-2016
 
 
-[Xml Import]: https://github.com/Daniel-KM/XmlImport
+[XML Import]: https://github.com/Daniel-KM/XmlImport
 [Omeka]: https://omeka.org
-[Csv Import]: https://github.com/omeka/plugin-CsvImport
-[Csv Import Full]: https://github.com/Daniel-KM/CsvImport
+[CSV Import+]: https://github.com/Daniel-KM/CsvImportPlus
+[CSV Import]: https://github.com/omeka/plugin-CsvImport
+[Archive Folder]: https://github.com/Daniel-KM/ArchiveFolder
 [Geolocation]: https://omeka.org/add-ons/plugins/geolocation
 [Mag]: http://www.iccu.sbn.it/opencms/opencms/it/main/standard/metadati/pagina_267.html
 [Mets]: https://www.loc.gov/standards/mets

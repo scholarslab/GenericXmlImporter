@@ -225,7 +225,7 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $version = get_plugin_ini('CsvImport', 'version');
         return substr($version, -5) == '-full'
-            && version_compare($version, '2.2-full', '>=');
+            && version_compare($version, '2.2.1-full', '>=');
     }
 
     /**

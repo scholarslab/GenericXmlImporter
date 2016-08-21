@@ -7,8 +7,8 @@
  * 1. Select XML file to upload and import options
  * 2. Form accepts and parses XML file, processes it and sends user to next step
  * with a drop down menu with elements that appear to be the document record
- * 3. User selects document record. Variables passed to CsvImport session, user
- * redirected to CsvImport column mapping
+ * 3. User selects document record. Variables passed to CsvImportPlus session,
+ * user redirected to CsvImportPlus column mapping
  *
  * @copyright Daniel Berthereau, 2012-2016
  * @copyright Scholars' Lab, 2010 [GenericXmlImporter v.1.0]
@@ -412,8 +412,8 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             // Get the view.
             $view = $this->view;
 
-            // Set up CsvImport validation and column mapping if needed.
-            $csvImportFile = new CsvImport_File($csvFilePath, $columnDelimiter, $enclosure);
+            // Set up CsvImportPlus validation and column mapping if needed.
+            $csvImportFile = new CsvImportPlus_File($csvFilePath, $columnDelimiter, $enclosure);
             $result = $csvImportFile->parse();
             if (!$result) {
                 $msg = __('Your CSV file is incorrectly formatted.')
@@ -422,10 +422,10 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
                 $this->_helper->redirector->goto('index');
             }
 
-            // Go directly to the correct view of CsvImport plugin.
-            $csvImportSession = new Zend_Session_Namespace('CsvImport');
+            // Go directly to the correct view of CsvImportPlus plugin.
+            $csvImportSession = new Zend_Session_Namespace('CsvImportPlus');
 
-            // @see CsvImport_IndexController::indexAction().
+            // @see CsvImportPlus_IndexController::indexAction().
             $csvImportSession->setExpirationHops(3);
             $csvImportSession->originalFilename = $csvFilename;
             $csvImportSession->filePath = $csvFilePath;
@@ -441,8 +441,8 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             $csvImportSession->enclosure = $enclosure;
             $csvImportSession->columnNames = $csvImportFile->getColumnNames();
             $csvImportSession->columnExamples = $csvImportFile->getColumnExamples();
-            // A bug appears in CsvImport when examples contain UTF-8 characters
-            // like 'ГЧ„чŁ'.
+            // A bug appears in CsvImportPlus when examples contain UTF-8
+            // characters like 'ГЧ„чŁ'.
             foreach ($csvImportSession->columnExamples as &$value) {
                 $value = iconv('ISO-8859-15', 'UTF-8', @iconv('UTF-8', 'ISO-8859-15' . '//IGNORE', $value));
             }
@@ -456,20 +456,20 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
             set_option('xml_import_stylesheet_intermediate', $args['stylesheet_intermediate']);
             set_option('xml_import_stylesheet_parameters', $args['stylesheet_parameters']);
             set_option('xml_import_format_filename', $args['format_filename']);
-            set_option(CsvImport_ColumnMap_IdentifierField::IDENTIFIER_FIELD_OPTION_NAME, $args['identifier_field']);
-            set_option(CsvImport_RowIterator::COLUMN_DELIMITER_OPTION_NAME, $args['column_delimiter']);
-            set_option(CsvImport_RowIterator::ENCLOSURE_OPTION_NAME, $args['enclosure']);
-            set_option(CsvImport_ColumnMap_Element::ELEMENT_DELIMITER_OPTION_NAME, $args['element_delimiter']);
-            set_option(CsvImport_ColumnMap_Tag::TAG_DELIMITER_OPTION_NAME, $args['tag_delimiter']);
-            set_option(CsvImport_ColumnMap_File::FILE_DELIMITER_OPTION_NAME, $args['file_delimiter']);
-            set_option('csv_import_html_elements', $args['html_elements']);
-            set_option('csv_import_extra_data', $args['extra_data']);
+            set_option(CsvImportPlus_ColumnMap_IdentifierField::IDENTIFIER_FIELD_OPTION_NAME, $args['identifier_field']);
+            set_option(CsvImportPlus_RowIterator::COLUMN_DELIMITER_OPTION_NAME, $args['column_delimiter']);
+            set_option(CsvImportPlus_RowIterator::ENCLOSURE_OPTION_NAME, $args['enclosure']);
+            set_option(CsvImportPlus_ColumnMap_Element::ELEMENT_DELIMITER_OPTION_NAME, $args['element_delimiter']);
+            set_option(CsvImportPlus_ColumnMap_Tag::TAG_DELIMITER_OPTION_NAME, $args['tag_delimiter']);
+            set_option(CsvImportPlus_ColumnMap_File::FILE_DELIMITER_OPTION_NAME, $args['file_delimiter']);
+            set_option('csv_import_plus_html_elements', $args['html_elements']);
+            set_option('csv_import_plus_extra_data', $args['extra_data']);
 
             if ($csvImportSession->containsExtraData == 'manual') {
-                $this->_helper->redirector->goto('map-columns', 'index', 'csv-import');
+                $this->_helper->redirector->goto('map-columns', 'index', 'csv-import-plus');
             }
 
-            $this->_helper->redirector->goto('check-manage-csv', 'index', 'csv-import');
+            $this->_helper->redirector->goto('check-manage-csv', 'index', 'csv-import-plus');
 
         } catch (Exception $e) {
             $msg = __('Error in your xml file, in your xsl sheet or in your options.')
@@ -500,8 +500,8 @@ class XmlImport_IndexController extends Omeka_Controller_AbstractActionControlle
     {
         if (!$this->_pluginConfig) {
             $config = $this->getInvokeArg('bootstrap')->config->plugins;
-            if ($config && isset($config->CsvImport)) {
-                $this->_pluginConfig = $config->CsvImport->toArray();
+            if ($config && isset($config->CsvImportPlus)) {
+                $this->_pluginConfig = $config->CsvImportPlus->toArray();
             }
             if (!array_key_exists('fileDestination', $this->_pluginConfig)) {
                 $this->_pluginConfig['fileDestination'] =

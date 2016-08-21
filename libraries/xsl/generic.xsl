@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     Description : Convert a flat xml file to CSV format in order to import it automatically into
-    Omeka via CsvImport.
+    Omeka via CsvImportPlus.
 
     @copyright Daniel Berthereau, 2012-2015
     @copyright Scholars' Lab, 2010 [GenericXmlImporter v.1.0]

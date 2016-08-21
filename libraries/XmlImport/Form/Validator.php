@@ -23,7 +23,7 @@ class XmlImport_Form_Validator extends Zend_Validate_Callback
         }
 
         // Check the security setting.
-        $settings = Zend_Registry::get('csv_import');
+        $settings = Zend_Registry::get('csv_import_plus');
         if ($settings->local_folders->allow != '1') {
             return false;
         }

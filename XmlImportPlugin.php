@@ -3,7 +3,7 @@
  * Xml Import
  *
  * Allows to import one or multiple XML files via generic or custom XSLT sheet.
- * Process ends with CsvImport, so all imports can be managed in one place.
+ * Process ends with CsvImportPlus, so all imports can be managed in one place.
  *
  * @copyright Daniel Berthereau, 2012-2013
  * @copyright Scholars' Lab, 2010 [GenericXmlImporter v.1.0]
@@ -54,8 +54,8 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookInstall()
     {
         if (!$this->checkCsvImport()) {
-            $message = __('Since release 2.15, Xml Import requires a fork of CsvImport, that adds some features.')
-                . ' ' . __('See %sreadme%s.', '<a href="https://github.com/Daniel-KM/CsvImport">', '</a>');
+            $message = __('Since release 2.16, Xml Import requires CSV Import+, that adds some features.')
+                . ' ' . __('See %sreadme%s.', '<a href="https://github.com/Daniel-KM/CsvImportPlus">', '</a>');
             throw new Omeka_Plugin_Exception($message);
         }
 
@@ -111,9 +111,8 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
 
         // Full Csv Import.
         if (!$this->checkCsvImport()) {
-            $flash->addMessage(__('You are using standard Csv Import.')
-                . ' ' . __('Since release 2.15, Xml Import requires its fork, that adds some features.')
-                . ' ' . __('See %sreadme%s.', '<a href="https://github.com/Daniel-KM/CsvImport">', '</a>'), 'error');
+            $flash->addMessage(__('Since release 2.16, Xml Import requires CSV Import+.')
+                . ' ' . __('See %sreadme%s.', '<a href="https://github.com/Daniel-KM/CsvImportPlus">', '</a>'), 'error');
         }
 
         // Require external processor.
@@ -170,7 +169,7 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
 
         // Check that all the roles exist, in case a plugin-added role has
         // been removed (e.g. GuestUser).
-        $allowRoles = unserialize(get_option('csv_import_allow_roles')) ?: array();
+        $allowRoles = unserialize(get_option('csv_import_plus_allow_roles')) ?: array();
         $allowRoles = array_intersect($roles, $allowRoles);
 
         if ($allowRoles) {
@@ -215,23 +214,22 @@ class XmlImportPlugin extends Omeka_Plugin_AbstractPlugin
     }
 
     /**
-     * Determine if the CsvImport Full is installed.
+     * Determine if the CsvImportPlus is installed.
      *
-     * Some import options are unailable if CsvImport Full is not installed.
+     * Some import options are unailable if CsvImportPus is not installed.
      *
      * @return boolean
      */
     static public function checkCsvImport()
     {
-        $version = get_plugin_ini('CsvImport', 'version');
-        return substr($version, -5) == '-full'
-            && version_compare($version, '2.2.1-full', '>=');
+        $version = get_plugin_ini('CsvImportPlus', 'version');
+        return version_compare($version, '2.3', '>=');
     }
 
     /**
      * Determine if the xslt processor is installed with php.
      *
-     * Some import options are unailable if CsvImport Full is not installed.
+     * Some import options are unailable if CsvImportPlus is not installed.
      *
      * @return boolean
      */

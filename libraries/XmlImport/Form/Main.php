@@ -25,13 +25,13 @@ class XmlImport_Form_Main extends Omeka_Form
     {
         parent::init();
 
-        $this->_columnDelimiter = CsvImport_RowIterator::getDefaultColumnDelimiter();
-        $this->_enclosure = CsvImport_RowIterator::getDefaultEnclosure();
-        $this->_elementDelimiter = CsvImport_ColumnMap_Element::getDefaultElementDelimiter();
-        $this->_tagDelimiter = CsvImport_ColumnMap_Tag::getDefaultTagDelimiter();
-        $this->_fileDelimiter = CsvImport_ColumnMap_File::getDefaultFileDelimiter();
+        $this->_columnDelimiter = CsvImportPlus_RowIterator::getDefaultColumnDelimiter();
+        $this->_enclosure = CsvImportPlus_RowIterator::getDefaultEnclosure();
+        $this->_elementDelimiter = CsvImportPlus_ColumnMap_Element::getDefaultElementDelimiter();
+        $this->_tagDelimiter = CsvImportPlus_ColumnMap_Tag::getDefaultTagDelimiter();
+        $this->_fileDelimiter = CsvImportPlus_ColumnMap_File::getDefaultFileDelimiter();
 
-        $allowLocalPaths = Zend_Registry::get('csv_import')->local_folders->allow == '1';
+        $allowLocalPaths = Zend_Registry::get('csv_import_plus')->local_folders->allow == '1';
 
         $this->setName('xmlimport');
         $this->setAttrib('id', 'xmlimport');
@@ -45,7 +45,7 @@ class XmlImport_Form_Main extends Omeka_Form
                 'folder' => __('All xml files in a folder'),
                 'recursive' => __('All xml files in a folder (recursive)'),
             ),
-            'description' => __('The xsl sheet will create one csv file from this or these xml files and send it to CsvImport.'),
+            'description' => __('The xsl sheet will create one csv file from this or these xml files and send it to CsvImportPlus.'),
             'required' => true,
             'value' => 'file',
         ));
@@ -112,10 +112,10 @@ class XmlImport_Form_Main extends Omeka_Form
         $this->addElement('checkbox', 'elements_are_html', array(
             'label' => __('Elements are html'),
             'description' => __('Set default format of all imported elements as html, else raw text.'),
-            'value' => get_option('csv_import_html_elements'),
+            'value' => get_option('csv_import_plus_html_elements'),
         ));
 
-        $identifierField = get_option('csv_import_identifier_field');
+        $identifierField = get_option('csv_import_plus_identifier_field');
         if (!empty($identifierField) && $identifierField != 'table id' && $identifierField != 'internal id') {
             $currentIdentifierField = $this->_getElementFromIdentifierField($identifierField);
             if ($currentIdentifierField) {
@@ -143,19 +143,19 @@ class XmlImport_Form_Main extends Omeka_Form
         $this->addElement('select', 'action', array(
             'label' => __('Action'),
             'multiOptions' => label_table_options(array(
-                CsvImport_ColumnMap_Action::ACTION_UPDATE_ELSE_CREATE
+                CsvImportPlus_ColumnMap_Action::ACTION_UPDATE_ELSE_CREATE
                     => __('Update the record if it exists, else create one'),
-                CsvImport_ColumnMap_Action::ACTION_CREATE
+                CsvImportPlus_ColumnMap_Action::ACTION_CREATE
                     => __('Create a new record'),
-                CsvImport_ColumnMap_Action::ACTION_UPDATE
+                CsvImportPlus_ColumnMap_Action::ACTION_UPDATE
                     => __('Update values of specific fields'),
-                CsvImport_ColumnMap_Action::ACTION_ADD
+                CsvImportPlus_ColumnMap_Action::ACTION_ADD
                     => __('Add values to specific fields'),
-                CsvImport_ColumnMap_Action::ACTION_REPLACE
+                CsvImportPlus_ColumnMap_Action::ACTION_REPLACE
                     => __('Replace values of all fields'),
-                CsvImport_ColumnMap_Action::ACTION_DELETE
+                CsvImportPlus_ColumnMap_Action::ACTION_DELETE
                     => __('Delete the record'),
-                CsvImport_ColumnMap_Action::ACTION_SKIP
+                CsvImportPlus_ColumnMap_Action::ACTION_SKIP
                     => __('Skip process of the record'),
             ), __('No default action')),
         ));
@@ -169,7 +169,7 @@ class XmlImport_Form_Main extends Omeka_Form
                 'ignore' => __('Ignore unrecognized column names'),
                 'yes' => __("Yes, so column names won't be checked"),
             ),
-            'value' => get_option('csv_import_extra_data'),
+            'value' => get_option('csv_import_plus_extra_data'),
         ));
 
         // XSLT Stylesheet.
@@ -674,7 +674,7 @@ class XmlImport_Form_Main extends Omeka_Form
 
         // If the plugin max file size setting is lower, choose it as the strict
         // max size.
-        $pluginMaxSizeRaw = trim(get_option(CsvImportPlugin::MEMORY_LIMIT_OPTION_NAME));
+        $pluginMaxSizeRaw = trim(get_option(CsvImportPlusPlugin::MEMORY_LIMIT_OPTION_NAME));
         if ($pluginMaxSizeRaw != '') {
             $pluginMaxSize = $this->_getBinarySize($pluginMaxSizeRaw);
             if ($pluginMaxSize) {
@@ -807,7 +807,7 @@ class XmlImport_Form_Main extends Omeka_Form
     {
         if (strlen($identifierField) > 0) {
             $parts = explode(
-                    CsvImport_ColumnMap_MixElement::DEFAULT_COLUMN_NAME_DELIMITER,
+                    CsvImportPlus_ColumnMap_MixElement::DEFAULT_COLUMN_NAME_DELIMITER,
                     $identifierField);
             if (count($parts) == 2) {
                 $elementSetName = trim($parts[0]);
